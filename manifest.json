@@ -1,0 +1,20 @@
+{
+    "name" : "GitHub ToolTips",
+    "version" : "1",
+    "permissions": ["storage","activeTab"],
+    "description": "Build an Extension!",
+    "background":
+    {
+        "scripts": ["jquery-2.0.3.js", "background.js"]
+    },
+    "content_scripts": 
+    [
+        {
+            "matches":["http://github*"],
+            "js":["jquery.1.10.2.min.js", "script.js"],
+            "css": ["css/style.css"],
+            "run_at": "document_end"
+        }
+    ],
+    "manifest_version" : 2
+}
