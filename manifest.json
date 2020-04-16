@@ -5,14 +5,13 @@
     "description": "Build an Extension!",
     "background":
     {
-        "scripts": ["jquery-2.0.3.js", "background.js"]
+        "scripts": ["background.js"]
     },
     "content_scripts": 
     [
         {
             "matches":["http://github*"],
-            "js":["jquery.1.10.2.min.js", "script.js"],
-            "css": ["css/style.css"],
+            "js":["script.js"],
             "run_at": "document_end"
         }
     ],
