@@ -29,11 +29,11 @@ function compareChanges()
 {
     var baseRepoClass = "range-editor text-gray js-range-editor";
     var baseRepoMessage = "This represents the origin and destination of your changes if you are not sure, leave it how it is,\n this is common for small changes.";
-    addTooltip(baseRepoClass,baseRepoMessage);
+    addTooltip(baseRepoClass,baseRepoMessage,false);
 
     var changesBoxClass = "js-diff-progressive-container";
     var changesBoxMessage = "This shows the changes between the orginal file (left) and your version (right).\n Green(+) represents lines added.\nRed(-) represents removed lines";
-    addTooltip(changesBoxClass,changesBoxMessage);
+    addTooltip(changesBoxClass,changesBoxMessage,false);
 
     //This I cannot do because the path I took isnt matching its weird.
     var createPullClass = "";
