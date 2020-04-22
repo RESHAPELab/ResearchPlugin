@@ -42,7 +42,7 @@ function compareChanges()
     //lists the messages and classes for the bar showing the commits, filechanged, commit comments, and contributors.
     var barCommitFileChanged = "nolink";
     var barCommitMessage = "This shows the ammount of commits in the pull request.";
-    var barFileChangedMessage = "this shows the amount of files you changed in the pull request.";
+    var barFileChangedMessage = "This shows the amount of files you changed in the pull request.";
     var barCommitCommentsMessage = "This shows how many comments were on the commits for the pull request.";
     var barContributorMessage = "This is the ammount of people who worked together on this pull request.";
     var arrayBar = [barCommitMessage,barFileChangedMessage,barCommitCommentsMessage,barContributorMessage];
@@ -67,13 +67,15 @@ function compareChanges()
     }
     else
     {
-        //Loops throught the element classes and sets the corresponding tooltip message to the title.
-        var i;
-        for(i = 0; i < toolTipMessage.length; i++)
+        if(elementClass[0] != null)
         {
-            elementClass[i].setAttribute("title",toolTipMessage[i]);
+        //Loops throught the element classes and sets the corresponding tooltip message to the title.
+            var i;
+            for(i = 0; i < toolTipMessage.length; i++)
+            {
+                elementClass[i].setAttribute("title",toolTipMessage[i]);
+            }
         }
-
     }
  }
 
