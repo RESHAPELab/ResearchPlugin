@@ -1,3 +1,3 @@
 $(document).ready(function() {
-    $("#readme").attr("title", "This is a test");
+    $(".mr-2.flex-self-stretch").attr("title", "This is a test");
  });
