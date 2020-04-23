@@ -3,6 +3,7 @@
 $(document).ready(function() {
     readMe();
     compareChanges();
+    openedPullRequest();
  });
 
  //Adds tooltips to the readMe page.
@@ -16,11 +17,27 @@ $(document).ready(function() {
 
     var editFileClass = "btn-link code px-3 px-sm-6 px-lg-3 flex-1 flex-md-auto selected tabnav-tab js-blob-edit-code js-blob-edit-tab"
     var editFileMessage = "This is an editor in MarkDown format";
-    addTooltip(editFileClass,editFileMessage);
+    addTooltip(editFileClass,editFileMessage,false);
 
     var previewChangesClass = "flex-1 flex-md-auto btn-link preview tabnav-tab js-blob-edit-preview js-blob-edit-tab";
     var previewChangesMessage = "Preview how the file will be displayed after interpreting the md file. \n This will not save the file it will only show the result."
     addTooltip(previewChangesClass,previewChangesMessage,false);
+
+    var proposeFileClass = "d-flex flex-column d-md-block col-lg-11 offset-lg-1 pr-lg-3 js-file-commit-form";
+    var proposeFileMessage = "Fill this form with information that describes the changes you are proposing.\nThis will be used to introduce your changes to the development team, helping them understand your goal";
+    addTooltip(proposeFileClass,proposeFileMessage,false);
+
+    var textBoxTitleClass = "form-control input-block input-contrast js-new-blob-commit-summary";
+    var textBoxTitleMessage = "This is the title. Give a brief description of the change.\nBe short and objective.";
+    addTooltip(textBoxTitleClass,textBoxTitleMessage,false);
+
+    var textBoxBodyClass = "form-control input-block input-contrast comment-form-textarea js-quick-submit";
+    var textBoxBodyMessage = "Add a more detailed description if needed. Here you can present your arguments and reasoning that lead to change.";
+    addTooltip(textBoxBodyClass,textBoxBodyMessage,false);
+
+    var proposeChangeButtonClass = "btn btn-primary js-blob-submit flex-auto mx-3 ml-md-3 mr-md-0 ml-lg-0 mb-3 mb-md-0";
+    var proposeChangeButtonMessage = "By clicking this button you will start the submission process.\nYou will have the chance to check your changes before finalizing it.";
+    addTooltip(proposeChangeButtonClass,proposeChangeButtonMessage,false);
 
 }
 
@@ -32,12 +49,12 @@ function compareChanges()
     addTooltip(baseRepoClass,baseRepoMessage,false);
 
     var changesBoxClass = "js-diff-progressive-container";
-    var changesBoxMessage = "This shows the changes between the orginal file (left) and your version (right).\n Green(+) represents lines added.\nRed(-) represents removed lines";
+    var changesBoxMessage = "This shows the changes between the orginal file (left) and your version (right).\nGreen(+) represents lines added.\nRed(-) represents removed lines";
     addTooltip(changesBoxClass,changesBoxMessage,false);
 
-    //This I cannot do because the path I took isnt matching its weird.
-    var createPullClass = "";
-    var createPullMessage = "";
+    var createPullClass = "btn btn-primary float-left js-details-target";
+    var createPullMessage = "By clicking here you will have a chance ot change the description of the change and continue with the submission process.";
+    addTooltip(createPullClass,createPullMessage,false);
 
     //lists the messages and classes for the bar showing the commits, filechanged, commit comments, and contributors.
     var barCommitFileChanged = "nolink";
@@ -47,8 +64,34 @@ function compareChanges()
     var barContributorMessage = "This is the ammount of people who worked together on this pull request.";
     var arrayBar = [barCommitMessage,barFileChangedMessage,barCommitCommentsMessage,barContributorMessage];
     addTooltip(barCommitFileChanged,arrayBar,true);
-    //TODO: all the other cases to the compare changes page.
 }
+
+ //This will change the tooltips on the opened pull request page.
+ function openedPullRequest()
+ {
+     //begining to get the classes and messages for this page.
+     var closePullClass = "js-form-action-text";
+     var closePullMessage = "This will close the pull request meaning people cannot view this! \n DO NOT CLICK UNLESS THE REQUEST WAS SOLVED.";
+     addTooltip(closePullClass,closePullMessage,false);
+
+     var openGreenButtonClass = "State State--green";
+     var openGreenButtonMessage = "This indicates that the pull request is open meaning someone will get to it soon.";
+     addTooltip(openGreenButtonClass,openGreenButtonMessage,false);
+
+     var branchConflictClass = "branch-action-item";
+     var branchConflictMessage = "This shows the conflicts related to the branch since there is no conflicts it is working perfectly!";
+     addTooltip(branchConflictClass,branchConflictMessage,false);
+
+
+     //These two do not work have to check if the page is updated in order ot add these tooltips
+     var pullRequestTextClass = "timeline-comment-wrapper timeline-new-comment composer";
+     var pullRequestTextMessage = "This is where you would describe all the changes you did such as a brief title and comment to describe why you made those changes.";
+     addTooltip(pullRequestTextClass,pullRequestTextMessage,false);
+
+     var createPullRequestClass = "btn btn-primary BtnGroup-item js-pull-request-button";
+     var createPullRequestMessage = "Click this to send the pull request to the developer team to look at.";
+     addTooltip(createPullRequestClass,createPullRequestMessage,false);
+ }
 
 //Adds a tooltip with toolTipMessage to the first element if multiple is false else it will go through the amount of messages in a array and attach them to the corresponding class.
  function addTooltip(className,toolTipMessage,multiple)
@@ -79,15 +122,7 @@ function compareChanges()
     }
  }
 
- //This will change the tooltips on the opened pull request page.
- function openedPullRequest()
- {
-     //begining to get the classes and messages for this page.
-     var closePullClass = "js-form-action-text";
-     var closePullMessage = "This will close the pull request meaning people cannot view this! \n DO NOT CLICK UNLESS THE REQUEST WAS SOLVED.";
-
-     var openGreenButtonClass = "State State--green";
-     var openGreenButtonMessage = "This indicates that the pull request is open meaning someone will get to it soon."
-
-    //TODO the rest of the cases for opened pull request page.
- }
+function checkURL(substring)
+{
+    //TODO return true if the substring is in the url of github after the repo name. 
+}
