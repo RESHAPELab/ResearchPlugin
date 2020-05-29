@@ -1,15 +1,22 @@
 {
-  "name": "jQuery DOM",
+  "name": "GitHub Plugin Development",
   "version": "1",
-  "description": "Manipulate the DOM when the page is done loading",
+  "description": "Add tooltips to GitHub when working in repositories",
   "browser_action": {
-    "name": "Manipulate DOM",
+    "name": "GitHub Plugin Development",
     "icons": ["icon.png"],
-    "default_icon": "icon.png"
+    "default_icon": "icon.png",
+    "default_popup": "index.html"
   },
-  "content_scripts": [ {
-    "js": [ "jquery.min.js", "content.js" ],
-    "matches": [ "http://*/*", "https://*/*"]
-  }],
-    "manifest_version" : 2
+
+  "content_scripts": [
+    {
+      "matches": [ "https://github.com/*"],
+      "run_at": "document_idle",
+      "css": [ "styles.css"],
+      "js": ["jquery.min.js", "content.js"]
+    }
+  ],
+  "manifest_version" : 2,
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
 }

@@ -14,9 +14,31 @@ class toolTip {
     this.htmlElement.className = this.htmlElementClass;
   }
 }
+
+class ToolTipIcon {
+  constructor(toolTipElement, toolTipClass, toolTipText, gitHubClassIcon) {
+    this.toolTipElement = toolTipElement;
+    this.toolTipClass = toolTipClass;
+    this.toolTipText = toolTipText;
+    this.gitHubClassIcon = gitHubClassIcon;
+  }
+
+  createIcon() {
+    this.toolTipElement = document.createElement(this.toolTipElement);
+    this.toolTipElement.className = this.toolTipClass;
+    this.toolTipElement.innerHTML = "?";
+    this.toolTipElement.setAttribute("data-tooltip", this.toolTipText);
+  }
+}
+
 // check the current url and call functions accordingly
 checkURL();
 
+/**
+ * Function name: checkURL
+ * Checks the windows current URL for keywords to determine which tooltips
+ * to display
+ */
 function checkURL() {
   // if the user is editing a markdown file
   if (
@@ -25,14 +47,14 @@ function checkURL() {
   ) {
     addReadMeToolTips();
     // if the user is reviewing a pull request
+  } else if (window.location.href.indexOf("compare") != NOT_FOUND) {
+    addProposeChangesToolTips();
   } else if (
     window.location.href.indexOf("pull") != NOT_FOUND &&
     window.location.href.indexOf("quick_pull") == NOT_FOUND
   ) {
     addReviewPullRequestTips();
     // if the user is opening a pull request
-  } else if (window.location.href.indexOf("compare") != NOT_FOUND) {
-    addProposeChangesToolTips();
   } else {
     console.log("not found");
   }
@@ -71,185 +93,147 @@ function appendChildToElement(className, node, nodeText) {
 
   node.appendChild(textNode);
 
-  className.appendChild(node);
+  document.getElementsByClassName(className)[0].appendChild(node);
+}
+
+/**
+ * Function name: addProgressBar
+ * Adds progressBar above forms in GitHub pages to let user how far they are
+ * in editing files
+ * @param currentStep current step in process
+ * @param totalSteps the amount of steps in process to determine overall progress
+ * @param rootElement className of GitHub HTML element that the progress bar
+ *                      will be added to
+ */
+function addProgressBar(currentStep, totalSteps, rootElement) {
+  // Get the total progress percentage as a float
+  var totalProgress = (currentStep / totalSteps) * 100;
+
+  // create the progress bar element
+  var progressBarStatus = document.createElement("div");
+  progressBarStatus.className = "progress_status";
+
+  var progressBar = document.createElement("div");
+
+  // check if the user is not in the last page of the process
+  if (totalProgress < 100) {
+    progressBar.className = "progressBar progressBarPartial";
+  } else {
+    progressBar.className = "progressBar";
+  }
+
+  progressBarStatus.appendChild(progressBar);
+
+  appendChildBeforeElement(rootElement, progressBarStatus, "");
+
+  updateProgressBar();
+
+  // creates progress bar animation and updates current progress
+  function updateProgressBar() {
+    var progressBarDiv = document.getElementsByClassName("progressBar")[0];
+    var width = 1;
+    var identity = setInterval(scene, 10);
+    function scene() {
+      if (width >= 100 || width >= totalProgress) {
+        clearInterval(identity);
+      } else {
+        width++;
+        progressBarDiv.style.width = width + "%";
+      }
+    }
+
+    progressBarDiv.innerHTML = "Step " + currentStep + " out of " + totalSteps;
+  }
 }
 
 /**
  * Function name: addReadMeToolTips
  * Adds tooltips to webpage when editing markdown files
+ * First step in editing markdown files
  */
 function addReadMeToolTips() {
-  // ribbon above the editor
-  let topRibbon = new toolTip(
-    "H4",
-    "alert alert-info text-center",
-    "This is the editor where you can make changes to your files.",
-    "js-blob-form"
-  );
-  topRibbon.createElement();
-  appendChildBeforeElement(
-    topRibbon.gitHubClass,
-    topRibbon.htmlElement,
-    topRibbon.htmlElementText
-  );
+  // progress bar above editor
+  addProgressBar(1, 3, "js-blob-form");
 
-  // banner to left of file name input
+  // icon to right of file name input
   var fileNameChangeText =
     "This is the file name, changing it will create " +
     " a new file with the new name";
 
   var breadCrumbDiv =
-    "breadcrumb d-flex flex-shrink-0 flex-items-center px-3 px-sm-6 px-lg-3";
+  '.d-md-inline-block';
 
-  let fileNameChange = new toolTip(
+  let fileNameChangeIcon = new ToolTipIcon(
     "H4",
-    "alert alert-warning",
+    "tooltip2",
     fileNameChangeText,
     breadCrumbDiv
   );
-  fileNameChange.createElement();
-  fileNameChange.htmlElement.style.marginRight = "20px";
 
-  appendChildBeforeElement(
-    fileNameChange.gitHubClass,
-    fileNameChange.htmlElement,
-    fileNameChange.htmlElementText
-  );
+  fileNameChangeIcon.createIcon();
+  console.log(fileNameChangeIcon);
+
+  $(fileNameChangeIcon.toolTipElement).insertAfter(fileNameChangeIcon.gitHubClassIcon);
+
+  //appendChildToElement(breadCrumbDiv, fileNameChangeIcon.toolTipElement, "?");
 
   // banner above commit message input
   var commitTitleText =
-    "This is the title. Give a brief description of the change. Be short and objective.";
-  var commitMessageClass =
-    "commit-form position-relative mb-2 p-3 " +
-    " border-0 border-lg-top border-lg-right " +
-    " border-lg-left border-lg-bottom rounded-1";
-
-  // select the H3 tag wihtin the commit changes box
-  var commitMessageHeader = document
-    .getElementsByClassName(commitMessageClass)[0]
-    .getElementsByTagName("H3")[0];
-
-  let commitMessageTitle = new toolTip(
+    "This is the title. Give a brief description of the change. Be short and objective. This is required.";
+  
+  let commitMessageIcon = new ToolTipIcon(
     "H4",
-    "alert alert-warning text-center",
+    "tooltip2",
     commitTitleText,
-    commitMessageHeader
+    "#commit-summary-input"
   );
-  commitMessageTitle.createElement();
 
-  appendChildToElement(
-    commitMessageTitle.gitHubClass,
-    commitMessageTitle.htmlElement,
-    commitMessageTitle.htmlElementText
-  );
+  commitMessageIcon.createIcon();
+
+  $(commitMessageIcon.toolTipElement).insertAfter("#commit-summary-input");
 
   var descriptionText =
     "Add a more detailed description if needed. Here you can" +
     " present your arguments and reasoning that lead to change.";
-  let commitExtendedDesc = new toolTip(
-    "H4",
-    "alert alert-warning text-center",
-    descriptionText,
-    "commit-description-textarea"
+  
+  let extendedDescIcon = new ToolTipIcon(
+      "H4",
+      "tooltip2",
+      descriptionText,
+      "#commit-description-textarea"
   );
+  
+  extendedDescIcon.createIcon();
 
-  commitExtendedDesc.createElement();
-
-  commitExtendedDesc.htmlElement.innerHTML = commitExtendedDesc.htmlElementText;
-
-  // get the parent container of the input fields and append the
-  // commitDescriptionContainer before the commitSummaryInput
-  var parentDiv = document.getElementById(commitExtendedDesc.gitHubClass)
-    .parentNode;
-  var gitHubSummaryInput = document.getElementById(
-    "commit-description-textarea"
-  );
-  parentDiv.insertBefore(commitExtendedDesc.htmlElement, gitHubSummaryInput);
-
+  $(extendedDescIcon.toolTipElement).insertAfter(extendedDescIcon.gitHubClassIcon);
+  
   // banner above Commit Changes / Cancel buttons
   var submitChangesText =
     "By clicking the Commit changes button you " +
     "will start the submission process. You " +
     "will have the chance to check your changes " +
     "before finalizing it.";
-
-  var formRootClass =
-    "d-flex flex-column d-md-block col-lg-11 offset-lg-1 " +
-    " pr-lg-3 js-file-commit-form";
-
-  let submitChangesButton = new toolTip(
-    "H4",
-    "alert alert-warning text-center",
+  
+  let submitChangesIcon = new ToolTipIcon( 
+    "H4", 
+    "tooltip2",
     submitChangesText,
-    formRootClass
+    "#submit-file"
   );
 
-  submitChangesButton.createElement();
-  submitChangesButton.htmlElement.innerHTML =
-    submitChangesButton.htmlElementText;
+  submitChangesIcon.createIcon();
 
-  var commitButton = document.getElementById("submit-file");
-
-  // Get the root div of the form and append the new H4 before the commit button
-  var formRootDiv = document.getElementsByClassName(
-    submitChangesButton.gitHubClass
-  )[0];
-  formRootDiv.insertBefore(submitChangesButton.htmlElement, commitButton);
+  $(submitChangesIcon.toolTipElement).insertAfter(submitChangesIcon.gitHubClassIcon);
 }
 
-/**
- * Function name: addReviewPullRequestTips
- * Adds tooltips to webpage when editing markdown files
- */
-function addReviewPullRequestTips() {
-  var branchContainerText =
-    "This indicates that the pull request is open " +
-    "meaning someone will get to it soon. ";
-
-  var branchContainerClass = "TableObject-item TableObject-item--primary";
-
-  // ribbon at top of page under pull request name
-  let pullRequestStatusRibbon = new toolTip(
-    "H4",
-    "alert alert-info text-center",
-    branchContainerText,
-    branchContainerClass
-  );
-
-  pullRequestStatusRibbon.createElement();
-
-  appendChildBeforeElement(
-    pullRequestStatusRibbon.gitHubClass,
-    pullRequestStatusRibbon.htmlElement,
-    pullRequestStatusRibbon.htmlElementText
-  );
-
-  var requestButtonsText =
-    "This will close the pull request meaning people " +
-    "cannot view this! Do not click close unless the " +
-    "request was solved. ";
-
-  var requestButtonsClass = "d-flex flex-justify-end";
-
-  let pullReuqestButtons = new toolTip(
-    "H4",
-    "alert alert-warning text-center",
-    requestButtonsText,
-    requestButtonsClass
-  );
-
-  pullReuqestButtons.createElement();
-
-  appendChildBeforeElement(
-    pullReuqestButtons.gitHubClass,
-    pullReuqestButtons.htmlElement,
-    pullReuqestButtons.htmlElementText
-  );
-}
+/*
+  Capture all user events that a user does, they should be able to save to their computer to send or save in a server for us to view
+*/
 
 /**
  * Function name: addProposeChangesToolTips
- * Adds tooltips to webpage when confirming a pull request
+ * Adds tooltips to webpage when confirming a change to file
+ * Second step in editing markdown files
  */
 function addProposeChangesToolTips() {
   var branchContainerClass = "range-editor text-gray js-range-editor";
@@ -273,6 +257,8 @@ function addProposeChangesToolTips() {
     currentBranchRibbon.htmlElement,
     currentBranchRibbon.htmlElementText
   );
+
+  addProgressBar(2, 3, "repository-content");
 
   var confirmPullRequestButton = "d-flex flex-justify-end m-2";
 
@@ -344,4 +330,70 @@ function addProposeChangesToolTips() {
     comparisonRibbon.htmlElement,
     comparisonRibbon.htmlElementText
   );
+}
+
+/**
+ * Function name: addReviewPullRequestTips
+ * Adds tooltips to webpage when reviewing pull requests
+ * Third step in editing markdown files
+ */
+function addReviewPullRequestTips() {
+  var branchContainerText =
+    "This indicates that the pull request is open " +
+    "meaning someone will get to it soon. ";
+
+  var branchContainerClass = "TableObject-item TableObject-item--primary";
+
+  // ribbon at top of page under pull request name
+  let pullRequestStatusRibbon = new toolTip(
+    "H4",
+    "alert alert-info text-center",
+    branchContainerText,
+    branchContainerClass
+  );
+
+  pullRequestStatusRibbon.createElement();
+
+  appendChildBeforeElement(
+    pullRequestStatusRibbon.gitHubClass,
+    pullRequestStatusRibbon.htmlElement,
+    pullRequestStatusRibbon.htmlElementText
+  );
+
+  addProgressBar(3, 3, "gh-header-show");
+
+  var requestButtonsText =
+    "This will close the pull request meaning people " +
+    "cannot view this! Do not click close unless the " +
+    "request was solved. ";
+
+  var requestButtonsClass = "d-flex flex-justify-end";
+
+  let pullReuqestButtons = new toolTip(
+    "H4",
+    "alert alert-warning text-center",
+    requestButtonsText,
+    requestButtonsClass
+  );
+
+  pullReuqestButtons.createElement();
+
+  appendChildBeforeElement(
+    pullReuqestButtons.gitHubClass,
+    pullReuqestButtons.htmlElement,
+    pullReuqestButtons.htmlElementText
+  );
+}
+
+/**
+ * Function name: addForkToolTips
+ * Edits tooltips when viewing a repository that you are not a contributor of
+ */
+function addForkToolTips() {
+  // get the second instance of icon to edit tool tip
+  var pencilIcon = document.getElementsByClassName(
+    "btn-octicon tooltipped tooltipped-nw"
+  )[1];
+
+  pencilIcon.setAttribute("aria-label", "Edit Readme");
 }

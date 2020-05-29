@@ -1,0 +1,77 @@
+.progress_status {
+  width: 100%;
+  background-color: #ddd;
+  border-radius: 50px;
+  margin-bottom: 20px;
+}
+
+/* have first two steps be yellow and then last step green */
+.progressBar {
+  width: 1%;
+  height: 35px;
+  background-color: #4caf50;
+  color: #fff;
+  text-align: center;
+  line-height: 32px;
+  border-radius: 50px;
+}
+
+/*Change the color of partial progress bars*/
+.progressBarPartial {
+  background-color: #ffc107 !important;
+}
+
+.tooltip2 {
+  z-index: 10;
+  display: inline-block;
+  position: relative;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px 12px;
+  border-radius: 50px;
+  margin-left: 20px;
+  font-size: 20px;
+  width: fit-content;
+  color: #ffffff;
+}
+
+.tooltip2:before,
+.tooltip2:after {
+  position: absolute;
+  left: 50%;
+  opacity: 0;
+  transition: allease 0.8s;
+}
+
+.tooltip2::before {
+  border-width: 10px 8px 08px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.3) transparent transparent transparent;
+  content: "";
+  margin-left: -8px;
+  top: -20px;
+}
+
+.tooltip2::after {
+  content: attr(data-tooltip);
+  background: rgba(0, 0, 0, 0.6);
+  top: -20px;
+  transform: translateY(-100%);
+  font-size: 14px;
+  margin-left: -150px;
+  width: 300px;
+  border-radius: 10px;
+  color: #fff;
+  padding: 14px;
+}
+
+/* Hover states */
+.tooltip2:hover::before,
+.tooltip2:hover::after {
+  opacity: 1;
+}
+
+/*Override GitHub styles to allow icons next to input fields*/
+.commit-form .input-block {
+  width: 90% !important;
+  display: inline-block !important;
+}
