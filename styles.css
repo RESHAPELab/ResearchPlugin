@@ -1,77 +1,197 @@
-.progress_status {
-  width: 100%;
-  background-color: #ddd;
-  border-radius: 50px;
-  margin-bottom: 20px;
+.container {
+  width: 100% !important;
+  margin: 10px auto 20px auto;
 }
 
-/* have first two steps be yellow and then last step green */
-.progressBar {
-  width: 1%;
-  height: 35px;
-  background-color: #4caf50;
-  color: #fff;
+.progressbar {
+  counter-reset: step;
+}
+
+.progressbar ul {
   text-align: center;
-  line-height: 32px;
-  border-radius: 50px;
 }
 
-/*Change the color of partial progress bars*/
-.progressBarPartial {
-  background-color: #ffc107 !important;
-}
-
-.tooltip2 {
-  z-index: 10;
+.progressbar li {
+  list-style-type: none;
+  width: 25%;
   display: inline-block;
+  font-size: 12px;
   position: relative;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 3px 12px;
-  border-radius: 50px;
-  margin-left: 20px;
-  font-size: 20px;
-  width: fit-content;
-  color: #ffffff;
+  text-align: center;
+  text-transform: uppercase;
+  color: #7d7d7d;
 }
 
-.tooltip2:before,
-.tooltip2:after {
+.progressbar li:before {
+  width: 30px;
+  height: 30px;
+  content: counter(step);
+  counter-increment: step;
+  line-height: 30px;
+  border: 2px solid #7d7d7d;
+  display: block;
+  text-align: center;
+  margin: 0 auto 10px auto;
+  border-radius: 50%;
+  background-color: white;
+}
+
+.progressbar li:after {
+  width: 100%;
+  height: 2px;
+  content: '';
   position: absolute;
-  left: 50%;
-  opacity: 0;
-  transition: allease 0.8s;
+  background-color: #7d7d7d;
+  top: 15px;
+  left: -50%;
+  z-index: -1;
 }
 
-.tooltip2::before {
-  border-width: 10px 8px 08px;
-  border-style: solid;
-  border-color: rgba(0, 0, 0, 0.3) transparent transparent transparent;
-  content: "";
-  margin-left: -8px;
-  top: -20px;
+.progressbar li:first-child {
+  margin-left: 0;
 }
 
-.tooltip2::after {
-  content: attr(data-tooltip);
-  background: rgba(0, 0, 0, 0.6);
-  top: -20px;
-  transform: translateY(-100%);
-  font-size: 14px;
-  margin-left: -150px;
-  width: 300px;
-  border-radius: 10px;
-  color: #fff;
-  padding: 14px;
+.progressbar li:first-child:after {
+  content: none;
 }
 
-/* Hover states */
-.tooltip2:hover::before,
-.tooltip2:hover::after {
-  opacity: 1;
+.progressbar li.active {
+  color: green;
+}
+
+.progressbar li.active:before {
+  border-color: #55b776;
+}
+
+.progressbar li.active + li:after {
+  background-color: #55b776;
+}
+
+.progressbar li.partial {
+  color: #ffc107;
+}
+
+.progressbar li.partial:before {
+  border-color: #ffc107;
+}
+
+.progressbar li.partial + li:after {
+  background-color: #ffc107;
 }
 
 /*Override GitHub styles to allow icons next to input fields*/
 .commit-form .input-block {
-  width: 90% !important;
+  width: 60% !important;
   display: inline-block !important;
+}
+
+.overall-summary {
+  display: inline-block;
+}
+
+/* CSS animation */
+@-webkit-keyframes fadeIn {
+  0% { 
+      opacity:0; 
+      transform: scale(0.6);
+  }
+
+  100% {
+      opacity:100%;
+      transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  0% { opacity:0; }
+  100% { opacity:100%; }
+}
+
+.flip-card {
+  display: block;
+  background-color: transparent;
+}
+
+.flip-card-inner {
+
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.flip-card-front {
+  background-color: #bbb;
+  color: black;
+}
+
+.flip-card-back {
+  background-color: #2980b9;
+  color: white;
+  transform: rotateY(180deg);
+}
+
+.helpIcon {
+  position: relative;
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.helpIcon .helpIconText {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  font-size: 14px !important;
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -60px;
+}
+
+.helpIcon:hover .helpIconText {
+  visibility: visible;
+}
+
+.helpIconText:before {
+  content:'';
+   display:block;
+   width:0;
+   height:0;
+   position:absolute;
+
+   border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+
+  border-top: 5px solid black;
+  top:100.5%;
+  margin-left: 50px;
+}
+
+.helpIconCircle {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 17px;
+  border-radius: 50px;
+  font-size: 20px;
+  text-decoration: none;
+  color:white;
 }

@@ -1,33 +1,29 @@
 let NOT_FOUND = -1;
 
-class toolTip {
-  constructor(htmlElement, htmlElementClass, htmlElementText, gitHubClass) {
-    this.htmlElement = htmlElement;
-    this.htmlElementClass = htmlElementClass;
-    this.htmlElementText = htmlElementText;
-    this.gitHubClass = gitHubClass;
-  }
-
-  // create the html element in the page with the given className
-  createElement() {
-    this.htmlElement = document.createElement(this.htmlElement);
-    this.htmlElement.className = this.htmlElementClass;
-  }
-}
-
 class ToolTipIcon {
-  constructor(toolTipElement, toolTipClass, toolTipText, gitHubClassIcon) {
+  constructor(toolTipElement, toolTipClass, toolTipText, gitHubElement) {
     this.toolTipElement = toolTipElement;
     this.toolTipClass = toolTipClass;
     this.toolTipText = toolTipText;
-    this.gitHubClassIcon = gitHubClassIcon;
+    this.gitHubElement = gitHubElement;
   }
 
   createIcon() {
-    this.toolTipElement = document.createElement(this.toolTipElement);
-    this.toolTipElement.className = this.toolTipClass;
-    this.toolTipElement.innerHTML = "?";
-    this.toolTipElement.setAttribute("data-tooltip", this.toolTipText);
+    var toolTipContainer = document.createElement("div");
+    toolTipContainer.className = "helpIcon";
+
+    var circleIcon = document.createElement("span");
+    circleIcon.className = "helpIconCircle";
+    circleIcon.innerHTML = "?";
+
+    var toolTip = document.createElement("span");
+    toolTip.className = "helpIconText";
+    toolTip.innerHTML = this.toolTipText;
+
+    toolTipContainer.appendChild(circleIcon);
+    toolTipContainer.appendChild(toolTip);
+
+    this.toolTipElement = toolTipContainer;
   }
 }
 
@@ -55,45 +51,15 @@ function checkURL() {
   ) {
     addReviewPullRequestTips();
     // if the user is opening a pull request
-  } else {
+  } else if ( document.getElementsByClassName('h-card').length != 0
+  ){
+    //createProfileCard();
+    console.log("in profile");
+  }
+
+  else {
     console.log("not found");
   }
-}
-
-/**
- * Function name: appendNodeInBody
- * Appends node above the first element in each class
- * @param className: string for container where the new node will be added
- * @param node: new element created in document to be added in container
- * @param nodeText: string to be added to node container
- */
-function appendChildBeforeElement(className, node, nodeText) {
-  var textNode = document.createTextNode(nodeText);
-
-  // Add the text to the node if any
-  node.appendChild(textNode);
-
-  var parentElement = document.getElementsByClassName(className)[0];
-
-  parentElement.appendChild(node);
-
-  parentElement.insertBefore(node, parentElement.firstChild);
-}
-
-/**
- * Function name: appendChildToElement
- * Accepts a node and appends it as a child to the first element
- * with the matching class name with the text parameter to display to the user
- * @param className: string for container where the new node will be added
- * @param node: new element created in document to be added in container
- * @param nodeText: string to be added to node container
- */
-function appendChildToElement(className, node, nodeText) {
-  var textNode = document.createTextNode(nodeText);
-
-  node.appendChild(textNode);
-
-  document.getElementsByClassName(className)[0].appendChild(node);
 }
 
 /**
@@ -105,45 +71,45 @@ function appendChildToElement(className, node, nodeText) {
  * @param rootElement className of GitHub HTML element that the progress bar
  *                      will be added to
  */
-function addProgressBar(currentStep, totalSteps, rootElement) {
+function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
   // Get the total progress percentage as a float
   var totalProgress = (currentStep / totalSteps) * 100;
 
   // create the progress bar element
-  var progressBarStatus = document.createElement("div");
-  progressBarStatus.className = "progress_status";
+  var progressBarContainer = document.createElement("div");
+  progressBarContainer.className = "container";
 
   var progressBar = document.createElement("div");
+  progressBar.className = "progressbar";
+  
 
-  // check if the user is not in the last page of the process
-  if (totalProgress < 100) {
-    progressBar.className = "progressBar progressBarPartial";
-  } else {
-    progressBar.className = "progressBar";
-  }
+  var itemList = document.createElement("ul");
 
-  progressBarStatus.appendChild(progressBar);
+  for( index = 1; index <= stepsList.length; index++ )
+    {
+      var listItem = document.createElement("li");
+      listItem.innerHTML = stepsList[index - 1];
 
-  appendChildBeforeElement(rootElement, progressBarStatus, "");
+      if( index == currentStep || index < currentStep )
+        {
+          listItem.className = "active";
 
-  updateProgressBar();
+          if( totalProgress < 100) {
+            listItem.className += " partial"
+          }
+        }
 
-  // creates progress bar animation and updates current progress
-  function updateProgressBar() {
-    var progressBarDiv = document.getElementsByClassName("progressBar")[0];
-    var width = 1;
-    var identity = setInterval(scene, 10);
-    function scene() {
-      if (width >= 100 || width >= totalProgress) {
-        clearInterval(identity);
-      } else {
-        width++;
-        progressBarDiv.style.width = width + "%";
-      }
+
+        itemList.appendChild( listItem );
     }
+    
+    progressBar.appendChild(itemList);
 
-    progressBarDiv.innerHTML = "Step " + currentStep + " out of " + totalSteps;
-  }
+    progressBarContainer.appendChild(progressBar);
+
+    $(progressBarContainer).insertBefore(
+      rootElement
+    );
 }
 
 /**
@@ -152,16 +118,18 @@ function addProgressBar(currentStep, totalSteps, rootElement) {
  * First step in editing markdown files
  */
 function addReadMeToolTips() {
+
+  var steps = ["Edit ReadMe File", "Confirm Pull Request", "Review Pull Request"];
+
   // progress bar above editor
-  addProgressBar(1, 3, "js-blob-form");
+   addProgressBar(1, 3, ".js-blob-form", steps);
 
   // icon to right of file name input
   var fileNameChangeText =
     "This is the file name, changing it will create " +
     " a new file with the new name";
 
-  var breadCrumbDiv =
-  '.d-md-inline-block';
+  var breadCrumbDiv = ".d-md-inline-block";
 
   let fileNameChangeIcon = new ToolTipIcon(
     "H4",
@@ -171,16 +139,22 @@ function addReadMeToolTips() {
   );
 
   fileNameChangeIcon.createIcon();
-  console.log(fileNameChangeIcon);
 
-  $(fileNameChangeIcon.toolTipElement).insertAfter(fileNameChangeIcon.gitHubClassIcon);
-
-  //appendChildToElement(breadCrumbDiv, fileNameChangeIcon.toolTipElement, "?");
+  $(fileNameChangeIcon.toolTipElement).insertAfter(
+    fileNameChangeIcon.gitHubElement
+  );
 
   // banner above commit message input
   var commitTitleText =
-    "This is the title. Give a brief description of the change. Be short and objective. This is required.";
+    "This is the title. Give a brief description of the change. Be short and objective.";
   
+  var inputTitleLabel = document.createElement("h3");
+  inputTitleLabel.innerHTML = "Insert a title here";
+  inputTitleLabel.style.display = "inline-block";
+  inputTitleLabel.style.marginRight = "20px";
+
+  $(inputTitleLabel).insertBefore("#commit-summary-input");
+
   let commitMessageIcon = new ToolTipIcon(
     "H4",
     "tooltip2",
@@ -196,39 +170,48 @@ function addReadMeToolTips() {
     "Add a more detailed description if needed. Here you can" +
     " present your arguments and reasoning that lead to change.";
   
-  let extendedDescIcon = new ToolTipIcon(
-      "H4",
-      "tooltip2",
-      descriptionText,
-      "#commit-description-textarea"
-  );
+  var inputDescriptionLabel = document.createElement("h3");
+  inputDescriptionLabel.innerHTML = "Insert a <br> description here";
+  inputDescriptionLabel.style.display = "inline-block";
+  inputDescriptionLabel.style.marginRight = "22px";
   
+  $(inputDescriptionLabel).insertBefore("#commit-description-textarea");
+
+  let extendedDescIcon = new ToolTipIcon(
+    "H4",
+    "tooltip2",
+    descriptionText,
+    "#commit-description-textarea"
+  );
+
   extendedDescIcon.createIcon();
 
-  $(extendedDescIcon.toolTipElement).insertAfter(extendedDescIcon.gitHubClassIcon);
-  
+  $(extendedDescIcon.toolTipElement).insertAfter(
+    extendedDescIcon.gitHubElement
+  );
+    
   // banner above Commit Changes / Cancel buttons
   var submitChangesText =
     "By clicking the Commit changes button you " +
     "will start the submission process. You " +
     "will have the chance to check your changes " +
     "before finalizing it.";
-  
-  let submitChangesIcon = new ToolTipIcon( 
-    "H4", 
+
+  let submitChangesIcon = new ToolTipIcon(
+    "H4",
     "tooltip2",
     submitChangesText,
     "#submit-file"
   );
 
   submitChangesIcon.createIcon();
+  
+  submitChangesIcon.toolTipElement.style.marginRight = "20px";
 
-  $(submitChangesIcon.toolTipElement).insertAfter(submitChangesIcon.gitHubClassIcon);
+  $(submitChangesIcon.toolTipElement).insertBefore(
+    submitChangesIcon.gitHubElement
+  );
 }
-
-/*
-  Capture all user events that a user does, they should be able to save to their computer to send or save in a server for us to view
-*/
 
 /**
  * Function name: addProposeChangesToolTips
@@ -236,51 +219,54 @@ function addReadMeToolTips() {
  * Second step in editing markdown files
  */
 function addProposeChangesToolTips() {
-  var branchContainerClass = "range-editor text-gray js-range-editor";
+  var steps = ["Edit ReadMe File", "Confirm Pull Request", "Review Pull Request"];
+
+  addProgressBar(2, 3, ".repository-content", steps);
 
   var branchContainerText =
     "This represents the origin and destination of " +
     "your changes if you are not sure, leave it how it " +
     "is, this is common for small changes.";
 
+  var topRibbon = document.getElementsByClassName('js-range-editor')[0];
+  topRibbon.style.width = "93%";
+  topRibbon.style.display = "inline-block";
+
   // ribbon above current current branch and new pull request branch
-  let currentBranchRibbon = new toolTip(
+  let currentBranchIcon = new ToolTipIcon(
     "H4",
-    "alert alert-info text-center",
+    "tooltip2",
     branchContainerText,
-    branchContainerClass
+    ".js-range-editor"
   );
 
-  currentBranchRibbon.createElement();
-  appendChildBeforeElement(
-    currentBranchRibbon.gitHubClass,
-    currentBranchRibbon.htmlElement,
-    currentBranchRibbon.htmlElementText
+  currentBranchIcon.createIcon();
+
+  $(currentBranchIcon.toolTipElement).insertAfter(
+    currentBranchIcon.gitHubElement
   );
-
-  addProgressBar(2, 3, "repository-content");
-
-  var confirmPullRequestButton = "d-flex flex-justify-end m-2";
+  
+  var test = document.getElementsByClassName('d-flex flex-justify-end m-2')[0];
+  test.classList.remove('flex-justify-end');
+  test.classList.add('flex-justify-start');
 
   var confirmPullRequestText =
     "By clicking here you will have a chance to change the " +
     "description of the change and continue with the submission " +
     "process.";
 
-  // ribbon next to create pull request button
-  let createPullRequest = new toolTip(
+  // icon next to create pull request button
+  let createPullRequestBtn = new ToolTipIcon(
     "H4",
-    "alert alert-warning text-center",
+    "tooltip2",
     confirmPullRequestText,
-    confirmPullRequestButton
+    ".js-pull-request-button"
   );
 
-  createPullRequest.createElement();
+  createPullRequestBtn.createIcon();
 
-  appendChildBeforeElement(
-    createPullRequest.gitHubClass,
-    createPullRequest.htmlElement,
-    createPullRequest.htmlElementText
+  $(createPullRequestBtn.toolTipElement).insertAfter(
+    createPullRequestBtn.gitHubElement
   );
 
   var summaryText =
@@ -290,46 +276,52 @@ function addProposeChangesToolTips() {
     " and the ammount of people who worked together on this " +
     "pull request.";
 
-  var summaryClass = "overall-summary";
+  var summaryClass = ".overall-summary";
+  
+  // override the container width and display to add icon
+  var numbersSummaryContainer = document.getElementsByClassName('overall-summary')[0];
+  numbersSummaryContainer.style.width = "93%";
+  numbersSummaryContainer.style.display = "inline-block";
 
-  // ribbon above summary of changes and commits
-  let requestSummaryRibbon = new toolTip(
+  // icon above summary of changes and commits
+  let requestSummaryIcon = new ToolTipIcon(
     "H4",
-    "alert alert-warning text-center",
+    "tooltip2",
     summaryText,
     summaryClass
   );
 
-  requestSummaryRibbon.createElement();
+  requestSummaryIcon.createIcon();
 
-  appendChildBeforeElement(
-    requestSummaryRibbon.gitHubClass,
-    requestSummaryRibbon.htmlElement,
-    requestSummaryRibbon.htmlElementText
+  requestSummaryIcon.toolTipElement.style = "float:right;";
+
+  $(requestSummaryIcon.toolTipElement).insertAfter(
+    requestSummaryIcon.gitHubElement
   );
 
-  var comparisonClass = "js-diff-progressive-container";
+  var comparisonClass = ".details-collapse";
 
   var changesText =
     "This shows the changes between the orginal file and " +
     "your version. Green(+) represents lines added. " +
     "Red(-) represents removed lines";
 
-  // ribbon above container for changes in current pull request
-  let comparisonRibbon = new toolTip(
+  // icon above container for changes in current pull request
+  let comparisonIcon = new ToolTipIcon(
     "H4",
-    "alert alert-warning text-center",
+    "tooltip2",
     changesText,
     comparisonClass
   );
 
-  comparisonRibbon.createElement();
+  comparisonIcon.createIcon();
+  //comparisonIcon.toolTipElement.style = "float:right;";
+  
+  var numbersSummaryContainer = document.getElementsByClassName('details-collapse')[0];
+  numbersSummaryContainer.style.width = "93%";
+  numbersSummaryContainer.style.display = "inline-block";
 
-  appendChildBeforeElement(
-    comparisonRibbon.gitHubClass,
-    comparisonRibbon.htmlElement,
-    comparisonRibbon.htmlElementText
-  );
+  $(comparisonIcon.toolTipElement).insertAfter(comparisonIcon.gitHubElement);
 }
 
 /**
@@ -338,50 +330,45 @@ function addProposeChangesToolTips() {
  * Third step in editing markdown files
  */
 function addReviewPullRequestTips() {
+  var steps = ["Edit ReadMe File", "Confirm Pull Request", "Review Pull Request"];
+
+  addProgressBar(3, 3, ".gh-header-show", steps);
+
   var branchContainerText =
     "This indicates that the pull request is open " +
     "meaning someone will get to it soon. ";
 
-  var branchContainerClass = "TableObject-item TableObject-item--primary";
-
-  // ribbon at top of page under pull request name
-  let pullRequestStatusRibbon = new toolTip(
+  let pullRequestStatusIcon = new ToolTipIcon(
     "H4",
-    "alert alert-info text-center",
+    "tooltip2",
     branchContainerText,
-    branchContainerClass
+    ".js-clipboard-copy"
   );
 
-  pullRequestStatusRibbon.createElement();
+  pullRequestStatusIcon.createIcon();
 
-  appendChildBeforeElement(
-    pullRequestStatusRibbon.gitHubClass,
-    pullRequestStatusRibbon.htmlElement,
-    pullRequestStatusRibbon.htmlElementText
+  $(pullRequestStatusIcon.toolTipElement).insertAfter(
+    pullRequestStatusIcon.gitHubElement
   );
-
-  addProgressBar(3, 3, "gh-header-show");
 
   var requestButtonsText =
     "This will close the pull request meaning people " +
     "cannot view this! Do not click close unless the " +
     "request was solved. ";
 
-  var requestButtonsClass = "d-flex flex-justify-end";
+  var requestButtonsClass = ".js-comment-and-button";
 
-  let pullReuqestButtons = new toolTip(
+  let closePullRequestIcon = new ToolTipIcon(
     "H4",
-    "alert alert-warning text-center",
+    "tooltip2",
     requestButtonsText,
     requestButtonsClass
   );
 
-  pullReuqestButtons.createElement();
+  closePullRequestIcon.createIcon();
 
-  appendChildBeforeElement(
-    pullReuqestButtons.gitHubClass,
-    pullReuqestButtons.htmlElement,
-    pullReuqestButtons.htmlElementText
+  $(closePullRequestIcon.toolTipElement).insertBefore(
+    closePullRequestIcon.gitHubElement
   );
 }
 
@@ -396,4 +383,37 @@ function addForkToolTips() {
   )[1];
 
   pencilIcon.setAttribute("aria-label", "Edit Readme");
+}
+
+function createProfileCard() {
+  var profileContainer = document.getElementsByClassName('h-card')[0];
+  profileContainer.className = "h-card";
+
+ var cardContainer = document.createElement("div");
+  cardContainer.className = "flip-card col-lg-3 col-md-4 col-12 float-md-left pr-md-3 pr-xl-6";
+
+  var innerCardContainer = document.createElement("div");
+  innerCardContainer.className = "flip-card-inner";
+
+
+  var cardFront = document.createElement("div");
+  cardFront.className = "flip-card-front";
+  cardFront.appendChild(profileContainer);
+
+  innerCardContainer.appendChild(cardFront);
+
+  var cardBack = document.createElement("div");
+  cardBack.className = "flip-card-back";
+
+  innerCardContainer.appendChild(cardBack);
+
+  console.log(innerCardContainer);
+  
+  cardContainer.appendChild(innerCardContainer);
+
+  console.log(cardContainer);
+
+  $(cardContainer).insertBefore(
+    document.getElementsByClassName("d-md-none")[0]
+  );
 }

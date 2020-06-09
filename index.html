@@ -1,32 +1,298 @@
 <!DOCTYPE html>
 <html>
-   <head>
-      <title>GitHub Plugin</title>
-      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-      <style>
-         body,html {
-         width: 600px;
-         height: 400px;
-         }
-      </style>
-   </head>
-   <body>
-      <div class="jumbotron text-center">
-         <h1>GitHub Plugin</h1>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+    canvas {
+      width: 300px !important;
+      height: 150px !important;
+    }
+
+    .container {
+      width: 600px;
+      height: 800px;
+      border: 3px solid #d4d4d4;
+      border-radius: 25px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+    }
+
+    h2 {
+      font-style: bold;
+      margin: 40px 0px 0px 15px;
+    }
+
+    p {
+      margin: 0px 0px 0px 15px;
+    }
+
+    .profile_picture {
+      background-color: #8c8c8c;
+      width: 150px;
+      height: 150px;
+      margin: 0px 0px 0px 15px;
+    }
+
+    .left_column {
+      top: 0;
+      right: 0;
+      position: absolute;
+      height: 800px;
+    }
+
+    img {
+      width: 150px;
+      height: 100px;
+      float: right;
+      display: block;
+      margin: 5px 10px 10px 10px;
+    }
+
+    #contribution_container {
+      display: block;
+    }
+
+    .link {
+      margin-top: 120px;
+      width: 100%;
+      text-align: center;
+      text-decoration: underline;
+    }
+
+    #bar_graph_container {
+      height: 410px;
+      margin-top: 70px;
+    }
+
+    .large_text {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .alt_links {
+      margin: -10px 0px 0px 0px !important;
+      text-align: center;
+    }
+
+    #barGraph {
+      margin: auto;
+      margin-right: auto;
+      width: 600px !important;
+      height: 250px !important;
+    }
+
+    #stacked,
+    #grouped {
+      cursor: pointer;
+    }
+  </style>
+  <body>
+    <div class="container">
+      <h2>johndouthat</h2>
+      <p>member for 5 years, 9 months</p>
+      <div class="profile_picture"><p>Profile Picture here</p></div>
+      <p><span class="large_text">5</span> followers</p>
+      <div class="left_column">
+        <img src="Github-Logo.jpg" />
+        <div id="contribution_container">
+          <h3 class="link">Contributions by Repository</h3>
+          <p class="alt_links">by language | by repository</p>
+        </div>
+        <canvas id="myChart"></canvas>
       </div>
-      <div class="container">
-      <div class="row text-center">
-         <div class="col">
-            <h1>Confused about a term? Look it up here!</h1>
-            <div class="input-group">
-               <input type="text" class="form-control" placeholder="Search for a term">
-               <div class="input-group-append">
-                  <button class="btn btn-secondary" type="button">
-                  <i class="fa fa-search"></i>
-                  </button>
-               </div>
-            </div>
-         </div>
+      <div id="bar_graph_container">
+        <h3 class="link">Contributions by Month</h3>
+        <p class="alt_links">
+          <span id="stacked" onclick="createStackedGraph()">stacked</span> |
+          <span id="grouped" onclick="createStackedGraph()"> grouped</span>
+        </p>
+        <canvas id="barGraph"></canvas>
       </div>
-   </body>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <script>
+      var isStacked = false;
+
+      var stackedButton = document.getElementById("stacked");
+      var groupedButton = document.getElementById("grouped");
+
+      window.addEventListener("load", function () {
+        createBarGraph();
+      });
+
+      var data = {
+        labels: ["repo1", "repo2", "repo3", "repo4"],
+        datasets: [
+          {
+            // 150
+            data: [65, 35, 10, 15],
+            backgroundColor: ["#32CD32", "#228B22", "#20B2AA", "#556B2F"],
+            hoverBackgroundColor: ["#32CD32", "#228B22", "#20B2AA", "#556B2F"],
+          },
+        ],
+      };
+
+      var barData = {
+        type: "bar",
+        data: {
+          labels: ["12/11", "01/12", "02/12", "03/12", "04/12"],
+          datasets: [
+            {
+              label: "issues",
+              backgroundColor: "#8B008B",
+              borderColor: "#990099",
+              borderWidth: 1,
+              data: [0, 0, 4, 1, 0],
+              },
+            {
+              label: "comments",
+              backgroundColor: "#DB70DB",
+              borderColor: "#800080",
+              borderWidth: 1,
+              data: [1, 3, 2, 1, 1],
+            },
+            {
+              label: "commits",
+              data: [0, 0, 5, 12, 0],
+              backgroundColor: "#871F78",
+              borderColor: "9C6B98",
+              borderWidth: 1,
+             
+            },
+          ],
+        },
+        options: {
+          scaleShowValues: true,
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                  stepSize: 5,
+                },
+              },
+            ],
+            xAxes: [
+              {
+                ticks: {
+                  autoSkip: false,
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      var ctx = document.getElementById("myChart");
+
+      // And for a doughnut chart
+      var myDoughnutChart = new Chart(ctx, {
+        type: "doughnut",
+        data: data,
+        options: {
+          rotation: 1 * Math.PI,
+          circumference: 1 * Math.PI,
+        },
+      });
+
+      var barGraph = document.getElementById("barGraph");
+
+      function createBarGraph() {
+        isStacked = false;
+        groupedButton.style.fontWeight = "bold";
+        new Chart(
+          barGraph,
+          barData
+        ); /*{
+          type: "bar",
+          data: barData,
+          options: {
+            scales: {
+              yAxes: [
+                {
+                  display: true,
+                  ticks: {
+                    min: 0,
+                    max: 15,
+                  },
+                },
+              ],
+            },
+          },
+        });*/
+      }
+
+      
+      function createStackedGraph() {
+        if (!isStacked) {
+          isStacked = true;
+
+          stackedButton.style.fontWeight = "bold";
+          groupedButton.style.fontWeight = "normal";
+
+          var barData = {
+        type: "bar",
+        data: {
+          labels: ["12/11", "01/12", "02/12", "03/12", "04/12"],
+          datasets: [
+            {
+              label: "issues",
+              backgroundColor: "#8B008B",
+              borderColor: "#990099",
+              borderWidth: 1,
+              data: [0, 0, 4, 1, 0],
+              },
+            {
+              label: "comments",
+              backgroundColor: "#DB70DB",
+              borderColor: "#800080",
+              borderWidth: 1,
+              data: [1, 3, 2, 1, 1],
+            },
+            {
+              label: "commits",
+              data: [0, 0, 5, 12, 0],
+              backgroundColor: "#871F78",
+              borderColor: "9C6B98",
+              borderWidth: 1,
+             
+            },
+          ],
+        },
+        options: {
+          scaleShowValues: true,
+          scales: {
+            yAxes: [
+              {
+                stacked: true,
+                ticks: {
+                  beginAtZero: true,
+                  stepSize: 5,
+                },
+              },
+            ],
+            xAxes: [
+              {
+                stacked: true,
+                ticks: {
+                  autoSkip: false,
+                },
+              },
+            ],
+          },
+        },
+      };
+      }
+      new Chart(
+          barGraph,
+          barData
+        ); 
+      }
+    </script>
+  </body>
 </html>
