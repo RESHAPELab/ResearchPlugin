@@ -10,7 +10,7 @@ class ToolTipIcon {
 
   createIcon() {
     var toolTipContainer = document.createElement("div");
-    toolTipContainer.className = "helpIcon";
+    toolTipContainer.className = this.toolTipClass;
 
     var circleIcon = document.createElement("span");
     circleIcon.className = "helpIconCircle";
@@ -51,13 +51,9 @@ function checkURL() {
   ) {
     addReviewPullRequestTips();
     // if the user is opening a pull request
-  } else if ( document.getElementsByClassName('h-card').length != 0
-  ){
-    //createProfileCard();
-    console.log("in profile");
-  }
-
-  else {
+  } else if (document.getElementsByClassName("h-card").length != 0) {
+    createProfileCard();
+  } else {
     console.log("not found");
   }
 }
@@ -72,44 +68,35 @@ function checkURL() {
  *                      will be added to
  */
 function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
-  // Get the total progress percentage as a float
-  var totalProgress = (currentStep / totalSteps) * 100;
-
   // create the progress bar element
   var progressBarContainer = document.createElement("div");
   progressBarContainer.className = "container";
 
   var progressBar = document.createElement("div");
   progressBar.className = "progressbar";
-  
 
   var itemList = document.createElement("ul");
 
-  for( index = 1; index <= stepsList.length; index++ )
-    {
-      var listItem = document.createElement("li");
-      listItem.innerHTML = stepsList[index - 1];
+  for (index = 1; index <= stepsList.length; index++) {
+    var listItem = document.createElement("li");
+    listItem.innerHTML = stepsList[index - 1];
 
-      if( index == currentStep || index < currentStep )
-        {
-          listItem.className = "active";
-
-          if( totalProgress < 100) {
-            listItem.className += " partial"
-          }
-        }
-
-
-        itemList.appendChild( listItem );
+    if (index == currentStep) {
+      listItem.className += " partial";
     }
-    
-    progressBar.appendChild(itemList);
+    // if the user has already completed a step
+    else if (index < currentStep) {
+      listItem.className = "partial completed";
+    }
 
-    progressBarContainer.appendChild(progressBar);
+    itemList.appendChild(listItem);
+  }
 
-    $(progressBarContainer).insertBefore(
-      rootElement
-    );
+  progressBar.appendChild(itemList);
+
+  progressBarContainer.appendChild(progressBar);
+
+  $(progressBarContainer).insertBefore(rootElement);
 }
 
 /**
@@ -118,11 +105,14 @@ function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
  * First step in editing markdown files
  */
 function addReadMeToolTips() {
-
-  var steps = ["Edit ReadMe File", "Confirm Pull Request", "Review Pull Request"];
+  var steps = [
+    "Edit ReadMe File",
+    "Confirm Pull Request",
+    "Review Pull Request",
+  ];
 
   // progress bar above editor
-   addProgressBar(1, 3, ".js-blob-form", steps);
+  addProgressBar(1, 3, ".js-blob-form", steps);
 
   // icon to right of file name input
   var fileNameChangeText =
@@ -133,7 +123,7 @@ function addReadMeToolTips() {
 
   let fileNameChangeIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     fileNameChangeText,
     breadCrumbDiv
   );
@@ -147,7 +137,7 @@ function addReadMeToolTips() {
   // banner above commit message input
   var commitTitleText =
     "This is the title. Give a brief description of the change. Be short and objective.";
-  
+
   var inputTitleLabel = document.createElement("h3");
   inputTitleLabel.innerHTML = "Insert a title here";
   inputTitleLabel.style.display = "inline-block";
@@ -157,7 +147,7 @@ function addReadMeToolTips() {
 
   let commitMessageIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     commitTitleText,
     "#commit-summary-input"
   );
@@ -169,17 +159,17 @@ function addReadMeToolTips() {
   var descriptionText =
     "Add a more detailed description if needed. Here you can" +
     " present your arguments and reasoning that lead to change.";
-  
+
   var inputDescriptionLabel = document.createElement("h3");
   inputDescriptionLabel.innerHTML = "Insert a <br> description here";
   inputDescriptionLabel.style.display = "inline-block";
   inputDescriptionLabel.style.marginRight = "22px";
-  
+
   $(inputDescriptionLabel).insertBefore("#commit-description-textarea");
 
   let extendedDescIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     descriptionText,
     "#commit-description-textarea"
   );
@@ -189,7 +179,7 @@ function addReadMeToolTips() {
   $(extendedDescIcon.toolTipElement).insertAfter(
     extendedDescIcon.gitHubElement
   );
-    
+
   // banner above Commit Changes / Cancel buttons
   var submitChangesText =
     "By clicking the Commit changes button you " +
@@ -199,13 +189,13 @@ function addReadMeToolTips() {
 
   let submitChangesIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     submitChangesText,
     "#submit-file"
   );
 
   submitChangesIcon.createIcon();
-  
+
   submitChangesIcon.toolTipElement.style.marginRight = "20px";
 
   $(submitChangesIcon.toolTipElement).insertBefore(
@@ -219,7 +209,11 @@ function addReadMeToolTips() {
  * Second step in editing markdown files
  */
 function addProposeChangesToolTips() {
-  var steps = ["Edit ReadMe File", "Confirm Pull Request", "Review Pull Request"];
+  var steps = [
+    "Edit ReadMe File",
+    "Confirm Pull Request",
+    "Review Pull Request",
+  ];
 
   addProgressBar(2, 3, ".repository-content", steps);
 
@@ -228,14 +222,14 @@ function addProposeChangesToolTips() {
     "your changes if you are not sure, leave it how it " +
     "is, this is common for small changes.";
 
-  var topRibbon = document.getElementsByClassName('js-range-editor')[0];
+  var topRibbon = document.getElementsByClassName("js-range-editor")[0];
   topRibbon.style.width = "93%";
   topRibbon.style.display = "inline-block";
 
   // ribbon above current current branch and new pull request branch
   let currentBranchIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     branchContainerText,
     ".js-range-editor"
   );
@@ -245,10 +239,10 @@ function addProposeChangesToolTips() {
   $(currentBranchIcon.toolTipElement).insertAfter(
     currentBranchIcon.gitHubElement
   );
-  
-  var test = document.getElementsByClassName('d-flex flex-justify-end m-2')[0];
-  test.classList.remove('flex-justify-end');
-  test.classList.add('flex-justify-start');
+
+  var test = document.getElementsByClassName("d-flex flex-justify-end m-2")[0];
+  test.classList.remove("flex-justify-end");
+  test.classList.add("flex-justify-start");
 
   var confirmPullRequestText =
     "By clicking here you will have a chance to change the " +
@@ -258,7 +252,7 @@ function addProposeChangesToolTips() {
   // icon next to create pull request button
   let createPullRequestBtn = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     confirmPullRequestText,
     ".js-pull-request-button"
   );
@@ -277,16 +271,18 @@ function addProposeChangesToolTips() {
     "pull request.";
 
   var summaryClass = ".overall-summary";
-  
+
   // override the container width and display to add icon
-  var numbersSummaryContainer = document.getElementsByClassName('overall-summary')[0];
+  var numbersSummaryContainer = document.getElementsByClassName(
+    "overall-summary"
+  )[0];
   numbersSummaryContainer.style.width = "93%";
   numbersSummaryContainer.style.display = "inline-block";
 
   // icon above summary of changes and commits
   let requestSummaryIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     summaryText,
     summaryClass
   );
@@ -309,15 +305,17 @@ function addProposeChangesToolTips() {
   // icon above container for changes in current pull request
   let comparisonIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     changesText,
     comparisonClass
   );
 
   comparisonIcon.createIcon();
   //comparisonIcon.toolTipElement.style = "float:right;";
-  
-  var numbersSummaryContainer = document.getElementsByClassName('details-collapse')[0];
+
+  var numbersSummaryContainer = document.getElementsByClassName(
+    "details-collapse"
+  )[0];
   numbersSummaryContainer.style.width = "93%";
   numbersSummaryContainer.style.display = "inline-block";
 
@@ -330,7 +328,11 @@ function addProposeChangesToolTips() {
  * Third step in editing markdown files
  */
 function addReviewPullRequestTips() {
-  var steps = ["Edit ReadMe File", "Confirm Pull Request", "Review Pull Request"];
+  var steps = [
+    "Edit ReadMe File",
+    "Confirm Pull Request",
+    "Review Pull Request",
+  ];
 
   addProgressBar(3, 3, ".gh-header-show", steps);
 
@@ -340,7 +342,7 @@ function addReviewPullRequestTips() {
 
   let pullRequestStatusIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     branchContainerText,
     ".js-clipboard-copy"
   );
@@ -360,7 +362,7 @@ function addReviewPullRequestTips() {
 
   let closePullRequestIcon = new ToolTipIcon(
     "H4",
-    "tooltip2",
+    "helpIcon",
     requestButtonsText,
     requestButtonsClass
   );
@@ -385,35 +387,121 @@ function addForkToolTips() {
   pencilIcon.setAttribute("aria-label", "Edit Readme");
 }
 
+/**
+ * Function name: createProfileCard
+ *
+ */
 function createProfileCard() {
-  var profileContainer = document.getElementsByClassName('h-card')[0];
-  profileContainer.className = "h-card";
+  let showGraphIcon = new ToolTipIcon(
+    "H4",
+    "helpIcon graph-tooltip",
+    "Click this tooltip to show more info about the user",
+    ".js-calendar-graph"
+  );
 
- var cardContainer = document.createElement("div");
-  cardContainer.className = "flip-card col-lg-3 col-md-4 col-12 float-md-left pr-md-3 pr-xl-6";
+  showGraphIcon.createIcon();
 
-  var innerCardContainer = document.createElement("div");
-  innerCardContainer.className = "flip-card-inner";
+  $(showGraphIcon.toolTipElement).insertBefore(showGraphIcon.gitHubElement);
 
+  $(".helpIcon").click(function () {
+    $(".back").toggleClass("hovered");
+    $("#js-contribution-activity").toggleClass("hidden");
+    $("#user-activity-overview").toggleClass("hidden");
+  });
 
-  var cardFront = document.createElement("div");
-  cardFront.className = "flip-card-front";
-  cardFront.appendChild(profileContainer);
-
-  innerCardContainer.appendChild(cardFront);
+  var outerContainer = document.getElementsByClassName(
+    "graph-before-activity-overview"
+  )[0];
+  outerContainer.className += " card-container";
 
   var cardBack = document.createElement("div");
-  cardBack.className = "flip-card-back";
+  cardBack.className = "back";
 
-  innerCardContainer.appendChild(cardBack);
+  var repoGraph = document.createElement("canvas");
+  repoGraph.className = "graph";
+  repoGraph.style.borderRight = "1px solid black";
+  repoGraph.style.borderBottom = "1px solid black";
+  repoGraph.style.float = "left";
+  repoGraph.id = "myChart";
 
-  console.log(innerCardContainer);
-  
-  cardContainer.appendChild(innerCardContainer);
+  var skillGraph = document.createElement("canvas");
+  skillGraph.className = "graph";
+  skillGraph.style.borderBottom = "1px solid black";
+  skillGraph.id = "skillGraph";
+  skillGraph.style.float = "right";
 
-  console.log(cardContainer);
+  var commitsGraph = document.createElement("canvas");
+  commitsGraph.className = "graph";
+  commitsGraph.style.borderRight = "1px solid black";
+  commitsGraph.style.float = "left";
+  commitsGraph.id = "commitsGraph";
 
-  $(cardContainer).insertBefore(
-    document.getElementsByClassName("d-md-none")[0]
-  );
+  var languagesGraph = document.createElement("canvas");
+  languagesGraph.className = "graph";
+  languagesGraph.id = "languagesGraph";
+  languagesGraph.style.float = "right";
+
+  cardBack.appendChild(repoGraph);
+  cardBack.appendChild(skillGraph);
+  cardBack.appendChild(commitsGraph);
+  cardBack.appendChild(languagesGraph);
+
+  outerContainer.appendChild(cardBack);
+
+  var repoGraphContainer = document.getElementById("myChart");
+  var skillGraphContainer = document.getElementById("skillGraph");
+  var commitGraphContainer = document.getElementById("commitsGraph");
+  var languagesGraphContainer = document.getElementById("languagesGraph");
+
+  var data = {
+    labels: ["repo1", "repo2", "repo3", "repo4"],
+    datasets: [
+      {
+        // 150
+        data: [65, 35, 10, 15],
+        backgroundColor: ["#32CD32", "#228B22", "#20B2AA", "#556B2F"],
+        hoverBackgroundColor: ["#32CD32", "#228B22", "#20B2AA", "#556B2F"],
+      },
+    ],
+  };
+
+  // And for a doughnut chart
+  var repoChart = new Chart(repoGraphContainer, {
+    type: "doughnut",
+    data: data,
+    options: {
+      responsive: false,
+      rotation: 1 * Math.PI,
+      circumference: 1 * Math.PI,
+    },
+  });
+
+  // And for a doughnut chart
+  var skillChart = new Chart(skillGraphContainer, {
+    type: "doughnut",
+    data: data,
+    options: {
+      responsive: false,
+      rotation: 1 * Math.PI,
+      circumference: 1 * Math.PI,
+    },
+  });
+
+  // And for a doughnut chart
+  var commitChart = new Chart(commitGraphContainer, {
+    type: "bar",
+    data: data,
+    options: {
+      responsive: false,
+    },
+  });
+
+  // And for a doughnut chart
+  var languagesChart = new Chart(languagesGraphContainer, {
+    type: "line",
+    data: data,
+    options: {
+      responsive: false,
+    },
+  });
 }

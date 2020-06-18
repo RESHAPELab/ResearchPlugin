@@ -91,7 +91,8 @@
     }
   </style>
   <body>
-    <div class="container">
+    <h1>This is the GitHub Plugin</h1>
+   <!--<div class="container">
       <h2>johndouthat</h2>
       <p>member for 5 years, 9 months</p>
       <div class="profile_picture"><p>Profile Picture here</p></div>
@@ -113,18 +114,14 @@
         <canvas id="barGraph"></canvas>
       </div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <script src="Chart.bundle.js"></script>
     <script>
+      window.addEventListener("load", createBarGraph);
       var isStacked = false;
 
       var stackedButton = document.getElementById("stacked");
       var groupedButton = document.getElementById("grouped");
-
-      window.addEventListener("load", function () {
-        createBarGraph();
-      });
-
+  
       var data = {
         labels: ["repo1", "repo2", "repo3", "repo4"],
         datasets: [
@@ -293,6 +290,6 @@
           barData
         ); 
       }
-    </script>
+    </script>-->
   </body>
 </html>
