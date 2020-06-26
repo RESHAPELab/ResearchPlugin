@@ -398,6 +398,12 @@ function createProfileCard() {
     "Click this tooltip to show more info about the user",
     ".js-calendar-graph"
   );
+  
+  var username = document.getElementsByClassName('vcard-username')[0].innerHTML;
+  
+  createCardContainer();
+
+  getRepos(username);
 
   showGraphIcon.createIcon();
 
@@ -408,10 +414,18 @@ function createProfileCard() {
     $("#js-contribution-activity").toggleClass("hidden");
     $("#user-activity-overview").toggleClass("hidden");
   });
+}
 
+
+/**
+ * Function: createCardContainer
+ * Creates card with four quadrants behind graph in GitHub user's profile page
+ */
+function createCardContainer() {
   var outerContainer = document.getElementsByClassName(
     "graph-before-activity-overview"
   )[0];
+
   outerContainer.className += " card-container";
 
   var cardBack = document.createElement("div");
@@ -447,61 +461,157 @@ function createProfileCard() {
   cardBack.appendChild(languagesGraph);
 
   outerContainer.appendChild(cardBack);
+}
+
+/**
+ * function getRepos
+ * @param string username - GitHub username for API 
+ * Uses GitHub API to view programming languages for user
+ */
+async function getRepos( username ) {
+  const oAuthToken = 'b1cb7d1ff339447f8a3cad88bd6216f36423dfae';
+
+  const colors = [ "#3e95cd","#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850",
+      "#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850", "#3e95cd",
+      "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850" ];
+
+  const headers = {
+    "Authorization" : 'Token ' + oAuthToken
+  }
+
+  const url = "https://api.github.com/users/" + username + "/repos";
+  const response = await fetch(url, {
+    "method" : "GET",
+    "headers": headers
+  });
+  
+  const result = await response.json();
+
+  var languages = [];
+  var repositoryNames = [];
+  var labels = {};
+  var dataSet = {};
+
+  result.forEach((index) => {
+
+    languages.push(index.language);
+    repositoryNames.push(index.name);
+  });
+
+  getCommits( repositoryNames, username );
 
   var repoGraphContainer = document.getElementById("myChart");
-  var skillGraphContainer = document.getElementById("skillGraph");
-  var commitGraphContainer = document.getElementById("commitsGraph");
-  var languagesGraphContainer = document.getElementById("languagesGraph");
 
-  var data = {
-    labels: ["repo1", "repo2", "repo3", "repo4"],
-    datasets: [
-      {
-        // 150
-        data: [65, 35, 10, 15],
-        backgroundColor: ["#32CD32", "#228B22", "#20B2AA", "#556B2F"],
-        hoverBackgroundColor: ["#32CD32", "#228B22", "#20B2AA", "#556B2F"],
-      },
-    ],
-  };
+  var count = {};
 
-  // And for a doughnut chart
-  var repoChart = new Chart(repoGraphContainer, {
-    type: "doughnut",
-    data: data,
-    options: {
-      responsive: false,
-      rotation: 1 * Math.PI,
-      circumference: 1 * Math.PI,
-    },
-  });
+  for (var index = 0; index < languages.length; index++) {
+    if (!count[languages[index]]) {
+      count[languages[index]] = 0;
+    }
+    count[languages[index]]++;
+  }
 
-  // And for a doughnut chart
-  var skillChart = new Chart(skillGraphContainer, {
-    type: "doughnut",
-    data: data,
-    options: {
-      responsive: false,
-      rotation: 1 * Math.PI,
-      circumference: 1 * Math.PI,
-    },
-  });
+  labels = Object.keys(count);
+  dataSet = Object.values(count);
 
-  // And for a doughnut chart
-  var commitChart = new Chart(commitGraphContainer, {
+  myBarChart = new Chart(repoGraphContainer, {
     type: "bar",
-    data: data,
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Repositories",
+          backgroundColor: colors,
+          data: dataSet,
+        },
+      ],
+    },
     options: {
       responsive: false,
+      legend: { display: false },
+      title: {
+        display: true,
+        text: "Programming languge totals for " + username + "'s repositories",
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
     },
   });
 
-  // And for a doughnut chart
-  var languagesChart = new Chart(languagesGraphContainer, {
-    type: "line",
-    data: data,
+}
+
+/**
+ * function getCommits
+ * @param string username - GitHub username for API 
+ * Uses GitHub API to view commit totals for user
+ */
+async function getCommits( repositories, username ) {
+  const oAuthToken = 'b1cb7d1ff339447f8a3cad88bd6216f36423dfae';
+  
+  const colors = [ "#3e95cd","#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850",
+      "#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850", "#3e95cd",
+      "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850" ];
+
+  var total = 0; 
+  var repoObject = {};
+  var ctx = document.getElementById("repositories");
+  var skillGraphContainer = document.getElementById("skillGraph");
+
+  const headers = {
+    "Authorization" : 'Token ' + oAuthToken
+  }
+
+ for (const repo of repositories) {
+    var commitUrl = "https://api.github.com/repos/" + username + "/" + repo + "/commits?page=1&per_page=50";
+    
+    var commitResponse = await fetch(commitUrl,
+      {
+        "method": "GET",
+        "headers": headers
+      });
+
+    var commitResult = await commitResponse.json();
+    repoObject[repo] = commitResult.length;
+ };
+
+ var labels = Object.keys(repoObject);
+ var data = Object.values(repoObject);
+
+ myBarChart = new Chart(skillGraphContainer, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Commits",
+          backgroundColor: colors,
+          data: data,
+        },
+      ],
+    },
     options: {
       responsive: false,
+      legend: { display: false },
+      title: {
+        display: true,
+        text: "Commits per repository for: " + username,
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true,
+            steps: 5,
+            stepValue: 10,
+            max: 50
+          }
+        }]
+      }
     },
   });
+
 }
