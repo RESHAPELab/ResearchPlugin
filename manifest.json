@@ -1,7 +1,7 @@
 {
-  "name": "GitHub Plugin Development",
+  "name": "GitHub Tool Tips",
   "version": "1",
-  "description": "Add tooltips to GitHub when working in repositories",
+  "description": "Helps newcomers navigate GitHub and successfully contribute to open source projects.",
   "browser_action": {
     "name": "GitHub Plugin Development",
     "icons": ["icon.png"],
@@ -12,11 +12,11 @@
   "content_scripts": [
     {
       "matches": [ "https://github.com/*"],
-      "run_at": "document_idle",
       "css": [ "styles.css"],
-      "js": ["jquery.min.js", "content.js"]
+      "js": ["jquery.min.js", "Chart.bundle.js", "content.js"],
+      "run_at": "document_end"
     }
   ],
   "manifest_version" : 2,
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
+  "content_security_policy": "script-src 'self' 'sha256-Cm8Z6dOt5LoFdNDqouQYEMWB0Z3D3bSMkhouBBPsByw='; object-src 'self'"
 }
