@@ -1,4 +1,4 @@
-let NOT_FOUND = -1;
+const NOT_FOUND = -1;
 
 class ToolTipIcon {
   constructor(toolTipElement, toolTipClass, toolTipText, gitHubElement) {
@@ -9,14 +9,14 @@ class ToolTipIcon {
   }
 
   createIcon() {
-    var toolTipContainer = document.createElement("div");
+    let toolTipContainer = document.createElement("div");
     toolTipContainer.className = this.toolTipClass;
 
-    var circleIcon = document.createElement("span");
+    let circleIcon = document.createElement("span");
     circleIcon.className = "helpIconCircle";
     circleIcon.innerHTML = "?";
 
-    var toolTip = document.createElement("span");
+    let toolTip = document.createElement("span");
     toolTip.className = "helpIconText";
     toolTip.innerHTML = this.toolTipText;
 
@@ -28,9 +28,9 @@ class ToolTipIcon {
 }
 
 // check the current url and call functions accordingly
-window.onload=function(){
-checkURL();
-}
+window.onload = function() {
+  checkURL();
+};
 
 
 /**
@@ -41,13 +41,8 @@ checkURL();
 function checkURL() {
   // check if the user wants to edit a file that they are not an owner of
   if (
-    document.getElementsByClassName("tooltipped")[2] != null &&
-    document
-      .getElementsByClassName("tooltipped")[2]
-      .getAttribute("aria-label") ===
-      "Edit the file in your fork of this project"
+    checkIsEditingForkedFile()
   ) {
-    console.log("here");
     addForkToolTips();
   }
   // if the user is editing a markdown file
@@ -87,6 +82,23 @@ function checkURL() {
 }
 
 /**
+ * Function name: checkIsEditingForkedFile
+ * Checks if the user is viewing a file that they do not own
+ */
+function checkIsEditingForkedFile() {
+  try {
+    // check if there is a pencil icon with this aria label
+    return document
+      .getElementsByClassName("tooltipped")[2]
+      .getAttribute("aria-label") ==
+      "Edit the file in your fork of this project";
+  }
+  catch(error) {
+    return false;
+  }
+}
+
+/**
  * Function name: addProgressBar
  * Adds progressBar above forms in GitHub pages to let user how far they are
  * in editing files
@@ -97,16 +109,18 @@ function checkURL() {
  */
 function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
   // create the progress bar element
-  var progressBarContainer = document.createElement("div");
+  const progressBarContainer = document.createElement("div");
   progressBarContainer.className = "container";
 
-  var progressBar = document.createElement("div");
+  let progressBar = document.createElement("div");
   progressBar.className = "progressbar";
 
-  var itemList = document.createElement("ul");
+  let itemList = document.createElement("ul");
+
+  let index = 1;
 
   for (index = 1; index <= stepsList.length; index++) {
-    var listItem = document.createElement("li");
+    let listItem = document.createElement("li");
     listItem.innerHTML = stepsList[index - 1];
 
     if( currentStep == totalSteps ) {
@@ -130,7 +144,7 @@ function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
 
   $(progressBarContainer).insertBefore(rootElement);
 
-  if( isComplete()) {
+  if( isComplete() ) {
     createSuccessRibbon();
   }
 }
@@ -153,7 +167,8 @@ function isComplete() {
  * Creates ribbon above progress bar to inform the user that the process is successful
  */
 function createSuccessRibbon() {
-  var processType;
+
+  let processType = "";
 
   if( window.location.href.indexOf("issues") != NOT_FOUND) {
     processType = "issue";
@@ -162,13 +177,13 @@ function createSuccessRibbon() {
     processType = "pull request"
   }
 
-  var container = document.createElement("div");
+  let container = document.createElement("div");
   container.className = "successRibbon";
 
 
-  var ribbonMessage = document.createTextNode("The " + processType + " was created successfully and will be reviewed shortly");
+  let ribbonMessage = document.createTextNode("The " + processType + " was created successfully and will be reviewed shortly");
 
-  //container.appendChild( closeButton );
+  // container.appendChild( closeButton );
   container.appendChild(ribbonMessage);
 
   $(container).insertBefore(
@@ -182,7 +197,7 @@ function createSuccessRibbon() {
  * First step in editing markdown files
  */
 function addReadMeToolTips() {
-  var steps = [
+  let steps = [
     "Edit File",
     "Confirm Pull Request",
     "Pull Request Opened",
@@ -192,11 +207,11 @@ function addReadMeToolTips() {
   addProgressBar(1, 3, ".js-blob-form", steps);
 
   // icon to right of file name input
-  var fileNameChangeText =
+  let fileNameChangeText =
     "This is the file name, changing it will create " +
     " a new file with the new name";
 
-  var breadCrumbDiv = ".d-md-inline-block";
+  let breadCrumbDiv = ".d-md-inline-block";
 
   let fileNameChangeIcon = new ToolTipIcon(
     "H4",
@@ -212,10 +227,10 @@ function addReadMeToolTips() {
   );
 
   // banner above commit message input
-  var commitTitleText =
+  let commitTitleText =
     "This is the title. Give a brief description of the change. Be short and objective.";
 
-  var inputTitleLabel = document.createElement("h3");
+  let inputTitleLabel = document.createElement("h3");
   inputTitleLabel.innerHTML = "Insert a title here";
   inputTitleLabel.style.display = "inline-block";
   inputTitleLabel.style.marginRight = "20px";
@@ -233,11 +248,11 @@ function addReadMeToolTips() {
 
   $(commitMessageIcon.toolTipElement).insertAfter("#commit-summary-input");
 
-  var descriptionText =
+  let descriptionText =
     "Add a more detailed description if needed. Here you can" +
     " present your arguments and reasoning that lead to change.";
 
-  var inputDescriptionLabel = document.createElement("h3");
+  let inputDescriptionLabel = document.createElement("h3");
   inputDescriptionLabel.innerHTML = "Insert a <br> description here";
   inputDescriptionLabel.style.display = "inline-block";
   inputDescriptionLabel.style.marginRight = "22px";
@@ -257,7 +272,7 @@ function addReadMeToolTips() {
     extendedDescIcon.gitHubElement
   );
   
-  var commitChangesDirectlyText = "By clicking the Commit Changes button the changes will automatically be pushed to the repo";
+  let commitChangesDirectlyText = "By clicking the Commit Changes button the changes will automatically be pushed to the repo";
 
   
   let submitChangesIcon = new ToolTipIcon(
@@ -276,10 +291,10 @@ function addReadMeToolTips() {
   );
 }
 
-/** On pull request step 1, toggle icon text to help inform user */
-var onDirectPull = true;
+//On pull request step 1, toggle icon text to help inform user
+let onDirectPull = true;
 
-var pullChangesText =
+let pullChangesText =
 "By clicking the Propose changes button you " +
 "will start the submission process. You " +
 "will have the chance to check your changes " +
@@ -319,7 +334,7 @@ $('input[name="commit-choice"]').click( function() {
  * Second step in editing markdown files
  */
 function addProposeChangesToolTips() {
-  var steps = [
+  let steps = [
     "Edit File",
     "Create Pull Request",
     "Pull Request Opened",
@@ -329,19 +344,19 @@ function addProposeChangesToolTips() {
 
   $("#pull_request_body").attr("placeholder", "You can add a more detailed description here if needed.");
 
-  var branchName = document.getElementsByClassName('branch-name')[0].innerText;
+  let branchName = document.getElementsByClassName('branch-name')[0].innerText;
 
-  $(".gh-header-meta").text("Finish the pull request submission below to allow others to accept the changes. These changes can be viewed later under the branch name: " + branchName + "." );
+  const newHeaderText = "Finish the pull request submission below to allow others to accept the changes. These changes can be viewed later under the branch name: " + branchName + ".";
 
-  var pullRequestTitle = document.getElementsByClassName('gh-header-title')[1];
+  $(".gh-header-meta").text( newHeaderText );
+
+  let pullRequestTitle = document.getElementsByClassName('gh-header-title')[1];
   pullRequestTitle.innerHTML = "Create pull request";
   
-  var branchContainerText =
-    "This represents the origin and destination of " +
-    "your changes if you are not sure, leave it how it " +
-    "is, this is common for small changes.";
+  const branchContainerText =
+    "This represents the origin and destination of your changes if you are not sure, leave it how it is, this is common for small changes.";
 
-  var topRibbon = document.getElementsByClassName("js-range-editor")[0];
+  let topRibbon = document.getElementsByClassName("js-range-editor")[0];
   topRibbon.style.width = "93%";
   topRibbon.style.display = "inline-block";
 
@@ -360,14 +375,13 @@ function addProposeChangesToolTips() {
   );
   
   // move button row to left side of editor
-  var buttonRow = document.getElementsByClassName(
+  let buttonRow = document.getElementsByClassName(
     "d-flex flex-justify-end m-2"
   )[0];
   buttonRow.classList.remove("flex-justify-end");
   buttonRow.classList.add("flex-justify-start");
 
-  var confirmPullRequestText =
-    "By clicking this button you will create the pull request to allow others to view your changes and accept them into the repository."
+  const confirmPullRequestText = "By clicking this button you will create the pull request to allow others to view your changes and accept them into the repository."
 
   // icon next to create pull request button
   let createPullRequestBtn = new ToolTipIcon(
@@ -383,17 +397,12 @@ function addProposeChangesToolTips() {
     createPullRequestBtn.gitHubElement
   );
 
-  var summaryText =
-    "This shows the amount of commits in the pull request, " +
-    "the amount of files you changed in the pull request, " +
-    "how many comments were on the commits for the pull request" +
-    " and the ammount of people who worked together on this " +
-    "pull request.";
+  const summaryText = "This shows the amount of commits in the pull request, the amount of files you changed in the pull request, how many comments were on the commits for the pull request and the ammount of people who worked together on this pull request.";
 
-  var summaryClass = ".overall-summary";
+  let summaryClass = ".overall-summary";
 
   // override the container width and display to add icon
-  var numbersSummaryContainer = document.getElementsByClassName(
+  let numbersSummaryContainer = document.getElementsByClassName(
     "overall-summary"
   )[0];
   numbersSummaryContainer.style.width = "93%";
@@ -415,12 +424,9 @@ function addProposeChangesToolTips() {
     requestSummaryIcon.gitHubElement
   );
 
-  var comparisonClass = ".details-collapse";
+  const comparisonClass = ".details-collapse";
 
-  var changesText =
-    "This shows the changes between the orginal file and " +
-    "your version. Green(+) represents lines added. " +
-    "Red(-) represents removed lines";
+  const changesText = "This shows the changes between the orginal file and your version. Green(+) represents lines added. Red(-) represents removed lines";
 
   // icon above container for changes in current pull request
   let comparisonIcon = new ToolTipIcon(
@@ -431,13 +437,12 @@ function addProposeChangesToolTips() {
   );
 
   comparisonIcon.createIcon();
-  //comparisonIcon.toolTipElement.style = "float:right;";
 
-  var numbersSummaryContainer = document.getElementsByClassName(
+  let commitSummaryContainer = document.getElementsByClassName(
     "details-collapse"
   )[0];
-  numbersSummaryContainer.style.width = "93%";
-  numbersSummaryContainer.style.display = "inline-block";
+  commitSummaryContainer.style.width = "93%";
+  commitSummaryContainer.style.display = "inline-block";
 
   $(comparisonIcon.toolTipElement).insertAfter(comparisonIcon.gitHubElement);
 }
@@ -448,10 +453,10 @@ function addProposeChangesToolTips() {
  * Third step in editing markdown files
  */
 function addReviewPullRequestTips() {
-  var pullRequestTitle = document.getElementsByClassName("js-issue-title")[0]
+  let pullRequestTitle = document.getElementsByClassName("js-issue-title")[0]
     .innerText;
 
-  var steps = [
+  let steps = [
     "Edit File",
     "Confirm Pull Request",
     "Pull Request Opened",
@@ -459,9 +464,7 @@ function addReviewPullRequestTips() {
 
   addProgressBar(3, 3, ".gh-header-show", steps);
 
-  var branchContainerText =
-    "This indicates that the pull request is open " +
-    "meaning someone will get to it soon. ";
+  const branchContainerText = "This indicates that the pull request is open meaning someone will get to it soon. ";
 
   let pullRequestStatusIcon = new ToolTipIcon(
     "H4",
@@ -476,13 +479,11 @@ function addReviewPullRequestTips() {
     pullRequestStatusIcon.gitHubElement
   );
 
-  var requestButtonsText =
-    "This will close the pull request meaning people " +
-    "cannot view this! Do not click close unless the " +
-    "request was solved. ";
+  const requestButtonsText = "This will close the pull request meaning people cannot view this! Do not click close unless the request was solved. ";
 
-  var requestButtonsClass = ".js-comment-and-button";
-
+  let requestButtonsClass = ".js-comment-and-button";
+  
+  
   $(".js-quick-submit-alternative").click(function (event) {
     if (
       !confirm(
@@ -508,7 +509,9 @@ function addReviewPullRequestTips() {
     closePullRequestIcon.gitHubElement
   );
 
-  var buttonRow = document.getElementsByClassName("d-flex flex-justify-end")[0];
+  closePullRequestIcon.toolTipElement.style.marginRight = "20px";
+
+  let buttonRow = document.getElementsByClassName("d-flex flex-justify-end")[0];
   buttonRow.classList.remove("flex-justify-end");
   buttonRow.classList.add("flex-justify-start");
 }
@@ -519,7 +522,7 @@ function addReviewPullRequestTips() {
  */
 function addForkToolTips() {
   // get the second instance of icon to edit tool tip
-  /*var pencilIcon = document.getElementsByClassName(
+  /*let pencilIcon = document.getElementsByClassName(
     "btn-octicon tooltipped tooltipped-nw"
   )[1];
 
@@ -534,12 +537,12 @@ function addForkToolTips() {
  * Adds tolltips to page when opening a new issue report
  */
 function addReportIssueTips() {
-  var steps = ["Report Issue", "confirm Issue Report", "Issue Submitted"];
+  let steps = ["Report Issue", "confirm Issue Report", "Issue Submitted"];
 
   // progress bar above editor
   addProgressBar(1, 3, ".new_issue", steps);
 
-  var submitButtonText =
+  let submitButtonText =
     "After clicking this, you will have a chance to update the issue report";
 
   let submitButtonIcon = new ToolTipIcon(
@@ -554,7 +557,6 @@ function addReportIssueTips() {
   $(submitButtonIcon.toolTipElement).insertAfter(
     submitButtonIcon.gitHubElement
   );
-
 }
 
 /**
@@ -562,21 +564,18 @@ function addReportIssueTips() {
  * Adds tolltips to page when reviewing a new issue report
  */
 function addReviewIssueTips() {
-  var issueTitle = document.getElementsByClassName("js-issue-title")[0]
+  let issueTitle = document.getElementsByClassName("js-issue-title")[0]
     .innerText;
 
-    var steps = ["Report Issue", "confirm Issue Report", "Issue Submitted"];
+    let steps = ["Report Issue", "confirm Issue Report", "Issue Submitted"];
 
   addProgressBar(3, 3, ".repository-content", steps);
 
-  var buttonRow = document.getElementsByClassName("d-flex flex-justify-end")[0];
+  let buttonRow = document.getElementsByClassName("d-flex flex-justify-end")[0];
   buttonRow.classList.remove("flex-justify-end");
   buttonRow.classList.add("flex-justify-start");
 
-  var closeIssueIconText =
-    "This will close the issue request meaning people " +
-    "cannot view this! Do not click close unless the " +
-    "request was solved. ";
+  const closeIssueIconText = "This will close the issue request meaning people cannot view this! Do not click close unless the request was solved. ";
 
   let submitButtonIcon = new ToolTipIcon(
     "H4",
@@ -593,7 +592,7 @@ function addReviewIssueTips() {
     submitButtonIcon.gitHubElement
   );
 
-  /*
+  
   $(".js-quick-submit-alternative").click(function (event) {
     if (
       !confirm(
@@ -602,7 +601,7 @@ function addReviewIssueTips() {
     ) {
       event.preventDefault();
     }
-  });*/
+  });
 }
 
 /**
@@ -617,7 +616,7 @@ function createProfileCard() {
     ".js-calendar-graph"
   );
 
-  var username = document.getElementsByClassName("vcard-username")[0].innerHTML;
+  let username = document.getElementsByClassName("vcard-username")[0].innerHTML;
 
   createCardContainer();
 
@@ -628,7 +627,6 @@ function createProfileCard() {
   $(showGraphIcon.toolTipElement).insertBefore(showGraphIcon.gitHubElement);
 
   $(".helpIcon").click(function () {
-    console.log($(".helpIconCircle").text());
     if($(".helpIconCircle").text() === '?' ) {
       $(".helpIconCircle").text("X");
       $(".helpIconText").addClass("removeText");
@@ -648,35 +646,35 @@ function createProfileCard() {
  * Creates card with four quadrants behind graph in GitHub user's profile page
  */
 function createCardContainer() {
-  var outerContainer = document.getElementsByClassName(
+  let outerContainer = document.getElementsByClassName(
     "graph-before-activity-overview"
   )[0];
 
   outerContainer.className += " card-container";
 
-  var cardBack = document.createElement("div");
+  let cardBack = document.createElement("div");
   cardBack.className = "back";
 
-  var repoGraph = document.createElement("canvas");
+  let repoGraph = document.createElement("canvas");
   repoGraph.className = "graph";
   repoGraph.style.borderRight = "1px solid black";
   repoGraph.style.borderBottom = "1px solid black";
   repoGraph.style.float = "left";
   repoGraph.id = "myChart";
 
-  var skillGraph = document.createElement("canvas");
+  let skillGraph = document.createElement("canvas");
   skillGraph.className = "graph";
   skillGraph.style.borderBottom = "1px solid black";
   skillGraph.id = "skillGraph";
   skillGraph.style.float = "right";
 
-  var commitsGraph = document.createElement("canvas");
+  let commitsGraph = document.createElement("canvas");
   commitsGraph.className = "graph";
   commitsGraph.style.borderRight = "1px solid black";
   commitsGraph.style.float = "left";
   commitsGraph.id = "commitsGraph";
 
-  var languagesGraph = document.createElement("canvas");
+  let languagesGraph = document.createElement("canvas");
   languagesGraph.className = "graph";
   languagesGraph.id = "languagesGraph";
   languagesGraph.style.float = "right";
@@ -713,7 +711,7 @@ const colors = [
  * Uses GitHub API to view programming languages for user
  */
 async function getRepos(username) {
-  const oAuthToken = "028bd2099548c1e58c9a7e944d61ed3d28dd8669";
+  const oAuthToken = "562260e9c902b96bd9cfe39d9413358703e66076";
 
   const headers = {
     Authorization: "Token " + oAuthToken,
@@ -727,10 +725,10 @@ async function getRepos(username) {
 
   const result = await response.json();
 
-  var languages = [];
-  var repositoryNames = [];
-  var labels = {};
-  var dataSet = {};
+  let languages = [];
+  let repositoryNames = [];
+  let labels = {};
+  let dataSet = {};
 
   result.forEach((index) => {
     if(index.language != null ) {
@@ -742,11 +740,11 @@ async function getRepos(username) {
 
   getCommits(repositoryNames, username);
 
-  var repoGraphContainer = document.getElementById("myChart");
+  let repoGraphContainer = document.getElementById("myChart");
 
-  var repositoriesObject = {};
+  let repositoriesObject = {};
 
-  for (var index = 0; index < languages.length; index++) {
+  for (let index = 0; index < languages.length; index++) {
     if (!repositoriesObject[languages[index]]) {
       repositoriesObject[languages[index]] = 0;
     }
@@ -790,6 +788,27 @@ async function getRepos(username) {
           },
         ],
       },
+      animation: {
+        duration: 1,
+        onProgress: function() {
+          var chartInstance = this.chart,
+            ctx = chartInstance.ctx;
+  
+          ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+  
+          this.data.datasets.forEach(function(dataset, i) {
+            var meta = chartInstance.controller.getDatasetMeta(i);
+            meta.data.forEach(function(bar, index) {
+              if (dataset.data[index] > 0) {
+                var data = dataset.data[index];
+                ctx.fillText(data, bar._model.x, bar._model.y);
+              }
+            });
+          });
+        }
+      },
     },
   });
 }
@@ -800,36 +819,36 @@ async function getRepos(username) {
  * Uses GitHub API to view commit totals for user
  */
 async function getCommits(repositories, username) {
-  const oAuthToken = "028bd2099548c1e58c9a7e944d61ed3d28dd8669";
+  const oAuthToken = "562260e9c902b96bd9cfe39d9413358703e66076";
 
-  var total = 0;
-  var repoObject = {};
-  var ctx = document.getElementById("repositories");
-  var skillGraphContainer = document.getElementById("skillGraph");
+  let total = 0;
+  let repoObject = {};
+  let ctx = document.getElementById("repositories");
+  let skillGraphContainer = document.getElementById("skillGraph");
 
   const headers = {
     Authorization: "Token " + oAuthToken,
   };
 
   for (const repo of repositories) {
-    var commitUrl =
+    let commitUrl =
       "https://api.github.com/repos/" +
       username +
       "/" +
       repo +
       "/commits?page=1&per_page=25";
 
-    var commitResponse = await fetch(commitUrl, {
+    let commitResponse = await fetch(commitUrl, {
       method: "GET",
       headers: headers,
     });
 
-    var commitResult = await commitResponse.json();
+    let commitResult = await commitResponse.json();
     repoObject[repo] = commitResult.length;
   }
 
-  var labels = Object.keys(repoObject);
-  var data = Object.values(repoObject);
+  let labels = Object.keys(repoObject);
+  let data = Object.values(repoObject);
 
   labels.sort(function(a, b) { return repoObject[b] - repoObject[a] });
 
@@ -859,7 +878,7 @@ async function getCommits(repositories, username) {
           {
             ticks: {
               beginAtZero: true,
-              max: 25,
+              max: 30,
               stepSize: 1,
             },
           },
@@ -878,7 +897,27 @@ async function getCommits(repositories, username) {
           }
         }],
       },
-      
+      animation: {
+        duration: 1,
+        onProgress: function() {
+          var chartInstance = this.chart,
+            ctx = chartInstance.ctx;
+  
+          ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+  
+          this.data.datasets.forEach(function(dataset, i) {
+            var meta = chartInstance.controller.getDatasetMeta(i);
+            meta.data.forEach(function(bar, index) {
+              if (dataset.data[index] > 0) {
+                var data = dataset.data[index];
+                ctx.fillText(data, bar._model.x, bar._model.y);
+              }
+            });
+          });
+        }
+      },
     },
   });
 }
@@ -888,7 +927,7 @@ async function getCommits(repositories, username) {
  * @param {array} labels - array of axis labels
  */
 function truncateAxisLabels( labels, maxLength ) {
-  var index = 0;
+  let index = 0;
 
   while( index < labels.length ) {
     if( labels[index].length > 4 ) {
@@ -899,4 +938,41 @@ function truncateAxisLabels( labels, maxLength ) {
   }
 
   return labels
+}
+
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    if( request.message === "progress_bar" ) {
+     manageProgressBar();
+    }
+    else if( request.message === "icon" ) {
+      manageIcons();
+    }
+    else if( request.message === "ribbon" ) {
+      manageRibbon();
+    }
+  }
+);
+
+function manageProgressBar(){
+    $('.progressbar').toggleClass('hiddenDisplay');
+}
+
+function manageIcons(){
+  $('.helpIcon').toggleClass('hiddenDisplay');
+
+  /*
+chrome.storage.local.get('iconStatus', function(status) {
+      let iconStatus = status.iconStatus;
+
+      if(iconStatus) {
+          document.getElementById('iconBtn').checked = true;
+      } else {
+          document.getElementById('iconBtn').checked = false;
+      }
+  });*/
+}
+
+function manageRibbon(){
+  $('.successRibbon').toggleClass('hiddenDisplay');
 }

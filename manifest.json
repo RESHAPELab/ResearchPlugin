@@ -1,11 +1,13 @@
 {
   "name": "GitHub Tool Tips",
   "version": "1",
+  "manifest_version" : 2,
+  "content_security_policy": "script-src 'self' 'sha256-h2wfw88s1v0G6TfLu2lTGsvk/fO+++3RvfDN1K262w8='; object-src 'self'",
   "description": "Helps newcomers navigate GitHub and successfully contribute to open source projects.",
   "browser_action": {
     "name": "GitHub Plugin Development",
     "icons": ["icon.png"],
-    "default_icon": "icon.png",
+    "default_icon": "outline.png",
     "default_popup": "index.html"
   },
 
@@ -17,6 +19,6 @@
       "run_at": "document_end"
     }
   ],
-  "manifest_version" : 2,
-  "content_security_policy": "script-src 'self' 'sha256-Cm8Z6dOt5LoFdNDqouQYEMWB0Z3D3bSMkhouBBPsByw='; object-src 'self'"
-}
+
+  "permissions": ["tabs", "storage"]
+  }

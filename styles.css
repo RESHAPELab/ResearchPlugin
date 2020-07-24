@@ -1,3 +1,4 @@
+/** Progress bar styles **/
 .container {
   width: 100% !important;
   margin: 10px auto 20px auto;
@@ -19,8 +20,7 @@
   position: relative;
   text-align: center;
   text-transform: uppercase;
-  color: #7d7d7d;
-
+  color: #B8B8B8;
   z-index: 2;
 }
 
@@ -30,7 +30,7 @@
   content: counter(step);
   counter-increment: step;
   line-height: 30px;
-  border: 2px solid #7d7d7d;
+  border: 2px solid #B0B0B0;
   display: block;
   text-align: center;
   margin: 0 auto 10px auto;
@@ -41,11 +41,11 @@
 .progressbar li:after {
   width: 100%;
   height: 2px;
-  content: '';
+  content: "";
   position: absolute;
-  background-color: #7d7d7d;
+  background-color: #B8B8B8;
   top: 15px;
-  left: -43.8%;
+  left: -44.5%;
   z-index: -1;
 }
 
@@ -62,7 +62,9 @@
 }
 
 .progressbar li.active:before {
-  border-color: #55b776;
+  content:'\2713';
+  background-color: #d4edda !important;
+  border-color: #55b776 !important;
 }
 
 .progressbar li.active + li:after {
@@ -71,26 +73,31 @@
 
 .progressbar li.partial {
   color: #ffc107;
+  /*-webkit-animation: progressBar 3s forwards;
+  -webkit-animation-fill-mode: both;
+  -moz-animation: progressBar 3s forwards;
+  -moz-animation-fill-mode: both;*/
 }
 
 .progressbar li.partial:before {
-  border-color: #ffc107;
+  border-color: #ffeeba;
 }
 
 .progressbar li.completed:before {
-  background-color: #ffc107 !important;
-  border-color: #ffc107;
+  content:'\2713' !important;
+  background-color: #d4edda !important;
+  border-color: #55b776;
 }
 
 .progressbar li.completed {
-  color: #ad850d;
+  color: green;
 }
 
 .progressbar li.completed + li:after {
-  background-color: #ffc107;
+  background-color: #55b776;
 }
 
-/*Override GitHub styles to allow icons next to input fields*/
+/** Override GitHub styles **/
 .commit-form .input-block {
   width: 60% !important;
   display: inline-block !important;
@@ -104,7 +111,7 @@
   z-index: -1;
 }
 
-
+/** Icon tooltip styles **/
 .helpIcon {
   position: relative;
   display: inline-block;
@@ -133,51 +140,65 @@
   visibility: visible;
 }
 
+.helpIcon:hover .removeText {
+  visibility: hidden !important;
+}
+
 .helpIconText:before {
-  content:'';
-  display:block;
-  width:0;
-  height:0;
-  position:absolute;
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  position: absolute;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
   border-top: 5px solid black;
-  top:100.5%;
+  top: 100.2%;
   margin-left: 50px;
 }
 
 .helpIconCircle {
   background: rgba(0, 0, 0, 0.3);
-  padding: 10px 17px;
+  padding: 5px 12px;
   border-radius: 50px;
   font-size: 20px;
   text-decoration: none;
-  color:white;
+  color: white;
 }
 
-.graph-tooltip {
-  cursor: pointer;
+/** Success Message Styles **/
+.successRibbon {
+  width: 100%;
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+  height: 50px;
 }
 
-.front, .back {
-	box-sizing: border-box;
-	padding: 2rem;
-	border-radius: 4px;
-	box-shadow: 0 1rem 2rem rgba(0, 0, 0, .25);
+/** Profile card styles **/
+.front,
+.back {
+  box-sizing: border-box;
+  padding: 2rem;
+  border-radius: 4px;
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
 
-	font-family: BlinkMacSystemFont, "Segoe UI", sans-serif;
-	font-size: 2rem;
-	color: #fff;
-	text-transform: uppercase;
-	text-align: center;
+  font-family: BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 2rem;
+  color: #fff;
+  text-transform: uppercase;
+  text-align: center;
 }
 
-.front, .back {
-	position: absolute;
-	top: 0;
-	left: 0;
-	backface-visibility: hidden;
-	transition: transform .8s ease;
+.front,
+.back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+  transition: transform 0.8s ease;
 }
 .back {
   transform: rotateY(180deg);
@@ -188,28 +209,36 @@
 }
 
 .card-container:hover .front {
-	transform: rotateY(-180deg);
+  transform: rotateY(-180deg);
 }
 
-.back.hovered 
-{
--webkit-transform:rotate(360deg); 
--moz-transform:rotate(360deg);
--o-transform:rotate(360deg);
-
-background-color: #fff;
-} 
+.back.hovered {
+  -webkit-transform: rotate(360deg);
+  -moz-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  transform: rotate(360deg);
+  background-color: #fff;
+}
 
 .hidden {
   visibility: hidden;
 }
 
 .card-container {
-	perspective: 75rem;
+  perspective: 75rem;
 }
 
 .graph {
   width: 50% !important;
   height: 50% !important;
   padding: 20px;
+}
+
+.graph-tooltip {
+  cursor: pointer;
+}
+
+
+.hiddenDisplay {
+  display: none;
 }

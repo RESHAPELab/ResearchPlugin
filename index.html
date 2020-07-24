@@ -2,294 +2,132 @@
 <html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta charset="UTF-8" />
+  
   <style>
     body {
-      font-family: Verdana, Geneva, Tahoma, sans-serif;
-    }
-    canvas {
-      width: 300px !important;
-      height: 150px !important;
-    }
-
-    .container {
-      width: 600px;
-      height: 800px;
-      border: 3px solid #d4d4d4;
-      border-radius: 25px;
-      margin-left: auto;
-      margin-right: auto;
-      position: relative;
+      background: #fff;
+      font-size: 14px;
+      color: #333;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      width: 380px !important;
+      height: 489px !important;
+      -webkit-font-smoothing: antialiased;
     }
 
-    h2 {
-      font-style: bold;
-      margin: 40px 0px 0px 15px;
-    }
+  #header-row {
+    border-bottom: 1px solid lightgray;
+    overflow: hidden;
+    background: linear-gradient(238.26deg, #5433FF 0%, #20BDFF 43.52%, #a5fecb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
 
-    p {
-      margin: 0px 0px 0px 15px;
-    }
+  #main-header {
+    color: #fff;
+  }
 
-    .profile_picture {
-      background-color: #8c8c8c;
-      width: 150px;
-      height: 150px;
-      margin: 0px 0px 0px 15px;
-    }
+  .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin-left: 50px;
+}
 
-    .left_column {
-      top: 0;
-      right: 0;
-      position: absolute;
-      height: 800px;
-    }
+ .buttonLabel {
+  display: inline-block;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
 
-    img {
-      width: 150px;
-      height: 100px;
-      float: right;
-      display: block;
-      margin: 5px 10px 10px 10px;
-    }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
 
-    #contribution_container {
-      display: block;
-    }
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
 
-    .link {
-      margin-top: 120px;
-      width: 100%;
-      text-align: center;
-      text-decoration: underline;
-    }
+input:checked + .slider {
+  background-color: #2196F3;
+}
 
-    #bar_graph_container {
-      height: 410px;
-      margin-top: 70px;
-    }
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
 
-    .large_text {
-      font-size: 20px;
-      font-weight: bold;
-    }
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
 
-    .alt_links {
-      margin: -10px 0px 0px 0px !important;
-      text-align: center;
-    }
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
 
-    #barGraph {
-      margin: auto;
-      margin-right: auto;
-      width: 600px !important;
-      height: 250px !important;
-    }
+.slider.round:before {
+  border-radius: 50%;
+}
 
-    #stacked,
-    #grouped {
-      cursor: pointer;
-    }
   </style>
   <body>
-    <h1>This is the GitHub Plugin</h1>
-   <!--<div class="container">
-      <h2>johndouthat</h2>
-      <p>member for 5 years, 9 months</p>
-      <div class="profile_picture"><p>Profile Picture here</p></div>
-      <p><span class="large_text">5</span> followers</p>
-      <div class="left_column">
-        <img src="Github-Logo.jpg" />
-        <div id="contribution_container">
-          <h3 class="link">Contributions by Repository</h3>
-          <p class="alt_links">by language | by repository</p>
-        </div>
-        <canvas id="myChart"></canvas>
-      </div>
-      <div id="bar_graph_container">
-        <h3 class="link">Contributions by Month</h3>
-        <p class="alt_links">
-          <span id="stacked" onclick="createStackedGraph()">stacked</span> |
-          <span id="grouped" onclick="createStackedGraph()"> grouped</span>
-        </p>
-        <canvas id="barGraph"></canvas>
+    <div id="container">
+      <div id="header-row">
+        <h2 id="main-header">GitHub Plugin Settings</h2>
       </div>
     </div>
-    <script src="Chart.bundle.js"></script>
-    <script>
-      window.addEventListener("load", createBarGraph);
-      var isStacked = false;
 
-      var stackedButton = document.getElementById("stacked");
-      var groupedButton = document.getElementById("grouped");
-  
-      var data = {
-        labels: ["repo1", "repo2", "repo3", "repo4"],
-        datasets: [
-          {
-            // 150
-            data: [65, 35, 10, 15],
-            backgroundColor: ["#32CD32", "#228B22", "#20B2AA", "#556B2F"],
-            hoverBackgroundColor: ["#32CD32", "#228B22", "#20B2AA", "#556B2F"],
-          },
-        ],
-      };
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="iconBtn" checked>
+        <span class="slider round"></span>
+      </label>
+      <h4 class="buttonLabel">Show Icons</h4>
+    </div>
 
-      var barData = {
-        type: "bar",
-        data: {
-          labels: ["12/11", "01/12", "02/12", "03/12", "04/12"],
-          datasets: [
-            {
-              label: "issues",
-              backgroundColor: "#8B008B",
-              borderColor: "#990099",
-              borderWidth: 1,
-              data: [0, 0, 4, 1, 0],
-              },
-            {
-              label: "comments",
-              backgroundColor: "#DB70DB",
-              borderColor: "#800080",
-              borderWidth: 1,
-              data: [1, 3, 2, 1, 1],
-            },
-            {
-              label: "commits",
-              data: [0, 0, 5, 12, 0],
-              backgroundColor: "#871F78",
-              borderColor: "9C6B98",
-              borderWidth: 1,
-             
-            },
-          ],
-        },
-        options: {
-          scaleShowValues: true,
-          scales: {
-            yAxes: [
-              {
-                ticks: {
-                  beginAtZero: true,
-                  stepSize: 5,
-                },
-              },
-            ],
-            xAxes: [
-              {
-                ticks: {
-                  autoSkip: false,
-                },
-              },
-            ],
-          },
-        },
-      };
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="ribbonBtn" checked>
+        <span class="slider round"></span>
+      </label>
+      <h4 class="buttonLabel">Show Ribbons</h4>
+    </div>
 
-      var ctx = document.getElementById("myChart");
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="progressBarBtn" checked>
+        <span class="slider round"></span>
+      </label>
+      <h4 class="buttonLabel">Show Progress Bar</h4>
+    </div>
 
-      // And for a doughnut chart
-      var myDoughnutChart = new Chart(ctx, {
-        type: "doughnut",
-        data: data,
-        options: {
-          rotation: 1 * Math.PI,
-          circumference: 1 * Math.PI,
-        },
-      });
-
-      var barGraph = document.getElementById("barGraph");
-
-      function createBarGraph() {
-        isStacked = false;
-        groupedButton.style.fontWeight = "bold";
-        new Chart(
-          barGraph,
-          barData
-        ); /*{
-          type: "bar",
-          data: barData,
-          options: {
-            scales: {
-              yAxes: [
-                {
-                  display: true,
-                  ticks: {
-                    min: 0,
-                    max: 15,
-                  },
-                },
-              ],
-            },
-          },
-        });*/
-      }
-
-      
-      function createStackedGraph() {
-        if (!isStacked) {
-          isStacked = true;
-
-          stackedButton.style.fontWeight = "bold";
-          groupedButton.style.fontWeight = "normal";
-
-          var barData = {
-        type: "bar",
-        data: {
-          labels: ["12/11", "01/12", "02/12", "03/12", "04/12"],
-          datasets: [
-            {
-              label: "issues",
-              backgroundColor: "#8B008B",
-              borderColor: "#990099",
-              borderWidth: 1,
-              data: [0, 0, 4, 1, 0],
-              },
-            {
-              label: "comments",
-              backgroundColor: "#DB70DB",
-              borderColor: "#800080",
-              borderWidth: 1,
-              data: [1, 3, 2, 1, 1],
-            },
-            {
-              label: "commits",
-              data: [0, 0, 5, 12, 0],
-              backgroundColor: "#871F78",
-              borderColor: "9C6B98",
-              borderWidth: 1,
-             
-            },
-          ],
-        },
-        options: {
-          scaleShowValues: true,
-          scales: {
-            yAxes: [
-              {
-                stacked: true,
-                ticks: {
-                  beginAtZero: true,
-                  stepSize: 5,
-                },
-              },
-            ],
-            xAxes: [
-              {
-                stacked: true,
-                ticks: {
-                  autoSkip: false,
-                },
-              },
-            ],
-          },
-        },
-      };
-      }
-      new Chart(
-          barGraph,
-          barData
-        ); 
-      }
-    </script>-->
+<!-- "content_security_policy": "script-src 'self' 'sha256-Cm8Z6dOt5LoFdNDqouQYEMWB0Z3D3bSMkhouBBPsByw='; object-src 'self'"
+-->
+    <script src="popup.js"></script>
   </body>
 </html>
