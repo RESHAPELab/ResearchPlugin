@@ -20,7 +20,7 @@
   position: relative;
   text-align: center;
   text-transform: uppercase;
-  color: #B8B8B8;
+  color: #b8b8b8;
   z-index: 2;
 }
 
@@ -30,7 +30,7 @@
   content: counter(step);
   counter-increment: step;
   line-height: 30px;
-  border: 2px solid #B0B0B0;
+  border: 2px solid #b0b0b0;
   display: block;
   text-align: center;
   margin: 0 auto 10px auto;
@@ -41,9 +41,9 @@
 .progressbar li:after {
   width: 100%;
   height: 2px;
-  content: "";
+  content: '';
   position: absolute;
-  background-color: #B8B8B8;
+  background-color: #b8b8b8;
   top: 15px;
   left: -44.5%;
   z-index: -1;
@@ -57,26 +57,10 @@
   content: none;
 }
 
-.progressbar li.active {
-  color: green;
-}
-
-.progressbar li.active:before {
-  content:'\2713';
-  background-color: #d4edda !important;
-  border-color: #55b776 !important;
-}
-
-.progressbar li.active + li:after {
-  background-color: #55b776;
-}
-
 .progressbar li.partial {
-  color: #ffc107;
-  /*-webkit-animation: progressBar 3s forwards;
-  -webkit-animation-fill-mode: both;
-  -moz-animation: progressBar 3s forwards;
-  -moz-animation-fill-mode: both;*/
+  color: #c4c400;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .progressbar li.partial:before {
@@ -84,12 +68,13 @@
 }
 
 .progressbar li.completed:before {
-  content:'\2713' !important;
+  content: '\2713' !important;
   background-color: #d4edda !important;
   border-color: #55b776;
 }
 
 .progressbar li.completed {
+  font-size: 12px !important;
   color: green;
 }
 
@@ -145,7 +130,7 @@
 }
 
 .helpIconText:before {
-  content: "";
+  content: '';
   display: block;
   width: 0;
   height: 0;
@@ -172,7 +157,7 @@
   color: #155724;
   background-color: #d4edda;
   border-color: #c3e6cb;
-  padding: .75rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   margin-bottom: 1rem;
   height: 50px;
 }
@@ -185,7 +170,7 @@
   border-radius: 4px;
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
 
-  font-family: BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 2rem;
   color: #fff;
   text-transform: uppercase;
@@ -237,7 +222,6 @@
 .graph-tooltip {
   cursor: pointer;
 }
-
 
 .hiddenDisplay {
   display: none;
