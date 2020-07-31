@@ -1,32 +1,133 @@
 <!DOCTYPE html>
 <html>
-   <head>
-      <title>GitHub Plugin</title>
-      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-      <style>
-         body,html {
-         width: 600px;
-         height: 400px;
-         }
-      </style>
-   </head>
-   <body>
-      <div class="jumbotron text-center">
-         <h1>GitHub Plugin</h1>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  
+  <style>
+    body {
+      background: #fff;
+      font-size: 14px;
+      color: #333;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      width: 380px !important;
+      height: 489px !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+  #header-row {
+    border-bottom: 1px solid lightgray;
+    overflow: hidden;
+    background: linear-gradient(238.26deg, #5433FF 0%, #20BDFF 43.52%, #a5fecb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  #main-header {
+    color: #fff;
+  }
+
+  .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin-left: 50px;
+}
+
+ .buttonLabel {
+  display: inline-block;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+  </style>
+  <body>
+    <div id="container">
+      <div id="header-row">
+        <h2 id="main-header">GitHub Plugin Settings</h2>
       </div>
-      <div class="container">
-      <div class="row text-center">
-         <div class="col">
-            <h1>Confused about a term? Look it up here!</h1>
-            <div class="input-group">
-               <input type="text" class="form-control" placeholder="Search for a term">
-               <div class="input-group-append">
-                  <button class="btn btn-secondary" type="button">
-                  <i class="fa fa-search"></i>
-                  </button>
-               </div>
-            </div>
-         </div>
-      </div>
-   </body>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="iconBtn" checked>
+        <span class="slider round"></span>
+      </label>
+      <h4 class="buttonLabel">Show Icons</h4>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="ribbonBtn" checked>
+        <span class="slider round"></span>
+      </label>
+      <h4 class="buttonLabel">Show Ribbons</h4>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="progressBarBtn" checked>
+        <span class="slider round"></span>
+      </label>
+      <h4 class="buttonLabel">Show Progress Bar</h4>
+    </div>
+
+<!-- "content_security_policy": "script-src 'self' 'sha256-Cm8Z6dOt5LoFdNDqouQYEMWB0Z3D3bSMkhouBBPsByw='; object-src 'self'"
+-->
+    <script src="popup.js"></script>
+  </body>
 </html>
