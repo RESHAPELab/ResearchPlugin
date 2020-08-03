@@ -2,7 +2,6 @@
   "name": "GitHub Tool Tips",
   "version": "1",
   "manifest_version": 2,
-  "content_security_policy": "script-src 'self' 'sha256-h2wfw88s1v0G6TfLu2lTGsvk/fO+++3RvfDN1K262w8='; object-src 'self'",
   "description": "Helps newcomers navigate GitHub and successfully contribute to open source projects.",
   "browser_action": {
     "name": "GitHub Plugin Development",
@@ -19,6 +18,11 @@
       "run_at": "document_end"
     }
   ],
-  "web_accessible_resources": ["*.json"],
-  "permissions": ["tabs", "storage"]
+
+  "background": {
+    "persistent": false,
+    "scripts": ["background.js"]
+  },
+  "web_accessible_resources": ["*.json", "jquery.min.js"],
+  "permissions": ["tabs", "storage", "*/overview.html"]
 }

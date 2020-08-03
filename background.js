@@ -1,11 +1,8 @@
-chrome.storage.onChanged.addListener(function(changes, areaName){
-    chrome.storage.local.get('iconStatus', function(status){
-        let iconStatus = status.iconStatus;
-
-        if(iconStatus) {
-            document.getElementById('iconBtn').checked = true;
-        } else {
-            document.getElementById('iconBtn').checked = false;
-        }
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+  if (msg.type === 'ACTIVITY_HISTORY_READY') {
+    chrome.tabs.create({ url: chrome.runtime.getURL('overview.html') });
+    sendResponse({
+      type: 'NO_DATA',
     });
+  }
 });
