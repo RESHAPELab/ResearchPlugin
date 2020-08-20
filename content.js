@@ -628,7 +628,7 @@ $(document).ready(() => {
  * Uses GitHub API to view commit totals for user
  */
 async function getCommits(repositories, username) {
-  const oAuthToken = '901e6d7d5bd2410e2172c2ada119b9e3e45fc1b4';
+  const oAuthToken = '';
 
   const headers = {
     Authorization: `Token ${oAuthToken}`,
@@ -743,7 +743,7 @@ async function getCommits(repositories, username) {
  * Uses GitHub API to view programming languages for user
  */
 async function getRepos(username) {
-  const oAuthToken = '901e6d7d5bd2410e2172c2ada119b9e3e45fc1b4';
+  const oAuthToken = '';
 
   const url = `https://api.github.com/users/${username}/repos`;
   const response = await fetch(url, {

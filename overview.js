@@ -1,6 +1,10 @@
 chrome.tabs.executeScript({ file: 'jquery.min.js' });
 
+let username = '';
+
 chrome.storage.sync.get('username', (result) => {
+  username = result.username;
+  document.getElementById('username').innerHTML = `${result.username}'s Repositories`;
   getRepos(result.username);
 });
 
@@ -8,7 +12,7 @@ const modal = document.getElementById('myModal');
 
 const closeButton = document.getElementsByClassName('close')[0];
 
-const oAuthToken = '18fe433b89391c14eb050803d2d72c52f1c3f6e6';
+const oAuthToken = '';
 
 const headers = {
   Authorization: `Token ${oAuthToken}`,
@@ -17,77 +21,42 @@ const headers = {
 const buttons = document.getElementsByClassName('card-button');
 
 class Card {
-  constructor(repositoryName, repositoryLink, commitTotal, topLangauge, cardContainer) {
+  constructor(repositoryName, repositoryLink, commitTotal, topLanguage, cardContainer) {
     this.repositoryName = repositoryName;
     this.repositoryLink = repositoryLink;
     this.commitTotal = commitTotal;
-    this.topLangauge = topLangauge;
+    this.topLanguage = topLanguage;
     this.cardContainer = cardContainer;
   }
 
   createCard() {
+    if (this.repositoryName.length > 20) {
+      this.repositoryName = this.repositoryName.substr(0, 20) + '...';
+    }
+
     const cardContainer = document.createElement('div');
     cardContainer.className = 'card';
 
-    const cardTitleOuterContainer = document.createElement('div');
-    cardTitleOuterContainer.className = 'card-text-section';
+    cardContainer.innerHTML = `<div class="card-text-section">
+                                  <div class="card-title">
+                                    <a href="${this.repositoryLink}" target="_blank">${this.repositoryName}</a>
+                                  </div>
+                                </div>
+                                <div class="card-text-section">
+                                  <div class="main-text">Commits: ${this.commitTotal}</div>
+                                  <div class="main-text">Top Language: ${this.topLanguage}</div>
+                                </div>
+                                <div class="card-actions">
+                                  <div class="card-button">
+                                    <span class="label" id="${this.repositoryName}">View Commit Messages</span>
+                                  </div>
+                                </div>`;
 
-    const cardTitleInnerContainer = document.createElement('div');
-
-    const repoLink = document.createElement('a');
-    repoLink.href = this.repositoryLink;
-    repoLink.target = '_blank';
-
-    let repoNameText = document.createTextNode(this.repositoryName);
-
-    repoLink.appendChild(repoNameText);
-
-    if (this.repositoryName.length > 20) {
-      cardTitleInnerContainer.className = 'card-title card-title-small';
-    } else {
-      cardTitleInnerContainer.className = 'card-title';
-    }
-
-    cardTitleInnerContainer.appendChild(repoLink);
-
-    const overviewOutercontainer = document.createElement('div');
-    overviewOutercontainer.className = 'card-text-section';
-
-    const commitContainer = document.createElement('div');
-    commitContainer.className = 'main-text';
-    commitContainer.innerHTML = `Commits: ${this.commitTotal}`;
-
-    const topLanguageContainer = document.createElement('div');
-    topLanguageContainer.className = 'main-text';
-    topLanguageContainer.innerHTML = `Top Language: ${this.topLangauge}`;
-
-    const buttonRowContainer = document.createElement('div');
-    buttonRowContainer.className = 'card-actions';
-
-    const cardButton = document.createElement('div');
-    cardButton.className = 'card-button';
-
-    const buttonText = document.createElement('span');
-    buttonText.className = 'label';
-    buttonText.id = this.repositoryName;
-    buttonText.innerHTML = 'View Commit Messages';
-
-    cardButton.appendChild(buttonText);
-    buttonRowContainer.appendChild(cardButton);
-
-    overviewOutercontainer.appendChild(commitContainer);
-    overviewOutercontainer.appendChild(topLanguageContainer);
-
-    cardTitleOuterContainer.appendChild(cardTitleInnerContainer);
-
-    cardContainer.appendChild(cardTitleOuterContainer);
-    cardContainer.appendChild(overviewOutercontainer);
-    cardContainer.appendChild(buttonRowContainer);
     this.cardContainer = cardContainer;
   }
 }
 
-document.body.onclick = function (ev) {
+document.body.onclick = (ev) => {
   if (ev.target.getAttribute('class') === 'label') {
     chrome.storage.sync.get('username', (result) => {
       getAllCommitMessages(ev.srcElement.id, result.username, 1);
@@ -95,21 +64,22 @@ document.body.onclick = function (ev) {
   }
 };
 
-closeButton.onclick = function () {
+closeButton.onclick = () => {
   modal.style.display = 'none';
   document.querySelectorAll('.message-title').forEach((element) => element.remove());
+  document.getElementById('list-title').innerHTML = '';
 };
 
 /**
- * Function name: createCompleteOverview
- * @param {JSON} userData - JSON result of all repositorys for user
+ * @param {JSON} userData - JSON result of all repositories for the user
  * @param {string} username - GitHub username
  * Creates cards containing total commits and top langauge
  */
 async function createCompleteOverview(userData, username) {
   let isNewPage = false;
+  let rowElements = '';
   try {
-    var rowElements = document.getElementsByClassName('row')[0].childElementCount;
+    rowElements = document.getElementsByClassName('row')[0].childElementCount;
   } catch (error) {
     isNewPage = true;
   }
@@ -152,7 +122,6 @@ async function createCompleteOverview(userData, username) {
 }
 
 /**
- * Function name: getRepos
  * @param {string} username - GitHub username
  * Uses GitHub API to view programming languages for user
  */
@@ -231,17 +200,27 @@ async function getAllCommitMessages(repository, username, page) {
 
   const commits = await result.json();
 
+  document.getElementById('list-title').innerHTML = `Commit Message Titles For: ${repository}`;
+
   if (commits.length !== 0) {
     commits.forEach((commit) => {
-      let innerContainer = document.getElementsByClassName('modal-content')[0];
+      console.log(commit);
+      if (commit.author.login === username && commit.author.login !== undefined) {
+        const innerContainer = document.getElementsByClassName('modal-content')[0];
 
-      let messageContainer = document.createElement('p');
-      messageContainer.className = 'message-title';
-      messageContainer.appendChild(document.createTextNode(commit.commit.message));
-      innerContainer.appendChild(messageContainer);
+        const messageContainer = document.createElement('p');
+        messageContainer.className = 'message-title';
+        messageContainer.appendChild(
+          document.createTextNode(
+            commit.commit.message + ' created at: ' + commit.commit.author.date
+          )
+        );
+        innerContainer.appendChild(messageContainer);
+      }
     });
 
     modal.style.display = 'block';
+
+    getAllCommitMessages(repository, username, page + 1);
   }
-  getAllCommitMessages(repository, username, page + 1);
 }

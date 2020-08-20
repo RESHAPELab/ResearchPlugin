@@ -3,8 +3,13 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="UTF-8" />
-
     <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif,
+          Apple Color Emoji, Segoe UI Emoji;
+        font-size: 14px;
+        line-height: 1.5;
+      }
 
       body,
       html {
@@ -30,14 +35,15 @@
 
       .card {
         width: 20%;
-        border-radius: 4px;
+        border-radius: 6px;
         background-color: #fff;
-        box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
-          0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+        border: 1px solid #e1e4e8;
         display: flex;
         margin-right: 20px;
         flex-direction: column;
         box-sizing: border-box;
+        padding-left: 8px;
+        padding-right: 8px;
       }
 
       .card-title,
@@ -53,9 +59,20 @@
         text-transform: inherit;
       }
 
-      .card-title a { color: blue; }
+      .card-title a:hover {
+        text-decoration: underline;
+      }
 
-      .card-title-small { font-size: 0.8rem; }
+      .card-title a,
+      .label {
+        color: #0366d6;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .card-title-small {
+        font-size: 12px !important;
+      }
 
       .card-text-section {
         padding-top: 18px;
@@ -67,7 +84,7 @@
         font-family: Roboto, sans-serif;
         -moz-osx-font-smoothing: grayscale;
         -webkit-font-smoothing: antialiased;
-        font-size: 0.875rem;
+        font-size: 12px;
         line-height: 1.25rem;
         font-weight: 400;
         letter-spacing: 0.0178571429em;
@@ -85,71 +102,51 @@
         padding: 8px 8px 8px 16px;
       }
 
-      .card-button { box-sizing: border-box; }
-
-      #filter-options {
-        position: absolute;
-        right: 10%;
-        margin-bottom: 50px;
+      .card-button {
+        box-sizing: border-box;
       }
 
-      .dropdown {
-        position: relative;
-        display: inline-block;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-          sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-        font-size: 1.5rem;
-        font-weight: 400;
-        line-height: 1.5;
-      }
-
-      .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f1f1f1;
-        min-width: 160px;
-        overflow: auto;
-        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-        z-index: 1;
-        font-size: 1rem;
-      }
-
-      .dropdown-content a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
+      .show {
         display: block;
       }
 
-      .dropdown a:hover { background-color: #ddd; }
-
-      .show { display: block; }
-
-      .label {
-        font-family: Roboto, sans-serif;
+      .card-button .label {
         cursor: pointer;
         -moz-osx-font-smoothing: grayscale;
-        font-size: 0.875rem;
-        line-height: 2.25rem;
+        color: #24292e;
+        background-color: #fafbfc;
+        border-color: rgba(27, 31, 35, 0.15);
+        box-shadow: 0 1px 0 rgba(27, 31, 35, 0.04), inset 0 1px 0 hsla(0, 0%, 100%, 0.25);
+        transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+        padding: 5px 16px;
+        font-size: 14px;
         font-weight: 500;
-        letter-spacing: 0.0892857143em;
-        line-height: inherit;
-        color: #b2102f;
+        line-height: 20px;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        border: 1px solid;
+        border-radius: 6px;
+      }
+
+      .label:hover {
+        background-color: #0366d6;
+        color: white;
       }
 
       /* The Modal (background) */
       .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
-        padding-top: 100px; /* Location of the box */
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
         left: 0;
         top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
+        width: 100%;
+        height: 100%;
+        overflow: auto;
         background-color: rgb(0, 0, 0); /* Fallback color */
-        background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+        background-color: rgba(0, 0, 0, 0.4);
       }
 
       /* Modal Content */
@@ -193,9 +190,16 @@
         text-transform: inherit;
         padding: 5px;
       }
+
+      #username {
+        font-size: 32px;
+        text-align: center;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
+    <h3 id="username"></h3>
     <div id="content">
       <div id="myModal" class="modal">
         <div class="modal-content">
@@ -204,7 +208,7 @@
         </div>
       </div>
     </div>
-    <script src="overview.js"></script>
     <script src="jquery.min.js"></script>
+    <script src="overview.js"></script>
   </body>
 </html>
