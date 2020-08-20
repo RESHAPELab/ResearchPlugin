@@ -8,7 +8,7 @@ const modal = document.getElementById('myModal');
 
 const closeButton = document.getElementsByClassName('close')[0];
 
-const oAuthToken = '2e52399ba6855793a8829ce53966012162665344';
+const oAuthToken = '18fe433b89391c14eb050803d2d72c52f1c3f6e6';
 
 const headers = {
   Authorization: `Token ${oAuthToken}`,

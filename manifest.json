@@ -3,26 +3,30 @@
   "version": "1",
   "manifest_version": 2,
   "description": "Helps newcomers navigate GitHub and successfully contribute to open source projects.",
+  "permissions": ["tabs", "activeTab", "webNavigation", "<all_urls>", "storage"],
   "browser_action": {
     "name": "GitHub Plugin Development",
     "icons": ["icon.png"],
     "default_icon": "outline.png",
     "default_popup": "index.html"
   },
-
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
       "css": ["styles.css"],
       "js": ["jquery.min.js", "Chart.bundle.js", "content.js"],
       "run_at": "document_end"
+    },
+    {
+      "matches": ["https://github.com/*/*"],
+      "css": ["styles.css"],
+      "js": ["jquery.min.js", "content.js", "Repository.js"],
+      "run_at": "document_end"
     }
   ],
-
   "background": {
-    "persistent": false,
+    "persistant": true,
     "scripts": ["background.js"]
   },
-  "web_accessible_resources": ["*.json", "jquery.min.js"],
-  "permissions": ["tabs", "storage", "*/overview.html"]
+  "web_accessible_resources": ["*.json", "jquery.min.js"]
 }

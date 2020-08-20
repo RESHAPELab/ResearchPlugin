@@ -1,17 +1,22 @@
-const NOT_FOUND = -1;
+window.onload = () => {
+  const currentPageUrl = document.location.pathname;
 
-// array of color values for graphs
+  checkUrl(currentPageUrl);
+};
+
+// Color values for graphs
 const colors = [
-  '#3e95cd',
-  '#8e5ea2',
-  '#3cba9f',
-  '#e8c3b9',
-  '#c45850',
-  '#3e95cd',
-  '#8e5ea2',
-  '#3cba9f',
-  '#e8c3b9',
-  '#c45850',
+  '#00498D',
+  '#01579B',
+  '#00498D',
+  '#0277BD',
+  '#0288D1',
+  '#039BE5',
+  '#03A9F4',
+  '#29B6F6',
+  '#4FC3F7',
+  '#81D4FA',
+  '#B3E5FC',
 ];
 
 class ToolTipIcon {
@@ -26,45 +31,38 @@ class ToolTipIcon {
     const toolTipContainer = document.createElement('div');
     toolTipContainer.className = this.toolTipClass;
 
-    const circleIcon = document.createElement('span');
-    circleIcon.className = 'helpIconCircle';
-    circleIcon.innerHTML = '?';
-
-    const toolTip = document.createElement('span');
-    toolTip.className = 'helpIconText';
-    toolTip.innerHTML = this.toolTipText;
-
-    toolTipContainer.appendChild(circleIcon);
-    toolTipContainer.appendChild(toolTip);
+    toolTipContainer.innerHTML = `<span class="helpIconCircle">?</span>
+                                  <span class="helpIconText">${this.toolTipText}</span>`;
 
     this.toolTipElement = toolTipContainer;
   }
 }
 
 /**
- * Function name: checkURL
- * Checks the windows current URL for keywords to determine which tooltips
- * to display
+ * Sorts given array in descending order
+ * @param {int} array
  */
-function checkURL() {
+function sortArrayInDescendingOrder(array) {
+  array.sort((a, b) => {
+    return b - a;
+  });
+}
+
+/**
+ * @param {string} currentUrl - pathname of current url
+ * Checks the windows current URL to determine which tooltips to display
+ */
+function checkUrl(currentUrl) {
   // check if the user wants to edit a file that they are not an owner of
   if (checkIsEditingForkedFile()) {
     createForkedFileToolTips();
-  }
-  // if the user is editing a markdown file
-  else if (
-    window.location.href.indexOf('.md') !== NOT_FOUND &&
-    window.location.href.indexOf('edit') !== NOT_FOUND
-  ) {
+  } else if (currentUrl.includes('/edit/')) {
     createFileEditorToolTips();
+  } else if (currentUrl.includes('/compare/')) {
+    createConfirmPullRequestToolTips();
   }
   // if the user is reviewing a pull request
-  else if (window.location.href.indexOf('compare') !== NOT_FOUND) {
-    createConfirmPullRequestToolTips();
-  } else if (
-    window.location.href.indexOf('pull') !== NOT_FOUND &&
-    window.location.href.indexOf('quick_pull') === NOT_FOUND
-  ) {
+  else if (currentUrl.includes('/pull/')) {
     createReviewPullRequestToolTips();
   }
   // if the user is opening a pull request
@@ -72,47 +70,41 @@ function checkURL() {
     updateProfileCard();
   }
   // if the user is creating a new issue
-  else if (
-    window.location.href.indexOf('issues') !== NOT_FOUND &&
-    window.location.href.indexOf('new') !== NOT_FOUND
-  ) {
+  else if (currentUrl.includes('/issues/new')) {
     createReportIssueToolTips();
-  } else if (
-    window.location.href.indexOf('issues') !== NOT_FOUND &&
-    window.location.href.indexOf('new') === NOT_FOUND
-  ) {
+  } else if (currentUrl.includes('/issues/')) {
     createReviewIssueToolTips();
   } else {
     // do nothing
   }
 }
 
-checkURL();
-
 /**
- * Function name: checkIsEditingForkedFile
  * Checks if the user is viewing a file that they do not own
  */
 function checkIsEditingForkedFile() {
+  const pencilIconLabelsList = [
+    'Edit the file in your fork of this project',
+    'Fork this project and edit the file',
+  ];
+
   try {
+    var pencilIconLabel = document
+      .getElementsByClassName('tooltipped')[2]
+      .getAttribute('aria-label');
     // check if there is a pencil icon with this aria label
-    return (
-      document.getElementsByClassName('tooltipped')[2].getAttribute('aria-label') ===
-      'Edit the file in your fork of this project'
-    );
+    return pencilIconLabelsList.includes(pencilIconLabel);
   } catch (error) {
     return false;
   }
 }
 
 /**
- * Function name: addProgressBar
  * @param {int} currentStep - current step in process
  * @param {int} totalSteps - the total amount of steps in process
  * @param {string} rootElement - className of HTML element that the progress bar
  *                      will be added to
- *  Adds progressBar above forms in GitHub pages to let user how far they are
- * in editing files
+ *  Adds progressBar above forms in GitHub pages to let user how far they are in a process
  */
 function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
   // create the progress bar element
@@ -124,7 +116,7 @@ function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
 
   const itemList = document.createElement('ul');
 
-  let index = 1;
+  let index;
 
   for (index = 1; index <= stepsList.length; index += 1) {
     const listItem = document.createElement('li');
@@ -156,8 +148,7 @@ function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
 }
 
 /**
- * Function name: isComplete
- * Checks if issue/ pull request was succesfully created and is open in the repo
+ * Checks if issue or pull request was succesfully created and is open in the repo
  */
 function isProcessCompleted() {
   let status = '';
@@ -170,16 +161,13 @@ function isProcessCompleted() {
 }
 
 /**
- * Function name: createSuccessRibbon
  * Creates ribbon above progress bar to inform the user that the process is successful
  */
 function createSuccessRibbon() {
-  let processType = '';
+  let processType = 'pull request';
 
-  if (window.location.href.indexOf('issues') != NOT_FOUND) {
+  if (document.location.pathname.includes('/issues/')) {
     processType = 'issue';
-  } else {
-    processType = 'pull request';
   }
 
   const successRibbonContainer = document.createElement('div');
@@ -195,9 +183,7 @@ function createSuccessRibbon() {
 }
 
 /**
- * Function name: createFileEditorToolTips
- * Adds tooltips to webpage when editing markdown files
- * First step in editing files
+ * Adds tooltips when editing files (First step)
  */
 function createFileEditorToolTips() {
   const steps = ['Edit File', 'Confirm Pull Request', 'Pull Request Opened'];
@@ -207,7 +193,7 @@ function createFileEditorToolTips() {
 
   // icon to right of file name input
   const fileNameChangeText =
-    'This is the file name, changing it will create a new file with the new name';
+    'This is the file name, changing it will create a new file with the new name.';
 
   const breadCrumbDiv = '.d-md-inline-block';
 
@@ -219,12 +205,11 @@ function createFileEditorToolTips() {
 
   // banner above commit message input
   const commitTitleText =
-    'This is the title. Give a brief description of the change. Be short and objective.';
+    'This is the title of the pull request. Give a brief description of the change. Be short and objective.';
 
   const inputTitleLabel = document.createElement('h3');
   inputTitleLabel.innerHTML = 'Insert a title here';
-  inputTitleLabel.style.display = 'inline-block';
-  inputTitleLabel.style.marginRight = '20px';
+  inputTitleLabel.className = 'label-margin-right';
 
   $(inputTitleLabel).insertBefore('#commit-summary-input');
 
@@ -240,12 +225,11 @@ function createFileEditorToolTips() {
   $(commitMessageIcon.toolTipElement).insertAfter('#commit-summary-input');
 
   const descriptionText =
-    'Add a more detailed description if needed. Here you can present your arguments and reasoning that lead to change.';
+    'Add a more detailed description of the pull request if needed. Here you can present your arguments and reasoning that lead to change.';
 
   const inputDescriptionLabel = document.createElement('h3');
   inputDescriptionLabel.innerHTML = 'Insert a <br> description here';
-  inputDescriptionLabel.style.display = 'inline-block';
-  inputDescriptionLabel.style.marginRight = '22px';
+  inputDescriptionLabel.className = 'label-margin-right';
 
   $(inputDescriptionLabel).insertBefore('#commit-description-textarea');
 
@@ -260,15 +244,17 @@ function createFileEditorToolTips() {
 
   $(extendedDescIcon.toolTipElement).insertAfter(extendedDescIcon.gitHubElement);
 
-  const commitChangesDirectlyText =
+  let commitChangesText =
     'By clicking the Commit Changes button the changes will automatically be pushed to the repo';
 
-  const submitChangesIcon = new ToolTipIcon(
-    'H4',
-    'helpIcon',
-    commitChangesDirectlyText,
-    '#submit-file'
-  );
+  const buttonText = document.getElementsByClassName('btn-primary')[1].innerText;
+
+  if (buttonText === 'Propose changes') {
+    commitChangesText =
+      'By clicking the Propose changes button you will start the pull request submission process. You will have the chance to check your changes before finalizing it.';
+  }
+
+  const submitChangesIcon = new ToolTipIcon('H4', 'helpIcon', commitChangesText, '#submit-file');
 
   submitChangesIcon.createIcon();
 
@@ -277,12 +263,12 @@ function createFileEditorToolTips() {
   $(submitChangesIcon.toolTipElement).insertBefore(submitChangesIcon.gitHubElement);
 }
 
-// On pull request step 1, toggle icon text to help inform user
+// On step 1 for pull request, toggle icon text to help inform user
 let onDirectPull = true;
 let iconText = '';
 
 const pullChangesText =
-  'By clicking the Propose changes button you will start the submission process. You will have the chance to check your changes before finalizing it.';
+  'By clicking the Propose changes button you will start the pull request submission process. You will have the chance to check your changes before finalizing it.';
 
 const directCommitText =
   'By clicking the Commit Changes button the changes will be directly pushed to the repo';
@@ -308,9 +294,7 @@ $('input[name="commit-choice"]').click(() => {
 });
 
 /**
- * Function name: createConfirmPullRequestToolTips
- * Adds tooltips to webpage when confirming a change to file
- * Second step in editing markdown files
+ * Adds tooltips when confirming a change to file (Second step)
  */
 function createConfirmPullRequestToolTips() {
   const steps = ['Edit File', 'Create Pull Request', 'Pull Request Opened'];
@@ -319,7 +303,7 @@ function createConfirmPullRequestToolTips() {
 
   $('#pull_request_body').attr(
     'placeholder',
-    'You can add a more detailed description here if needed.'
+    'You can add a more detailed description of the pull request here if needed.'
   );
 
   let branchName = '';
@@ -346,7 +330,7 @@ function createConfirmPullRequestToolTips() {
   pullRequestTitle.innerHTML = 'Create pull request';
 
   const branchContainerText =
-    'This represents the origin and destination of your changes if you are not sure, leave it how it is, this is common for small changes.';
+    'This represents the origin and destination of your pull request. If you are not sure, leave it how it is, this is common for small changes.';
 
   const topRibbon = document.getElementsByClassName('js-range-editor')[0];
   topRibbon.style.width = '93%';
@@ -365,9 +349,11 @@ function createConfirmPullRequestToolTips() {
   $(currentBranchIcon.toolTipElement).insertAfter(currentBranchIcon.gitHubElement);
 
   // move button row to left side of editor
-  const buttonRow = document.getElementsByClassName('d-flex flex-justify-end m-2')[0];
-  buttonRow.classList.remove('flex-justify-end');
-  buttonRow.classList.add('flex-justify-start');
+  if (!isComparingBranch) {
+    const buttonRow = document.getElementsByClassName('d-flex flex-justify-end m-2')[0];
+    buttonRow.classList.remove('flex-justify-end');
+    buttonRow.classList.add('flex-justify-start');
+  }
 
   const confirmPullRequestText =
     'By clicking this button you will create the pull request to allow others to view your changes and accept them into the repository.';
@@ -422,39 +408,36 @@ function createConfirmPullRequestToolTips() {
 
   $(comparisonIcon.toolTipElement).insertAfter(comparisonIcon.gitHubElement);
 
-  console.log('here');
-  setTimeout(changeMergeText, 3000);
-  console.log('here2');
+  setTimeout(changeMergeText, 2500);
 }
 
+/**
+ * Updates text when there is a merge conflict in a pull request
+ */
 function changeMergeText() {
-  let canMerge = true;
-  let mergeText = '';
+  let canMerge = false;
   try {
-    mergeText = document.getElementsByClassName('text-red')[0].innerText;
-    console.log(mergeText);
+    document.getElementsByClassName('text-red')[0].innerText;
   } catch (error) {
-    canMerge = false;
+    // if the 'text-red' element does not exist, then the pull request can be merged automatically
+    canMerge = true;
   }
-  console.log(canMerge);
-  if (mergeText === 'Can’t automatically merge. ') {
-    console.log('here');
-    $('.text-red').innerHTML(
-      'There is a merge conflict, but this can be fixed by creating the pull request'
+
+  if (!canMerge) {
+    $('.pre-mergability').html(
+      "<strong class='text-red'>There is a merge conflict, but this can be fixed by creating the pull request.</strong>Don't worry, the owner of the repository will fix this for you."
     );
   }
 }
 /**
- * Function name: createReviewPullRequestToolTips
- * Adds tooltips to webpage when reviewing pull requests
- * Third step in editing markdown files
+ * Adds tooltips when reviewing a pull request (Final step)
  */
 function createReviewPullRequestToolTips() {
   const steps = ['Edit File', 'Confirm Pull Request', 'Pull Request Opened'];
 
   addProgressBar(3, 3, '.gh-header-show', steps);
 
-  const titleTest = 'new'; // document.getElementsByClassName('js-issue-title')[0];
+  const pullRequestName = document.getElementsByClassName('js-issue-title')[0].innerText;
 
   const branchContainerText =
     'This indicates that the pull request is open meaning someone will get to it soon.';
@@ -463,12 +446,12 @@ function createReviewPullRequestToolTips() {
     'H4',
     'helpIcon',
     branchContainerText,
-    '.js-clipboard-copy'
+    '.gh-header-meta:nth-child(1)'
   );
 
   pullRequestStatusIcon.createIcon();
 
-  $(pullRequestStatusIcon.toolTipElement).insertAfter(pullRequestStatusIcon.gitHubElement);
+  $(pullRequestStatusIcon.toolTipElement).insertBefore(pullRequestStatusIcon.gitHubElement);
 
   const requestButtonsText =
     'This will close the pull request meaning people cannot view this! Do not click close unless the request was solved.';
@@ -488,37 +471,35 @@ function createReviewPullRequestToolTips() {
 
   closePullRequestIcon.toolTipElement.style.marginRight = '20px';
 
-  /*
-  var submitButtons = document.getElementsByClassName('d-flex flex-justify-end')[0];
+  const submitButtons = document.getElementsByClassName('d-flex flex-justify-end')[0];
   submitButtons.classList.remove('flex-justify-end');
-  submitButtons.classList.add('flex-justify-start');*/
+  submitButtons.classList.add('flex-justify-start');
 
   $('.js-quick-submit-alternative').click((event) => {
-    if (!Confirm(`Are you sure that you want to close the pull request: ${titleTest}?`)) {
+    if (!confirm(`Are you sure that you want to close the pull request: ${pullRequestName}?`)) {
       event.preventDefault();
     }
   });
 }
 
 /**
- * Function name: createForkedFileToolTips
  * Edits tooltips when viewing a repository that you are not a contributor of
  */
 function createForkedFileToolTips() {
-  $('.tooltipped-nw:nth-child(2)').attr('aria-label', 'Edit Readme');
+  $('.tooltipped-nw:nth-child(2)').attr('aria-label', 'Edit File');
 }
 
 /**
- * Function name: createReportIssueToolTips
- * Adds tooltips to page when opening a new issue report
+ * Adds tooltips to page when opening a new issue report (First step)
  */
 function createReportIssueToolTips() {
-  const steps = ['Report Issue', 'confirm Issue Report', 'Issue Submitted'];
+  const steps = ['Report Issue', 'Issue Submitted'];
 
   // progress bar above editor
-  addProgressBar(1, 3, '.new_issue', steps);
+  addProgressBar(1, 2, '.new_issue', steps);
 
-  const submitButtonText = 'After clicking this, you will have a chance to update the issue report';
+  const submitButtonText =
+    'By clicking this, it will submit the issue to the owner of the repository';
 
   const submitButtonClass = '.flex-justify-end button:eq(0)';
 
@@ -530,15 +511,14 @@ function createReportIssueToolTips() {
 }
 
 /**
- * Function name: createReviewIssueToolTips
- * Adds tooltips to page when reviewing a new issue report
+ * Adds tooltips to page when reviewing a new issue report (Final step)
  */
 function createReviewIssueToolTips() {
   const issueTitle = document.getElementsByClassName('js-issue-title')[0].innerText;
 
-  const steps = ['Report Issue', 'confirm Issue Report', 'Issue Submitted'];
+  const steps = ['Report Issue', 'Issue Submitted'];
 
-  addProgressBar(3, 3, '.repository-content', steps);
+  addProgressBar(2, 2, '.repository-content', steps);
 
   const buttonRow = document.getElementsByClassName('d-flex flex-justify-end')[0];
   buttonRow.classList.remove('flex-justify-end');
@@ -547,9 +527,9 @@ function createReviewIssueToolTips() {
   const closeIssueIconText =
     'This will close the issue request meaning people cannot view this! Do not click close unless the request was solved. ';
 
-  const submitButtonClass = '.flex-justify-end button:eq(0)';
+  const closeButtonClass = '.flex-justify-end button:eq(0)';
 
-  const submitButtonIcon = new ToolTipIcon('H4', 'helpIcon', closeIssueIconText, submitButtonClass);
+  const submitButtonIcon = new ToolTipIcon('H4', 'helpIcon', closeIssueIconText, closeButtonClass);
 
   submitButtonIcon.createIcon();
 
@@ -565,7 +545,6 @@ function createReviewIssueToolTips() {
 }
 
 /**
- * Function name: updateProfileCard
  * Updates contribution graph to show icon to toggle between graphs
  */
 function updateProfileCard() {
@@ -594,9 +573,11 @@ function updateProfileCard() {
   $('.helpIcon').click(() => {
     if ($('.helpIconCircle').text() === '?') {
       $('.helpIconCircle').text('X');
+      $('.helpIconCircle').addClass('closeButton');
       $('.helpIconText').addClass('removeText');
     } else {
       $('.helpIconCircle').text('?');
+      $('.helpIconCircle').removeClass('closeButton');
       $('.helpIconText').removeClass('removeText');
     }
     $('.back').toggleClass('hovered');
@@ -606,7 +587,6 @@ function updateProfileCard() {
 }
 
 /**
- * Function: createCardContainer
  * Creates structure of profile overview with graphs
  */
 function createCardContainer() {
@@ -617,51 +597,28 @@ function createCardContainer() {
   const cardBack = document.createElement('div');
   cardBack.className = 'back';
 
-  const externalLinkContainer = document.createElement('div');
-  externalLinkContainer.className = 'link-row';
-
-  const externalLinkTitle = document.createElement('h4');
-  externalLinkTitle.appendChild(document.createTextNode('View all information'));
-
-  const externalLink = document.createElement('span');
-  externalLink.className = 'complete-list-link';
-  externalLink.appendChild(document.createTextNode(' here'));
-
-  externalLinkTitle.appendChild(externalLink);
-  externalLinkContainer.appendChild(externalLinkTitle);
-
-  const repoGraph = document.createElement('canvas');
-  repoGraph.className = 'graph';
-  repoGraph.id = 'myChart';
-
-  const skillGraph = document.createElement('canvas');
-  skillGraph.className = 'graph';
-  skillGraph.id = 'skillGraph';
-
-  const commitsGraph = document.createElement('canvas');
-  commitsGraph.className = 'graph';
-  commitsGraph.id = 'commitsGraph';
-
-  const languagesGraph = document.createElement('canvas');
-  languagesGraph.className = 'graph';
-  languagesGraph.id = 'languagesGraph';
-
-  cardBack.appendChild(externalLinkContainer);
-  cardBack.appendChild(repoGraph);
-  cardBack.appendChild(skillGraph);
-  cardBack.appendChild(commitsGraph);
-  cardBack.appendChild(languagesGraph);
+  cardBack.innerHTML = `<div class="link-row">
+                          <h4 id="test">View all information<span class="complete-list-link" id="overviewLink"> here</span></h4>
+                        </div>
+                        <canvas class="graph" id="myChart"></canvas>
+                        <canvas class="graph" id="skillGraph"></canvas>
+                        <canvas class="graph" id="commitsGraph"></canvas>
+                        <canvas class="graph" id="languagesGraph"></canvas>`;
 
   outerContainer.appendChild(cardBack);
 }
 
-$('.complete-list-link').click(() => {
-  const username = document.getElementsByClassName('vcard-username')[0].innerHTML;
+$(document).ready(() => {
+  $(document).click((event) => {
+    if (event.target.className === 'complete-list-link') {
+      const username = document.getElementsByClassName('vcard-username')[0].innerHTML;
 
-  chrome.storage.sync.set({ username: username });
+      chrome.storage.sync.set({ username: username });
 
-  chrome.runtime.sendMessage({
-    type: 'ACTIVITY_HISTORY_READY',
+      chrome.runtime.sendMessage({
+        type: 'OPEN_COMPLETE_OVERVIEW',
+      });
+    }
   });
 });
 
@@ -671,7 +628,7 @@ $('.complete-list-link').click(() => {
  * Uses GitHub API to view commit totals for user
  */
 async function getCommits(repositories, username) {
-  const oAuthToken = '2e52399ba6855793a8829ce53966012162665344';
+  const oAuthToken = '901e6d7d5bd2410e2172c2ada119b9e3e45fc1b4';
 
   const headers = {
     Authorization: `Token ${oAuthToken}`,
@@ -786,7 +743,7 @@ async function getCommits(repositories, username) {
  * Uses GitHub API to view programming languages for user
  */
 async function getRepos(username) {
-  const oAuthToken = '2e52399ba6855793a8829ce53966012162665344';
+  const oAuthToken = '901e6d7d5bd2410e2172c2ada119b9e3e45fc1b4';
 
   const url = `https://api.github.com/users/${username}/repos`;
   const response = await fetch(url, {
@@ -903,7 +860,7 @@ function getApis(username) {
   const url = chrome.runtime.getURL('result.json');
 
   fetch(url)
-    .then((response) => response.json()) // assuming file contains json
+    .then((response) => response.json())
     .then((json) => createApiGraph(json, username));
 }
 
@@ -1012,30 +969,17 @@ function createApiGraph(userData, username) {
   });
 }
 
-function sortArrayInDescendingOrder(array) {
-  array.sort((a, b) => {
-    return b - a;
-  });
-}
-
-function manageProgressBar() {
-  $('.progressbar').toggleClass('hiddenDisplay');
-}
-
-function manageIcons() {
-  $('.helpIcon').toggleClass('hiddenDisplay');
-}
-
-function manageRibbon() {
-  $('.successRibbon').toggleClass('hiddenDisplay');
-}
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.message === 'progress_bar') {
-    manageProgressBar();
-  } else if (request.message === 'icon') {
-    manageIcons();
-  } else if (request.message === 'ribbon') {
-    manageRibbon();
+/**
+ * Listen to changes from background
+ */
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.message === 'progress_bar') {
+    $('.progressbar').toggleClass('hiddenDisplay');
+  } else if (msg.message === 'icon') {
+    $('.helpIcon').toggleClass('hiddenDisplay');
+  } else if (msg.message === 'ribbon') {
+    $('.successRibbon').toggleClass('hiddenDisplay');
+  } else if (msg.type === 'CHECK_URL') {
+    checkUrl(document.location.pathname);
   }
 });
