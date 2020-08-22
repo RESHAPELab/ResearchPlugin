@@ -41,7 +41,7 @@
 .progressbar li:after {
   width: 100%;
   height: 2px;
-  content: '';
+  content: "";
   position: absolute;
   background-color: #b8b8b8;
   top: 15px;
@@ -58,24 +58,26 @@
 }
 
 .progressbar li.partial {
-  color: #c4c400;
-  font-weight: bold;
+  color: #000;
   font-size: 16px;
+  text-transform: capitalize;
 }
 
 .progressbar li.partial:before {
   border-color: #ffeeba;
+  background-color: #ffeeba;
 }
 
 .progressbar li.completed:before {
-  content: '\2713' !important;
+  content: "\2713" !important;
   background-color: #d4edda !important;
   border-color: #55b776;
 }
 
 .progressbar li.completed {
   font-size: 12px !important;
-  color: green;
+  color: #000;
+  text-transform: capitalize;
 }
 
 .progressbar li.completed + li:after {
@@ -96,6 +98,9 @@
   z-index: -1;
 }
 
+.toggleBtn {
+  z-index: 999;
+}
 /** Icon tooltip styles **/
 .helpIcon {
   position: relative;
@@ -130,7 +135,7 @@
 }
 
 .helpIconText:before {
-  content: '';
+  content: "";
   display: block;
   width: 0;
   height: 0;
@@ -149,6 +154,20 @@
   font-size: 20px;
   text-decoration: none;
   color: white;
+}
+
+.closeButton {
+  background: none !important;
+  color: black;
+}
+
+.closeButton:hover {
+  border: 1px solid black;
+}
+
+.label-margin-right {
+  display: inline-block;
+  margin-right: 20px;
 }
 
 /** Success Message Styles **/
@@ -170,7 +189,7 @@
   border-radius: 4px;
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
 
-  font-family: BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 2rem;
   color: #fff;
   text-transform: uppercase;
@@ -213,6 +232,21 @@
   perspective: 75rem;
 }
 
+.link-row {
+  color: #000;
+  display: block;
+  text-transform: capitalize;
+}
+
+.complete-list-link {
+  color: blue;
+  text-decoration: underline;
+}
+
+.complete-list-link:hover {
+  cursor: pointer;
+}
+
 .graph {
   width: 50% !important;
   height: 50% !important;
@@ -223,6 +257,64 @@
   cursor: pointer;
 }
 
+#myChart,
+#commitsGraph {
+  float: left;
+  border-right: 1px solid #000;
+}
+
+#skillGraph,
+#myChart {
+  border-bottom: 1px solid #000;
+}
+
+#skillGraph,
+#languagesGraph {
+  float: right;
+}
+
 .hiddenDisplay {
-  display: none;
+  display: none !important;
+}
+
+.UnderlineNav {
+  justify-content: center !important;
+}
+
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+.accordian-active,
+.accordion:hover {
+  background-color: #ccc;
+}
+
+.accordion:after {
+  content: "Click to show all files \002B";
+  color: #777;
+  font-weight: bold;
+  margin-left: 15px;
+  display: flex;
+}
+
+.active:after {
+  content: "Click to collapse \2212";
+}
+
+.panel {
+  padding: 0 18px;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
 }
