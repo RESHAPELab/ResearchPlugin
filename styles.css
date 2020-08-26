@@ -41,7 +41,7 @@
 .progressbar li:after {
   width: 100%;
   height: 2px;
-  content: "";
+  content: '';
   position: absolute;
   background-color: #b8b8b8;
   top: 15px;
@@ -69,7 +69,7 @@
 }
 
 .progressbar li.completed:before {
-  content: "\2713" !important;
+  content: '\2713' !important;
   background-color: #d4edda !important;
   border-color: #55b776;
 }
@@ -135,7 +135,7 @@
 }
 
 .helpIconText:before {
-  content: "";
+  content: '';
   display: block;
   width: 0;
   height: 0;
@@ -189,7 +189,7 @@
   border-radius: 4px;
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
 
-  font-family: BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 2rem;
   color: #fff;
   text-transform: uppercase;
@@ -300,7 +300,7 @@
 }
 
 .accordion:after {
-  content: "Click to show all files \002B";
+  content: 'Click to show all files \002B';
   color: #777;
   font-weight: bold;
   margin-left: 15px;
@@ -308,7 +308,7 @@
 }
 
 .active:after {
-  content: "Click to collapse \2212";
+  content: 'Click to collapse \2212';
 }
 
 .panel {

@@ -4,7 +4,6 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   }
 });
 
-
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   chrome.tabs.sendMessage(tabId, {
     type: 'CHECK_URL',

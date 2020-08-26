@@ -1,21 +1,20 @@
-updateRepoLayout();
+updateLink();
 
-function updateRepoLayout() {
-  let navBarLinks = '';
-
-  try {
-    navBarLinks = $('.UnderlineNav-body').find('li').length;
-  } catch (error) {
-    return false;
-  }
+/**
+ * Function name: updateLink
+ * Updates id of code link in nav bar
+ */
+function updateLink() {
+  // add id to code link for easier access in DOM
+  $('.selected:eq(0)').attr('id', 'codeLink');
 
   createHomePage();
-
-  return true;
 }
 
 $('#homePage').click(() => {
-  createHomePage();
+  if ($('.selected:eq(0)').text() !== 'Home') {
+    createHomePage();
+  }
 });
 
 $('#codeLink').click((event) => {
@@ -24,12 +23,12 @@ $('#codeLink').click((event) => {
 });
 
 /**
+ * Function name: createHomePage
  * Updates the main page of a repository to only dispay readme file
  */
 function createHomePage() {
   createHomePageLink();
-  // add id to code link for easier access in DOM
-  $('.selected:eq(0)').attr('id', 'codeLink');
+
   $('.selected:eq(0)').removeClass('selected');
 
   // toggle display for files in repo
@@ -39,13 +38,10 @@ function createHomePage() {
   $('.Details-content--hidden-not-important:eq(1)').removeClass('d-md-block');
   $('.file-navigation:eq(0)').removeClass('d-flex');
 
-  $('#codeLink').removeClass('selected');
-
   const codeLink = $('#codeLink');
+
   if (codeLink.attr('aria-current')) {
     codeLink.removeAttr('aria-current');
-  } else {
-    codeLink.attr('aria-current', 'page');
   }
 
   $('#homePage').addClass('selected');
@@ -56,7 +52,8 @@ function createHomePage() {
 }
 
 /**
- * Display files on repository
+ * Function name: createAccordionLayout
+ * Display files in repository inside an dropdown menu
  */
 function createAccordionLayout() {
   try {
@@ -82,6 +79,7 @@ function createAccordionLayout() {
 }
 
 /**
+ * Function name: updateAccordion
  * Updates files to collapse and expand
  */
 function updateAccordion() {
@@ -100,21 +98,17 @@ function updateAccordion() {
 }
 
 /**
+ * Function name: createHomePageLink
  * Appends new link to top nav bar in repository
  */
 function createHomePageLink() {
-  // check number of existing links
-  const navBarLinks = $('.UnderlineNav-body').find('li').length;
-
-  if (navBarLinks !== 9 && navBarLinks !== 10) {
+  if (document.getElementById('homePage') === null) {
     const newNavLink = document.createElement('li');
     newNavLink.className = 'd-flex';
 
     newNavLink.innerHTML = `<a class="js-selected-navigation-item UnderlineNav-item hx_underlinenav-item no-wrap js-responsive-underlinenav-item" id="homePage" data-tab-item="code-tab"">Home</a>`;
 
     $('.UnderlineNav-body').prepend(newNavLink);
-  } else {
-    // home page link was already created
   }
 }
 

@@ -73,6 +73,7 @@ document.getElementsByClassName('close')[0].onclick = () => {
 };
 
 /**
+ * Function name: createCompleteOverview
  * @param {JSON} userData - JSON result of all repositories for the user
  * @param {string} username - GitHub username
  * Creates cards containing total commits and top langauge
@@ -81,6 +82,7 @@ async function createCompleteOverview(userData, username) {
   const FIRST_PAGE = 1;
   const MAX_CARDS_PER_ROW = 4;
   const EMPTY_ROW = 0;
+  const allRepositories = [];
 
   let isNewPage = false;
   let rowElements = '';
@@ -103,7 +105,7 @@ async function createCompleteOverview(userData, username) {
 
     const langaugeColor = await getLanguageColor(repo.language);
 
-    let repositoryCard = new Card(
+    const repositoryCard = new Card(
       repo.name,
       repo.html_url,
       totalCommits,
@@ -111,13 +113,19 @@ async function createCompleteOverview(userData, username) {
       langaugeColor
     );
 
-    repositoryCard.createCard(username);
+    allRepositories.push(repositoryCard);
+  }
 
-    let totalRows = document.getElementsByClassName('row').length;
+  sortArrayInDescendingOrder(allRepositories);
+
+  allRepositories.forEach((repository) => {
+    repository.createCard(username);
+
+    const totalRows = document.getElementsByClassName('row').length;
 
     let lastRowCardCount = 0;
 
-    let newRow = document.createElement('div');
+    newRow = document.createElement('div');
     newRow.className = 'row';
 
     if (totalRows !== 0) {
@@ -131,8 +139,21 @@ async function createCompleteOverview(userData, username) {
       $(newRow).insertAfter('.row:last');
     }
 
-    $('.row:last').append(repositoryCard.cardContainer);
-  }
+    $('.row:last').append(repository.cardContainer);
+  });
+
+  return true;
+}
+
+/**
+ * Function name: sortArrayInDescendingOrder
+ * Sorts given array in descending order
+ * @param {Card} array - all repositories for user
+ */
+function sortArrayInDescendingOrder(array) {
+  array.sort((a, b) => {
+    return b.commitTotal - a.commitTotal;
+  });
 }
 
 /**
@@ -156,10 +177,15 @@ async function getRepos(username) {
 
   const result = await response.json();
 
-  createCompleteOverview(result, username);
+  const repositoriesCreated = await createCompleteOverview(result, username);
+
+  if (repositoriesCreated) {
+    document.getElementById('progressBar').style.display = 'none';
+  }
 }
 
 /**
+ * Function name: getAllCommits
  * @param {string} repositoryName - GitHub repository
  * @param {string} username - GitHub username
  * @param {int} page - Current page in api pagination
@@ -188,30 +214,6 @@ async function getAllCommits(repositoryName, username, page) {
   }
 
   return totalCommits;
-}
-
-/**
- * @param {string} repositoryName - GitHub repository
- * @param {string} username - GitHub username
- * returns object of languages for specific repository
- */
-async function getAllLanguages(repository, username) {
-  const oAuthToken = '';
-
-  const apiHeaders = {
-    Authorization: `Token ${oAuthToken}`,
-  };
-
-  const languageUrl = `https://api.github.com/repos/${username}/${repository}/languages`;
-
-  const result = await fetch(languageUrl, {
-    method: 'GET',
-    headers: apiHeaders,
-  });
-
-  const langaugeData = await result.json();
-
-  return langaugeData;
 }
 
 /**
@@ -257,6 +259,7 @@ async function getAllCommitMessages(repository, username, page) {
 }
 
 /**
+ * Function name: updateTotalIssues
  * @param {string} repository - repository name
  * @param {string} username - GitHub username
  * @param {int} page - current page
@@ -271,6 +274,7 @@ async function updateTotalIssues(repository, username, page) {
 }
 
 /**
+ * Function name: getTotalIssues
  * @param {string} repository - repository name
  * @param {string} username - GitHub username
  * @param {int} page - curent page
@@ -296,6 +300,7 @@ async function getTotalIssues(repository, username, page) {
 }
 
 /**
+ * Function name: updateModal
  * @param {string} message
  * @param {string} createdDate
  * Appends new commit message to modal
@@ -335,6 +340,7 @@ async function getLanguageColor(language) {
 }
 
 /**
+ * Function name: getAllIssues
  * @param {string} repository  - current repository
  * @param {string} username  - GitHub username
  * @param {int} page - current page
@@ -366,13 +372,34 @@ async function getAllIssues(repository, username, page) {
   }
 }
 
-$('#repo-issues').click(() => {
-  document.querySelectorAll('.message-title').forEach((element) => element.remove());
-  const currentRepository = document.getElementById('current-repository').innerHTML;
+$('#repo-issues-link').click(() => {
+  if ($('#commit-messages-link').attr('aria-current')) {
+    $('#commit-messages-link').removeAttr('aria-current');
+    $('#repo-issues-link').attr('aria-current', 'page');
 
-  const FIRST_PAGE = 1;
+    document.querySelectorAll('.message-title').forEach((element) => element.remove());
+    const currentRepository = document.getElementById('current-repository').innerHTML;
 
-  chrome.storage.sync.get('username', (result) => {
-    getAllIssues(currentRepository, result.username, FIRST_PAGE);
-  });
+    const FIRST_PAGE = 1;
+
+    chrome.storage.sync.get('username', (result) => {
+      getAllIssues(currentRepository, result.username, FIRST_PAGE);
+    });
+  }
+});
+
+$('#commit-messages-link').click(() => {
+  if ($('#repo-issues-link').attr('aria-current')) {
+    $('#repo-issues-link').removeAttr('aria-current');
+    $('#commit-messages-link').attr('aria-current', 'page');
+
+    document.querySelectorAll('.message-title').forEach((element) => element.remove());
+    const currentRepository = document.getElementById('current-repository').innerHTML;
+
+    const FIRST_PAGE = 1;
+
+    chrome.storage.sync.get('username', (result) => {
+      getAllCommitMessages(currentRepository, result.username, FIRST_PAGE);
+    });
+  }
 });

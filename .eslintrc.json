@@ -5,6 +5,7 @@
     "prettier/prettier": ["error"]
   },
   "no-use-before-define": ["error", { "functions": false, "classes": false }],
+  "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
   "env": {
     "browser": true,
     "commonjs": true,

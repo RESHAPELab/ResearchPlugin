@@ -1,20 +1,5 @@
 let injected = false;
 
-// Color values for graphs
-const colors = [
-  '#00498D',
-  '#01579B',
-  '#00498D',
-  '#0277BD',
-  '#0288D1',
-  '#039BE5',
-  '#03A9F4',
-  '#29B6F6',
-  '#4FC3F7',
-  '#81D4FA',
-  '#B3E5FC',
-];
-
 window.onload = () => {
   const currentPageUrl = document.location.pathname;
 
@@ -44,6 +29,7 @@ class ToolTipIcon {
 }
 
 /**
+ * Function name: checkUrl
  * @param {string} currentUrl - pathname of current url
  * Checks the windows current URL to determine which tooltips to display
  */
@@ -75,6 +61,7 @@ function checkUrl(currentUrl) {
 }
 
 /**
+ * Function name: sortArrayInDescendingOrder
  * Sorts given array in descending order
  * @param {int} array
  */
@@ -85,6 +72,7 @@ function sortArrayInDescendingOrder(array) {
 }
 
 /**
+ * Function name: checkIsEditingForkedFile
  * Checks if the user is viewing a file that they do not own
  */
 function checkIsEditingForkedFile() {
@@ -94,9 +82,10 @@ function checkIsEditingForkedFile() {
   ];
 
   try {
-    var pencilIconLabel = document
+    const pencilIconLabel = document
       .getElementsByClassName('tooltipped')[2]
       .getAttribute('aria-label');
+
     // check if there is a pencil icon with this aria label
     return pencilIconLabelsList.includes(pencilIconLabel);
   } catch (error) {
@@ -105,6 +94,7 @@ function checkIsEditingForkedFile() {
 }
 
 /**
+ * Function name: createForkedFileToolTips
  * Edits tooltips when viewing a repository that you are not a contributor of
  */
 function createForkedFileToolTips() {
@@ -112,6 +102,7 @@ function createForkedFileToolTips() {
 }
 
 /**
+ * Function name: addProgressBar
  * @param {int} currentStep - current step in process
  * @param {int} totalSteps - the total amount of steps in process
  * @param {string} rootElement - className of HTML element that the progress bar
@@ -160,6 +151,7 @@ function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
 }
 
 /**
+ * Function name: isProcessCompleted
  * Checks if issue or pull request was succesfully created and is open in the repo
  */
 function isProcessCompleted() {
@@ -173,6 +165,7 @@ function isProcessCompleted() {
 }
 
 /**
+ * Function name: createSuccessRibbon
  * Creates ribbon above progress bar to inform the user that the process is successful
  */
 function createSuccessRibbon() {
@@ -195,6 +188,7 @@ function createSuccessRibbon() {
 }
 
 /**
+ * Function name: createFileEditorToolTips
  * Adds tooltips when editing files (First step)
  */
 function createFileEditorToolTips() {
@@ -295,6 +289,7 @@ $.fn.extend({
 });
 
 /**
+ * Function name: createConfirmPullRequestToolTips
  * Creates tooltips when confirming a change to file (Second step)
  */
 function createConfirmPullRequestToolTips() {
@@ -413,6 +408,7 @@ function createConfirmPullRequestToolTips() {
 }
 
 /**
+ * Function name: changeMergeText
  * Updates text when there is a merge conflict in a pull request
  */
 function changeMergeText() {
@@ -431,6 +427,7 @@ function changeMergeText() {
   }
 }
 /**
+ * Function name: createReviewPullRequestToolTips
  * Adds tooltips when reviewing a pull request (Final step)
  */
 function createReviewPullRequestToolTips() {
@@ -484,6 +481,7 @@ function createReviewPullRequestToolTips() {
 }
 
 /**
+ * Function name: createReportIssueToolTips
  * Adds tooltips to page when opening a new issue report (First step)
  */
 function createReportIssueToolTips() {
@@ -505,6 +503,7 @@ function createReportIssueToolTips() {
 }
 
 /**
+ * Function name: createReviewIssueToolTips
  * Adds tooltips to page when reviewing a new issue report (Final step)
  */
 function createReviewIssueToolTips() {
@@ -539,6 +538,7 @@ function createReviewIssueToolTips() {
 }
 
 /**
+ * Function name: updateProfileCard
  * Updates contribution graph to show icon to toggle between graphs
  */
 function updateProfileCard() {
@@ -571,6 +571,7 @@ function updateProfileCard() {
 }
 
 /**
+ *Function name: createCardContainer
  * Creates structure of profile overview with graphs
  */
 function createCardContainer() {
@@ -607,7 +608,7 @@ $(document).ready(() => {
 });
 
 /**
- * function getCommits
+ * Function name: getCommits
  * @param {string} username - GitHub username for API
  * Uses GitHub API to view commit totals for user
  */
@@ -619,7 +620,7 @@ async function getCommits(repositories, username) {
   };
 
   const repoObject = {};
-  const ctx = document.getElementById('repositories');
+
   const skillGraphContainer = document.getElementById('skillGraph');
   let total = 0;
 
@@ -632,7 +633,7 @@ async function getCommits(repositories, username) {
         headers: headers,
       });
 
-      let commitResult = await commitResponse.json();
+      const commitResult = await commitResponse.json();
       repoObject[repo] = commitResult.length;
 
       total += 1;
@@ -648,85 +649,25 @@ async function getCommits(repositories, username) {
 
   sortArrayInDescendingOrder(data);
 
-  commitGraph = new Chart(skillGraphContainer, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Commits',
-          backgroundColor: colors,
-          data: data,
-        },
-      ],
-    },
-    options: {
-      responsive: false,
-      legend: { display: false },
-      title: {
-        display: true,
-        text: `Commits per repository for:  ${username}`,
-      },
-      scales: {
-        yAxes: [
-          {
-            ticks: {
-              beginAtZero: true,
-              max: 30,
-              stepSize: 1,
-            },
-          },
-        ],
-        xAxes: [
-          {
-            ticks: {
-              fontSize: 8,
-              callback: function (value) {
-                if (value.length > 4) {
-                  return value.substr(0, 4) + '...'; //truncate
-                } else {
-                  return value;
-                }
-              },
-            },
-          },
-        ],
-      },
-      animation: {
-        duration: 1,
-        onProgress: function () {
-          var chartInstance = this.chart,
-            ctx = chartInstance.ctx;
+  const graphTitle = `Commits per repository for:  ${username}`;
 
-          ctx.font = Chart.helpers.fontString(
-            Chart.defaults.global.defaultFontSize,
-            Chart.defaults.global.defaultFontStyle,
-            Chart.defaults.global.defaultFontFamily
-          );
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-
-          this.data.datasets.forEach(function (dataset, i) {
-            var meta = chartInstance.controller.getDatasetMeta(i);
-            meta.data.forEach(function (bar, index) {
-              if (dataset.data[index] > 0) {
-                var data = dataset.data[index];
-                ctx.fillText(data, bar._model.x, bar._model.y);
-              }
-            });
-          });
-        },
-      },
-    },
-  });
+  createNewBarGraph(skillGraphContainer, graphTitle, labels, data);
 }
 
 /**
- * function getRepos
+ * Function name: getRepos
  * @param {string} username - GitHub username for API
  * Uses GitHub API to view programming languages for user
  */
 async function getRepos(username) {
+  const graphTitle = `Programming languge totals for ${username}'s repositories`;
+  const repoGraphContainer = document.getElementById('myChart');
+  const MAX_COUNT = 10;
+
+  const languages = [];
+  const repositoryNames = [];
+  const repositoriesObject = {};
+
   const oAuthToken = '';
 
   const url = `https://api.github.com/users/${username}/repos`;
@@ -737,102 +678,41 @@ async function getRepos(username) {
     },
   });
 
-  const result = await response.json();
+  const repositories = await response.json();
 
-  const languages = [];
-  const repositoryNames = [];
-  let labels = {};
-  let dataSet = {};
+  let graphLabels = {};
+  let graphDataSet = {};
 
   let total = 0;
 
-  result.forEach((index) => {
-    if (index.language != null && total < 10) {
-      languages.push(index.language);
-      repositoryNames.push(index.name);
+  repositories.forEach((repository) => {
+    if (repository.language != null && total < MAX_COUNT) {
+      languages.push(repository.language);
+      repositoryNames.push(repository.name);
       total += 1;
     }
   });
 
   getCommits(repositoryNames, username);
 
-  const repoGraphContainer = document.getElementById('myChart');
-
-  const repositoriesObject = {};
-
   for (let index = 0; index < languages.length; index += 1) {
-    if (!repositoriesObject[languages[index]]) {
+    if (repositoriesObject[languages[index]] === undefined) {
       repositoriesObject[languages[index]] = 0;
     }
     repositoriesObject[languages[index]] += 1;
   }
 
-  labels = Object.keys(repositoriesObject);
-  dataSet = Object.values(repositoriesObject);
+  graphLabels = Object.keys(repositoriesObject);
+  graphDataSet = Object.values(repositoriesObject);
 
   // use b - a for desc order and a - b for asc order
-  labels.sort((a, b) => {
+  graphLabels.sort((a, b) => {
     return repositoriesObject[b] - repositoriesObject[a];
   });
 
-  sortArrayInDescendingOrder(dataSet);
+  sortArrayInDescendingOrder(graphDataSet);
 
-  repositoryGraph = new Chart(repoGraphContainer, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Repositories',
-          backgroundColor: colors,
-          data: dataSet,
-        },
-      ],
-    },
-    options: {
-      responsive: false,
-      legend: { display: false },
-      title: {
-        display: true,
-        text: `Programming languge totals for ${username}'s repositories`,
-      },
-      scales: {
-        yAxes: [
-          {
-            ticks: {
-              beginAtZero: true,
-              stepSize: 1,
-            },
-          },
-        ],
-      },
-      animation: {
-        duration: 1,
-        onProgress: function () {
-          var chartInstance = this.chart,
-            ctx = chartInstance.ctx;
-
-          ctx.font = Chart.helpers.fontString(
-            Chart.defaults.global.defaultFontSize,
-            Chart.defaults.global.defaultFontStyle,
-            Chart.defaults.global.defaultFontFamily
-          );
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-
-          this.data.datasets.forEach(function (dataset, i) {
-            var meta = chartInstance.controller.getDatasetMeta(i);
-            meta.data.forEach(function (bar, index) {
-              if (dataset.data[index] > 0) {
-                var data = dataset.data[index];
-                ctx.fillText(data, bar._model.x, bar._model.y);
-              }
-            });
-          });
-        },
-      },
-    },
-  });
+  createNewBarGraph(repoGraphContainer, graphTitle, graphLabels, graphDataSet);
 }
 
 /**
@@ -855,18 +735,18 @@ function getApis(username) {
  */
 function createApiGraph(userData, username) {
   const apiGraphContainer = document.getElementById('commitsGraph');
-
-  const apis = [];
+  const apiGraphTitle = `Total commits per api for ${username}`;
+  const MAX_COUNT = 10;
+  const apiTitles = [];
   const apiTotals = [];
-
   const languages = [];
 
   let total = 0;
 
   userData.Repos.forEach((index) => {
     index.API.apis.forEach((api) => {
-      if (total < 10) {
-        apis.push(api.name);
+      if (total < MAX_COUNT) {
+        apiTitles.push(api.name);
         apiTotals.push(api.count);
         total += 1;
       }
@@ -877,19 +757,44 @@ function createApiGraph(userData, username) {
     });
   });
 
-  sortArrayInDescendingOrder(apis);
+  sortArrayInDescendingOrder(apiTitles);
 
   sortArrayInDescendingOrder(apiTotals);
 
-  apiGraph = new Chart(apiGraphContainer, {
+  createNewBarGraph(apiGraphContainer, apiGraphTitle, apiTitles, apiTotals);
+}
+
+/**
+ * Function createNewBarGraph
+ * @param {string} container - container to append new chart
+ * @param {string} graphTitle - title of graph
+ * @param {[string]} graphLabels - labels for each bar in graph
+ * @param {[int]} graphData - data points for each bar in graph
+ */
+function createNewBarGraph(container, graphTitle, graphLabels, graphData) {
+  const colors = [
+    '#00498D',
+    '#01579B',
+    '#00498D',
+    '#0277BD',
+    '#0288D1',
+    '#039BE5',
+    '#03A9F4',
+    '#29B6F6',
+    '#4FC3F7',
+    '#81D4FA',
+    '#B3E5FC',
+  ];
+
+  const barGraph = new Chart(container, {
     type: 'bar',
     data: {
-      labels: apis,
+      labels: graphLabels,
       datasets: [
         {
-          label: 'Total Commits: ',
-          data: apiTotals,
+          label: 'Commits',
           backgroundColor: colors,
+          data: graphData,
         },
       ],
     },
@@ -898,7 +803,7 @@ function createApiGraph(userData, username) {
       legend: { display: false },
       title: {
         display: true,
-        text: `Total commits per api for ${username}`,
+        text: graphTitle,
       },
       scales: {
         yAxes: [
@@ -913,12 +818,11 @@ function createApiGraph(userData, username) {
           {
             ticks: {
               fontSize: 8,
-              callback: function (value) {
+              callback(value) {
                 if (value.length > 4) {
-                  return value.substr(0, 4) + '...';
-                } else {
-                  return value;
+                  return `${value.substr(0, 4)}...`;
                 }
+                return value;
               },
             },
           },
@@ -926,9 +830,9 @@ function createApiGraph(userData, username) {
       },
       animation: {
         duration: 1,
-        onProgress: function () {
-          var chartInstance = this.chart,
-            ctx = chartInstance.ctx;
+        onProgress() {
+          const chartInstance = this.chart;
+          const { ctx } = chartInstance;
 
           ctx.font = Chart.helpers.fontString(
             Chart.defaults.global.defaultFontSize,
@@ -938,11 +842,11 @@ function createApiGraph(userData, username) {
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
 
-          this.data.datasets.forEach(function (dataset, i) {
-            var meta = chartInstance.controller.getDatasetMeta(i);
-            meta.data.forEach(function (bar, index) {
+          this.data.datasets.forEach((dataset, dataIndex) => {
+            const meta = chartInstance.controller.getDatasetMeta(dataIndex);
+            meta.data.forEach((bar, index) => {
               if (dataset.data[index] > 0) {
-                var data = dataset.data[index];
+                const data = dataset.data[index];
                 ctx.fillText(data, bar._model.x, bar._model.y);
               }
             });
@@ -954,9 +858,9 @@ function createApiGraph(userData, username) {
 }
 
 /**
- * Listen to changes from background
+ * Listen to changes from background script
  */
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg) => {
   if (msg.message === 'progress_bar') {
     $('.progressbar').toggleClass('hiddenDisplay');
   } else if (msg.message === 'icon') {
@@ -964,9 +868,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   } else if (msg.message === 'ribbon') {
     $('.successRibbon').toggleClass('hiddenDisplay');
   } else if (msg.type === 'CHECK_URL') {
-    if (!injected) {
-      injected = true;
-      checkUrl(document.location.pathname);
+    if (checkIsEditingForkedFile()) {
+      createForkedFileToolTips();
     }
   }
 });

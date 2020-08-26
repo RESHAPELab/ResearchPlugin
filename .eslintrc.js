@@ -13,5 +13,6 @@ module.exports = {
   },
   rules: {
     'no-use-before-define': ['error', { functions: false, classes: false }],
+    'no-restricted-syntax': ['error', 'ForInStatement', 'LabeledStatement', 'WithStatement'],
   },
 };
