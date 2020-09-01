@@ -3,6 +3,7 @@ body {
     Apple Color Emoji, Segoe UI Emoji;
   font-size: 14px;
   line-height: 1.5;
+  margin: 0 !important;
 }
 
 body,
@@ -117,11 +118,12 @@ html {
 .card-button .label {
   cursor: pointer;
   -moz-osx-font-smoothing: grayscale;
-  color: #24292e;
-  background-color: #fafbfc;
-  border: 1px solid rgba(27, 31, 35, 0.15);
-  box-shadow: 0 1px 0 rgba(27, 31, 35, 0.04), inset 0 1px 0 hsla(0, 0%, 100%, 0.25);
-  transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  color: #fff;
+  background-color: #2ea44f;
+  border-color: rgba(27, 31, 35, 0.15);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(27, 31, 35, 0.1), inset 0 1px 0 hsla(0, 0%, 100%, 0.03);
+  display: inline-block;
   padding: 5px 16px;
   font-size: 14px;
   font-weight: 500;
@@ -129,7 +131,6 @@ html {
   white-space: nowrap;
   vertical-align: middle;
   cursor: pointer;
-  border-radius: 6px;
 }
 
 /* The Modal (background) */
@@ -174,11 +175,11 @@ html {
 }
 
 .message-title {
-  margin-bottom: 15px;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #e1e4e8;
-  font-family: Roboto, sans-serif;
-  -moz-osx-font-smoothing: grayscale;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-left: 1px solid #e1e4e8;
+  border-right: 1px solid #e1e4e8;
+  border-top: 1px solid #e1e4e8;
   -webkit-font-smoothing: antialiased;
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -186,12 +187,12 @@ html {
   letter-spacing: 0.0178571429em;
   text-decoration: inherit;
   text-transform: inherit;
-  padding: 5px;
+  padding: 8px 16px;
 }
 
 .timeStamp {
-  float: right;
-  font-weight: bold;
+  display: block;
+  color: #aaaaaa;
 }
 
 #username {
@@ -646,6 +647,12 @@ form {
 .octicon-mark-github {
   height: 32px;
   width: 32px;
+  fill: #fff !important;
+}
+
+.octicon-plus,
+.octicon-bell {
+  fill: #fff !important;
 }
 
 input {
@@ -993,4 +1000,33 @@ details:not([open]) > :not(summary) {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+}
+
+.header-search-current .header-search-input {
+  display: table-cell;
+  width: 100%;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+#display-none-before::before {
+  content: none !important;
+}
+
+#repo-name {
+  text-align: center;
+  font-size: 20px !important;
+}
+
+.avatar-user {
+  border-radius: 50% !important;
+}
+
+.message-title:last-of-type {
+  border-bottom: 1px solid #e1e4e8;
 }

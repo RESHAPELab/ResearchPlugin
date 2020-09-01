@@ -16,9 +16,10 @@
     }
 
     #header-row {
-      border-bottom: 1px solid lightgray;
       overflow: hidden;
-      background: linear-gradient(238.26deg, #5433ff 0%, #20bdff 43.52%, #a5fecb 100%);
+      background-color: #24292e;
+      line-height: 1.5;
+      color: hsla(0, 0%, 100%, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -72,11 +73,11 @@
     }
 
     input:checked + .slider {
-      background-color: #2196f3;
+      background-color: #2ea44f;
     }
 
     input:focus + .slider {
-      box-shadow: 0 0 1px #2196f3;
+      box-shadow: 0 0 1px #2ea44f;
     }
 
     input:checked + .slider:before {
@@ -124,6 +125,8 @@
       </label>
       <h4 class="buttonLabel">Show Progress Bar</h4>
     </div>
+
+    <a href="https://github.com/NAU-OSL/ResearchPlugin" target="_blank">GitHub</a>
 
     <script src="popup.js"></script>
   </body>

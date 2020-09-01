@@ -30,14 +30,24 @@ function iconPopUp() {
  * Function name: ribbonPopUp
  * Toggles display for ribbon on page, if any
  */
-function ribbonPopUp() {
+function ribbonPopUp(value) {
+  console.log(value);
   chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
     const activeTab = tabs[0];
     chrome.tabs.sendMessage(activeTab.id, { message: 'ribbon' });
   });
 }
 
+function buttonChanged(buttonName) {
+  console.log(buttonName);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('iconBtn').checked = false;
+  document.getElementById('ribbonBtn').checked = false;
+
+  document.getElementById('progressBarBtn').checked = false;
+
   chrome.storage.local.get('iconStatus', (status) => {
     const switchStatus = status.iconStatus;
 
@@ -47,17 +57,16 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('iconBtn').checked = false;
     }
 
-    if (
-      document.getElementsByClassName('helpIcon')[0].style.display == 'inline-block' &&
-      switchStatus
-    ) {
+    if (document.getElementsByClassName('helpIcon')[0] !== null && switchStatus) {
       document.getElementById('iconBtn').checked = true;
     }
   });
 
-  document.getElementById('iconBtn').addEventListener('change', iconPopUp);
+  document.getElementById('iconBtn').addEventListener('change', buttonChanged('helpIcon'));
 
-  document.getElementById('ribbonBtn').addEventListener('change', ribbonPopUp);
+  document.getElementById('ribbonBtn').addEventListener('change', buttonChanged('ribbon'));
 
-  document.getElementById('progressBarBtn').addEventListener('change', progressBarPopUp);
+  document
+    .getElementById('progressBarBtn')
+    .addEventListener('change', buttonChanged('progressBar'));
 });

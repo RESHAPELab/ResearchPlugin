@@ -15,13 +15,13 @@ class Card {
     this.cardContainer = cardContainer;
   }
 
-  createCard(username) {
+  createCard() {
     const cardContainer = document.createElement('div');
     cardContainer.className = 'card';
 
     cardContainer.innerHTML = `<div class="card-text-section">
                                   <div class="card-title">
-                                    <a href="${this.repositoryLink}" target="_blank"><svg class="octicon octicon-repo mr-2 text-gray flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path></svg> ${username}/${this.repositoryName}</a>
+                                    <a href="${this.repositoryLink}" target="_blank"><svg class="octicon octicon-repo mr-2 text-gray flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path></svg>${this.repositoryName}</a>
                                   </div>
                                 </div>
                                 <div class="card-text-section">
@@ -41,7 +41,7 @@ class Card {
                                 </div>
                                 <div class="card-actions">
                                   <div class="card-button">
-                                    <span class="label" id="${this.repositoryName}">View Commit Messages/Issues</span>
+                                    <span class="label" id="${this.repositoryName}">Commits/Issues Overview</span>
                                   </div>
                                 </div>`;
 
@@ -49,27 +49,35 @@ class Card {
   }
 }
 
-chrome.storage.sync.get('username', (result) => {
+window.onload = async () => {
+  const githubUsername = await getGitHubUsername();
+
   document.getElementById(
     'username'
-  ).innerHTML = `<a href="https://github.com/${result.username}" target="_blank"><svg aria-label="forks" class="octicon octicon-repo-forked" viewBox="0 0 16 16" version="1.1" width="24" height="24" role="img"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg> ${result.username}/<span class="text-gray-dark ">Repositories</span></a>`;
-  getRepos(result.username);
-});
+  ).innerHTML = `<a href="https://github.com/${githubUsername}" target="_blank"><svg aria-label="forks" class="octicon octicon-repo-forked" viewBox="0 0 16 16" version="1.1" width="24" height="24" role="img"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg> ${githubUsername}/<span class="text-gray-dark ">Repositories</span></a>`;
 
-document.body.onclick = (ev) => {
-  if (ev.target.getAttribute('class') === 'label') {
-    chrome.storage.sync.get('username', (result) => {
-      const FIRST_PAGE = 1;
-      getAllCommitMessages(ev.srcElement.id, result.username, FIRST_PAGE);
-      updateTotalIssues(ev.srcElement.id, result.username, FIRST_PAGE);
-    });
+  $('github-username').text(githubUsername);
+
+  const userProfileImage = await retrieveProfileImage(githubUsername);
+
+  $('#profile-image').attr('src', userProfileImage);
+  getRepos(githubUsername);
+};
+
+document.body.onclick = async (event) => {
+  const gitHubUser = await getGitHubUsername();
+
+  if (event.target.getAttribute('class') === 'label') {
+    const FIRST_PAGE = 1;
+    getAllCommitMessages(event.srcElement.id, gitHubUser, FIRST_PAGE);
+    updateTotalIssues(event.srcElement.id, gitHubUser, FIRST_PAGE);
   }
 };
 
 document.getElementsByClassName('close')[0].onclick = () => {
   document.getElementById('modalContainer').style.display = 'none';
   document.querySelectorAll('.message-title').forEach((element) => element.remove());
-  document.getElementById('current-repository').innerHTML = '';
+  document.getElementById('repo-name').innerHTML = '';
 };
 
 /**
@@ -100,7 +108,7 @@ async function createCompleteOverview(userData, username) {
     $(newRow).insertAfter('.row:last');
   }
 
-  for (repo of userData) {
+  for (const repo of userData) {
     const totalCommits = await getAllCommits(repo.name, username, FIRST_PAGE);
 
     const langaugeColor = await getLanguageColor(repo.language);
@@ -147,8 +155,8 @@ async function createCompleteOverview(userData, username) {
 
 /**
  * Function name: sortArrayInDescendingOrder
- * Sorts given array in descending order
  * @param {Card} array - all repositories for user
+ * Sorts given array in descending order
  */
 function sortArrayInDescendingOrder(array) {
   array.sort((a, b) => {
@@ -162,7 +170,7 @@ function sortArrayInDescendingOrder(array) {
  * Uses GitHub API to view programming languages for user
  */
 async function getRepos(username) {
-  const oAuthToken = '';
+  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
 
   const apiHeaders = {
     Authorization: `Token ${oAuthToken}`,
@@ -192,7 +200,9 @@ async function getRepos(username) {
  * Returns all commits for each repository for a certain user
  */
 async function getAllCommits(repositoryName, username, page) {
-  const oAuthToken = '';
+  const MAX_PAGES = 25;
+
+  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
 
   const apiHeaders = {
     Authorization: `Token ${oAuthToken}`,
@@ -209,7 +219,7 @@ async function getAllCommits(repositoryName, username, page) {
 
   let totalCommits = commitResult.length;
 
-  if (totalCommits % 100 === 0) {
+  if (totalCommits % 100 === 0 && page < MAX_PAGES) {
     totalCommits += await getAllCommits(repositoryName, username, page + 1);
   }
 
@@ -223,7 +233,9 @@ async function getAllCommits(repositoryName, username, page) {
  * returns object of languages for specific repository
  */
 async function getAllCommitMessages(repository, username, page) {
-  const oAuthToken = '';
+  const MAX_PAGES = 15;
+
+  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
 
   const apiHeaders = {
     Authorization: `Token ${oAuthToken}`,
@@ -238,7 +250,10 @@ async function getAllCommitMessages(repository, username, page) {
 
   const commits = await result.json();
 
-  document.getElementById('current-repository').innerHTML = repository;
+  document.getElementById(
+    'repo-name'
+  ).innerHTML = `<svg class="octicon octicon-repo mr-2 text-gray flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path></svg> 
+                <a href="https://github.com/${username}/${repository} target="_blank">${repository}</a>`;
 
   if (commits.length !== 0) {
     commits.forEach((commit) => {
@@ -248,7 +263,7 @@ async function getAllCommitMessages(repository, username, page) {
     });
 
     document.getElementById('modalContainer').style.display = 'block';
-    if (commits.length % 100 === 0) {
+    if (commits.length % 100 === 0 && page < MAX_PAGES) {
       getAllCommitMessages(repository, username, page + 1);
     }
 
@@ -281,7 +296,7 @@ async function updateTotalIssues(repository, username, page) {
  * Finds all issues in repository and returns total
  */
 async function getTotalIssues(repository, username, page) {
-  const oAuthToken = '';
+  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
 
   const apiHeaders = {
     Authorization: `Token ${oAuthToken}`,
@@ -305,7 +320,11 @@ async function getTotalIssues(repository, username, page) {
  * @param {string} createdDate
  * Appends new commit message to modal
  */
-function updateModal(message, createdDate, commitLink) {
+async function updateModal(message, createdDate, commitLink) {
+  const username = await getGitHubUsername();
+
+  const profileImage = await retrieveProfileImage(username);
+
   const innerContainer = document.getElementsByClassName('modal-content')[0];
 
   const messageContainer = document.createElement('p');
@@ -315,7 +334,7 @@ function updateModal(message, createdDate, commitLink) {
     messageContainer.innerHTML = `<a href="${commitLink}>${message}</a>`;
   } else {
     const localTime = new Date(createdDate).toLocaleDateString();
-    messageContainer.innerHTML = `<a href="${commitLink}">${message}</a> <span class="timeStamp">Created at: ${localTime}`;
+    messageContainer.innerHTML = `<a href="${commitLink}">${message}</a><span class="timeStamp"><img height="20" width="20" alt="@${username}" src="${profileImage}" class="avatar-user"> ${username} Committed at: ${localTime}`;
   }
   innerContainer.appendChild(messageContainer);
 }
@@ -330,7 +349,7 @@ async function getLanguageColor(language) {
     return '#000';
   }
 
-  const url = chrome.runtime.getURL('colors.json');
+  const url = chrome.runtime.getURL('data/colors.json');
 
   const response = await fetch(url);
 
@@ -346,7 +365,7 @@ async function getLanguageColor(language) {
  * @param {int} page - current page
  */
 async function getAllIssues(repository, username, page) {
-  const oAuthToken = '';
+  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
 
   const apiHeaders = {
     Authorization: `Token ${oAuthToken}`,
@@ -372,34 +391,76 @@ async function getAllIssues(repository, username, page) {
   }
 }
 
-$('#repo-issues-link').click(() => {
+/**
+ * Function name: retrieveProfileImage
+ * @param {string} username - GitHub username
+ * Returns url for profile image
+ */
+async function retrieveProfileImage(username) {
+  const oAuthToken = '';
+
+  const apiHeaders = {
+    Authorization: `Token ${oAuthToken}`,
+  };
+
+  const profileUrl = `https://api.github.com/users/${username}`;
+
+  const result = await fetch(profileUrl, {
+    method: 'GET',
+    headers: apiHeaders,
+  });
+
+  const userProfile = await result.json();
+
+  return userProfile.avatar_url;
+}
+
+$('#repo-issues-link').click(async () => {
   if ($('#commit-messages-link').attr('aria-current')) {
     $('#commit-messages-link').removeAttr('aria-current');
     $('#repo-issues-link').attr('aria-current', 'page');
 
-    document.querySelectorAll('.message-title').forEach((element) => element.remove());
-    const currentRepository = document.getElementById('current-repository').innerHTML;
+    const currentRepository = document.getElementById('repo-name').innerText.trim();
 
     const FIRST_PAGE = 1;
 
-    chrome.storage.sync.get('username', (result) => {
-      getAllIssues(currentRepository, result.username, FIRST_PAGE);
-    });
+    const username = await getGitHubUsername();
+
+    document.querySelectorAll('.message-title').forEach((element) => element.remove());
+
+    getAllIssues(currentRepository, username, FIRST_PAGE);
   }
 });
 
-$('#commit-messages-link').click(() => {
+$('#commit-messages-link').click(async () => {
   if ($('#repo-issues-link').attr('aria-current')) {
     $('#repo-issues-link').removeAttr('aria-current');
     $('#commit-messages-link').attr('aria-current', 'page');
 
-    document.querySelectorAll('.message-title').forEach((element) => element.remove());
-    const currentRepository = document.getElementById('current-repository').innerHTML;
+    const currentRepository = document.getElementById('repo-name').innerText.trim();
 
     const FIRST_PAGE = 1;
 
-    chrome.storage.sync.get('username', (result) => {
-      getAllCommitMessages(currentRepository, result.username, FIRST_PAGE);
-    });
+    const username = await getGitHubUsername();
+
+    document.querySelectorAll('.message-title').forEach((element) => element.remove());
+
+    getAllCommitMessages(currentRepository, username, FIRST_PAGE);
   }
 });
+
+/**
+ * Function name: getGitHubUsername
+ * Returns username from GitHub stored in browser
+ */
+async function getGitHubUsername() {
+  const localUsername = new Promise((resolve) => {
+    chrome.storage.sync.get('username', (result) => {
+      resolve(result.username);
+    });
+  });
+
+  const username = await localUsername;
+
+  return username;
+}

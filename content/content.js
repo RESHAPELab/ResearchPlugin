@@ -1,10 +1,11 @@
 let injected = false;
 
-window.onload = () => {
+window.onload = async () => {
   const currentPageUrl = document.location.pathname;
 
   if (!injected) {
     injected = true;
+
     checkUrl(currentPageUrl);
   }
 };
@@ -30,7 +31,6 @@ class ToolTipIcon {
 
 /**
  * Function name: checkUrl
- * @param {string} currentUrl - pathname of current url
  * Checks the windows current URL to determine which tooltips to display
  */
 function checkUrl(currentUrl) {
@@ -62,8 +62,8 @@ function checkUrl(currentUrl) {
 
 /**
  * Function name: sortArrayInDescendingOrder
+ * @param {int} array - array to be sorted
  * Sorts given array in descending order
- * @param {int} array
  */
 function sortArrayInDescendingOrder(array) {
   array.sort((a, b) => {
@@ -176,7 +176,7 @@ function createSuccessRibbon() {
   }
 
   const successRibbonContainer = document.createElement('div');
-  successRibbonContainer.className = 'successRibbon';
+  successRibbonContainer.className = 'successRibbon text-center';
 
   const ribbonMessage = document.createTextNode(
     `The ${processType}  was created successfully and will be reviewed shortly`
@@ -196,6 +196,12 @@ function createFileEditorToolTips() {
 
   // progress bar above editor
   addProgressBar(1, 3, '.js-blob-form', steps);
+
+  if (document.getElementsByClassName('flash-messages ')[0] !== null) {
+    $('.flash-messages').addClass('text-center');
+    document.getElementsByClassName('flash')[0].innerText =
+      'You are now editing the file, make your changes below and press the green button to continue';
+  }
 
   // icon to right of file name input
   const fileNameChangeText =
@@ -490,6 +496,16 @@ function createReportIssueToolTips() {
   // progress bar above editor
   addProgressBar(1, 2, '.new_issue', steps);
 
+  $('.input-block').css({ width: '90%', display: 'inline-block' });
+
+  const iconTitleText = 'Enter a descriptive name of the issue report here. This is required';
+
+  const titleIcon = new ToolTipIcon('H4', 'helpIcon', iconTitleText, '.input-block');
+
+  titleIcon.createIcon();
+
+  $(titleIcon.toolTipElement).insertAfter(titleIcon.gitHubElement);
+
   const submitButtonText =
     'By clicking this, it will submit the issue to the owner of the repository';
 
@@ -543,8 +559,8 @@ function createReviewIssueToolTips() {
  */
 function updateProfileCard() {
   const toggleButton = document.createElement('button');
-  toggleButton.className = 'btn mb-3 toggleBtn';
-  toggleButton.innerText = 'Click to show more information';
+  toggleButton.className = 'btn btn-primary mb-3 ml-md-3 toggleBtn';
+  toggleButton.innerText = 'Show more information';
 
   const username = document.getElementsByClassName('vcard-username')[0].innerHTML;
 
@@ -557,12 +573,16 @@ function updateProfileCard() {
   $(toggleButton).insertAfter('.contrib-footer ');
 
   $('.toggleBtn').click(() => {
-    if ($('.toggleBtn').text() === 'Click to show more information') {
+    if ($('.toggleBtn').text() === 'Show more information') {
       $('.toggleBtn').text('X');
       $('.toggleBtn').addClass('closeButton');
+      $('.toggleBtn').removeClass('btn-primary');
+      $('.toggleBtn').removeClass('ml-md-3');
     } else {
-      $('.toggleBtn').text('Click to show more information');
+      $('.toggleBtn').text('Show more information');
       $('.toggleBtn').removeClass('closeButton');
+      $('.toggleBtn').addClass('btn-primary');
+      $('.toggleBtn').addClass('ml-md-3');
     }
     $('.back').toggleClass('hovered');
     $('#js-contribution-activity').toggleClass('hidden');
@@ -571,7 +591,7 @@ function updateProfileCard() {
 }
 
 /**
- *Function name: createCardContainer
+ * Function name: createCardContainer
  * Creates structure of profile overview with graphs
  */
 function createCardContainer() {
@@ -613,15 +633,16 @@ $(document).ready(() => {
  * Uses GitHub API to view commit totals for user
  */
 async function getCommits(repositories, username) {
-  const oAuthToken = '';
+  const skillGraphContainer = document.getElementById('skillGraph');
 
-  const headers = {
+  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
+
+  const apiHeader = {
     Authorization: `Token ${oAuthToken}`,
   };
 
   const repoObject = {};
 
-  const skillGraphContainer = document.getElementById('skillGraph');
   let total = 0;
 
   for (const repo of repositories) {
@@ -630,7 +651,7 @@ async function getCommits(repositories, username) {
 
       const commitResponse = await fetch(commitUrl, {
         method: 'GET',
-        headers: headers,
+        headers: apiHeader,
       });
 
       const commitResult = await commitResponse.json();
@@ -668,14 +689,16 @@ async function getRepos(username) {
   const repositoryNames = [];
   const repositoriesObject = {};
 
-  const oAuthToken = '';
+  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
+
+  const apiHeader = {
+    Authorization: `Token ${oAuthToken}`,
+  };
 
   const url = `https://api.github.com/users/${username}/repos`;
   const response = await fetch(url, {
     method: 'GET',
-    headers: {
-      Authorization: `Token ${oAuthToken}`,
-    },
+    headers: apiHeader,
   });
 
   const repositories = await response.json();
@@ -721,7 +744,7 @@ async function getRepos(username) {
  * Creates graph of contribitions with API's
  */
 function getApis(username) {
-  const url = chrome.runtime.getURL('result.json');
+  const url = chrome.runtime.getURL('data/result.json');
 
   fetch(url)
     .then((response) => response.json())
@@ -765,7 +788,7 @@ function createApiGraph(userData, username) {
 }
 
 /**
- * Function createNewBarGraph
+ * Function name: createNewBarGraph
  * @param {string} container - container to append new chart
  * @param {string} graphTitle - title of graph
  * @param {[string]} graphLabels - labels for each bar in graph

@@ -3,7 +3,7 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="UTF-8" />
-    <link rel="stylesheet" type="text/css" href="overview_page.css" />
+    <link rel="stylesheet" type="text/css" href="../styles/overview_page.css" />
   </head>
   <body>
     <div class="position-relative js-header-wrapper">
@@ -436,7 +436,10 @@
             </div>
           </div>
 
-          <nav class="d-flex" aria-label="Global">
+          <nav
+            class="d-flex flex-column flex-md-row flex-self-stretch flex-md-self-auto"
+            aria-label="Global"
+          >
             <a
               class="js-selected-navigation-item Header-link py-md-3 mr-3"
               data-hotkey="g p"
@@ -458,18 +461,16 @@
               Issues
             </a>
 
-            <div class="mr-3">
-              <a
-                class="js-selected-navigation-item Header-link py-md-3 d-inline-block"
-                data-ga-click="Header, click, Nav menu - item:marketplace context:user"
-                data-octo-click="marketplace_click"
-                data-octo-dimensions="location:nav_bar"
-                data-selected-links=" /marketplace"
-                href="/marketplace"
-              >
-                Marketplace
-              </a>
-            </div>
+            <a
+              class="js-selected-navigation-item Header-link py-md-3 mr-3 d-inline-block"
+              data-ga-click="Header, click, Nav menu - item:marketplace context:user"
+              data-octo-click="marketplace_click"
+              data-octo-dimensions="location:nav_bar"
+              data-selected-links=" /marketplace"
+              href="/marketplace"
+            >
+              Marketplace
+            </a>
 
             <a
               class="js-selected-navigation-item Header-link py-md-3 mr-3"
@@ -517,7 +518,7 @@
           </notification-indicator>
         </div>
 
-        <div class="Header-item position-relative">
+        <div class="Header-item position-relative" id="display-none-before">
           <details class="details-overlay details-reset">
             <summary
               class="Header-link"
@@ -603,11 +604,12 @@
               role="button"
             >
               <img
-                alt="@zachspiel"
+                alt="@user"
                 width="20"
                 height="20"
-                src="https://avatars3.githubusercontent.com/u/20634543?s=60&amp;v=4"
+                src=""
                 class="avatar avatar-user"
+                id="profile-image"
               />
 
               <span
@@ -628,7 +630,8 @@
                   class="no-underline user-profile-link px-3 pt-2 pb-2 mb-n2 mt-n1 d-block"
                   href="/zachspiel"
                   data-ga-click="Header, go to profile, text:Signed in as"
-                  >Signed in as <strong class="css-truncate-target">zachspiel</strong></a
+                  >Signed in as
+                  <strong class="css-truncate-target" id="github-username">zachspiel</strong></a
                 >
               </div>
               <div role="none" class="dropdown-divider"></div>
@@ -1239,12 +1242,17 @@
       </svg>
       <div id="modalContainer" class="modal">
         <div class="modal-content">
+          <p id="repo-name" class="card-title"></p>
+          <span class="close">&times;</span>
           <div
             class="mt-4 position-sticky top-0 d-md-block bg-white width-full border-bottom"
             style="z-index: 3;"
           >
-            <div class="container-xl px-3 px-md-4 px-lg-5">
-              <div class="gutter-condensed gutter-lg flex-column flex-md-row d-flex">
+            <div class="container-xl px-3 px-md-4 px-lg-5" style="display: flex;">
+              <div
+                class="gutter-condensed gutter-lg flex-column flex-md-row d-flex"
+                style="margin-right: auto; margin-left: auto;"
+              >
                 <div class="flex-shrink-0 col-12 col-md-9 mb-4 mb-md-0">
                   <div class="UnderlineNav width-full box-shadow-none">
                     <nav class="UnderlineNav-body" data-pjax="" aria-label="User profile">
@@ -1287,11 +1295,9 @@
               </div>
             </div>
           </div>
-          <span class="close">&times;</span>
-          <p id="list-title">
-            Commit Message Titles For: <span id="current-repository"></span>
-            <span class="createdAtTime"></span>
-          </p>
+
+          <p id="list-title"></p>
+          <p class="timeStamp"></p>
         </div>
       </div>
     </div>
@@ -1337,11 +1343,11 @@
           href="https://github.com"
         >
           <svg
-            height="24"
-            class="octicon octicon-mark-github"
+            height="32"
+            class="octicon"
             viewBox="0 0 16 16"
             version="1.1"
-            width="24"
+            width="32"
             aria-hidden="true"
           >
             <path
