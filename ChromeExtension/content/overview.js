@@ -64,22 +64,6 @@ window.onload = async () => {
   getRepos(githubUsername);
 };
 
-document.body.onclick = async (event) => {
-  const gitHubUser = await getGitHubUsername();
-
-  if (event.target.getAttribute('class') === 'label') {
-    const FIRST_PAGE = 1;
-    getAllCommitMessages(event.srcElement.id, gitHubUser, FIRST_PAGE);
-    updateTotalIssues(event.srcElement.id, gitHubUser, FIRST_PAGE);
-  }
-};
-
-document.getElementsByClassName('close')[0].onclick = () => {
-  document.getElementById('modalContainer').style.display = 'none';
-  document.querySelectorAll('.message-title').forEach((element) => element.remove());
-  document.getElementById('repo-name').innerHTML = '';
-};
-
 /**
  * Function name: createCompleteOverview
  * @param {JSON} userData - JSON result of all repositories for the user
@@ -170,20 +154,9 @@ function sortArrayInDescendingOrder(array) {
  * Uses GitHub API to view programming languages for user
  */
 async function getRepos(username) {
-  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
-
-  const apiHeaders = {
-    Authorization: `Token ${oAuthToken}`,
-  };
-
   const url = `https://api.github.com/users/${username}/repos`;
 
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: apiHeaders,
-  });
-
-  const result = await response.json();
+  const result = await parseGithubUrl(url);
 
   const repositoriesCreated = await createCompleteOverview(result, username);
 
@@ -202,20 +175,9 @@ async function getRepos(username) {
 async function getAllCommits(repositoryName, username, page) {
   const MAX_PAGES = 25;
 
-  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
-
-  const apiHeaders = {
-    Authorization: `Token ${oAuthToken}`,
-  };
-
   const commitUrl = `https://api.github.com/repos/${username}/${repositoryName}/commits?page=${page}&per_page=100`;
 
-  const commitResponse = await fetch(commitUrl, {
-    method: 'GET',
-    headers: apiHeaders,
-  });
-
-  const commitResult = await commitResponse.json();
+  const commitResult = await parseGithubUrl(commitUrl);
 
   let totalCommits = commitResult.length;
 
@@ -227,6 +189,28 @@ async function getAllCommits(repositoryName, username, page) {
 }
 
 /**
+ * Function Name: parseGithubUrl
+ * @param {string} apiUrl
+ * Gets api url and returns json from GitHub
+ */
+async function parseGithubUrl(apiUrl) {
+  const oAuthToken = '91994454ec657214a0b6f969d3fc4ea7271a1f6a';
+
+  const apiHeaders = {
+    Authorization: `Token ${oAuthToken}`,
+  };
+
+  const apiResponse = await fetch(apiUrl, {
+    method: 'GET',
+    headers: apiHeaders,
+  });
+
+  const apiResult = await apiResponse.json();
+
+  return apiResult;
+}
+
+/**
  * Function name: getAllCommitMessages
  * @param {string} repositoryName - GitHub repository
  * @param {string} username - GitHub username
@@ -235,20 +219,9 @@ async function getAllCommits(repositoryName, username, page) {
 async function getAllCommitMessages(repository, username, page) {
   const MAX_PAGES = 15;
 
-  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
-
-  const apiHeaders = {
-    Authorization: `Token ${oAuthToken}`,
-  };
-
   const commitsUrl = `https://api.github.com/repos/${username}/${repository}/commits?page=${page}&per_page=100`;
 
-  const result = await fetch(commitsUrl, {
-    method: 'GET',
-    headers: apiHeaders,
-  });
-
-  const commits = await result.json();
+  const commits = await parseGithubUrl(commitsUrl);
 
   document.getElementById(
     'repo-name'
@@ -280,12 +253,18 @@ async function getAllCommitMessages(repository, username, page) {
  * @param {int} page - current page
  * Updates the total issue count in modal
  */
-async function updateTotalIssues(repository, username, page) {
+async function updateRepositoryCounters(repository, username, page) {
   const totalIssues = await getTotalIssues(repository, username, page);
 
-  const counterLink = document.getElementsByClassName('Counter')[0];
+  const issueCounter = document.getElementById('issuesCounter');
 
-  counterLink.innerHTML = totalIssues;
+  issueCounter.innerHTML = totalIssues;
+
+  const totalCommits = await getTotalCommits(repository, username, page);
+
+  const commitCounter = document.getElementById('commitsCounter');
+
+  commitCounter.innerHTML = totalCommits;
 }
 
 /**
@@ -296,22 +275,33 @@ async function updateTotalIssues(repository, username, page) {
  * Finds all issues in repository and returns total
  */
 async function getTotalIssues(repository, username, page) {
-  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
-
-  const apiHeaders = {
-    Authorization: `Token ${oAuthToken}`,
-  };
-
   const issuesUrl = `https://api.github.com/repos/${username}/${repository}/issues?page=${page}&per_page=100`;
 
-  const result = await fetch(issuesUrl, {
-    method: 'GET',
-    headers: apiHeaders,
-  });
-
-  const issues = await result.json();
+  const issues = await parseGithubUrl(issuesUrl);
 
   return issues.length;
+}
+
+/**
+ * Function name: getTotalCommits
+ * @param {string} repository - repository name
+ * @param {string} username - GitHub username
+ * @param {int} page - curent page
+ * Finds all commits in repository and returns total
+ */
+async function getTotalCommits(repository, username, page) {
+  const commitsUrl = `https://api.github.com/repos/${username}/${repository}/commits?page=${page}&per_page=100`;
+
+  const commits = await parseGithubUrl(commitsUrl);
+
+  let total = commits.length;
+  const MAX_PAGE = 25;
+
+  if (page < MAX_PAGE && total % 100 === 0) {
+    total += await getTotalCommits(repository, username, page + 1);
+  }
+
+  return total;
 }
 
 /**
@@ -320,7 +310,7 @@ async function getTotalIssues(repository, username, page) {
  * @param {string} createdDate
  * Appends new commit message to modal
  */
-async function updateModal(message, createdDate, commitLink) {
+async function updateRepositoryModal(message, createdDate, commitLink) {
   const username = await getGitHubUsername();
 
   const profileImage = await retrieveProfileImage(username);
@@ -365,24 +355,13 @@ async function getLanguageColor(language) {
  * @param {int} page - current page
  */
 async function getAllIssues(repository, username, page) {
-  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
-
-  const apiHeaders = {
-    Authorization: `Token ${oAuthToken}`,
-  };
-
   const issuesUrl = `https://api.github.com/repos/${username}/${repository}/issues?page=${page}&per_page=100`;
 
-  const result = await fetch(issuesUrl, {
-    method: 'GET',
-    headers: apiHeaders,
-  });
-
-  const issues = await result.json();
+  const issues = await parseGithubUrl(issuesUrl);
 
   issues.forEach((issue) => {
     if (issue.user.login !== null && issue.user.login === username) {
-      updateModal(issue.title, issue.created_at, issue.html_url);
+      updateRepositoryModal(issue.title, issue.created_at, issue.html_url);
     }
   });
 
@@ -397,22 +376,27 @@ async function getAllIssues(repository, username, page) {
  * Returns url for profile image
  */
 async function retrieveProfileImage(username) {
-  const oAuthToken = '';
-
-  const apiHeaders = {
-    Authorization: `Token ${oAuthToken}`,
-  };
-
   const profileUrl = `https://api.github.com/users/${username}`;
 
-  const result = await fetch(profileUrl, {
-    method: 'GET',
-    headers: apiHeaders,
-  });
-
-  const userProfile = await result.json();
+  const userProfile = await parseGithubUrl(profileUrl);
 
   return userProfile.avatar_url;
+}
+
+/**
+ * Function name: getGitHubUsername
+ * Returns username from GitHub stored in browser
+ */
+async function getGitHubUsername() {
+  const localUsername = new Promise((resolve) => {
+    chrome.storage.sync.get('username', (result) => {
+      resolve(result.username);
+    });
+  });
+
+  const username = await localUsername;
+
+  return username;
 }
 
 $('#repo-issues-link').click(async () => {
@@ -449,18 +433,19 @@ $('#commit-messages-link').click(async () => {
   }
 });
 
-/**
- * Function name: getGitHubUsername
- * Returns username from GitHub stored in browser
- */
-async function getGitHubUsername() {
-  const localUsername = new Promise((resolve) => {
-    chrome.storage.sync.get('username', (result) => {
-      resolve(result.username);
-    });
-  });
+document.body.onclick = async (event) => {
+  const gitHubUser = await getGitHubUsername();
 
-  const username = await localUsername;
+  if (event.target.getAttribute('class') === 'label') {
+    const FIRST_PAGE = 1;
+    const repositoryName = event.srcElement.id;
+    getAllCommitMessages(repositoryName, gitHubUser, FIRST_PAGE);
+    updateRepositoryCounters(repositoryName, gitHubUser, FIRST_PAGE);
+  }
+};
 
-  return username;
-}
+document.getElementsByClassName('close')[0].onclick = () => {
+  document.getElementById('modalContainer').style.display = 'none';
+  document.querySelectorAll('.message-title').forEach((element) => element.remove());
+  document.getElementById('repo-name').innerHTML = '';
+};

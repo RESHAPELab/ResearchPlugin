@@ -1,4 +1,4 @@
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener((tabId) => {
   chrome.tabs.sendMessage(tabId, {
     type: 'CHECK_URL',
   });
@@ -14,7 +14,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
  * @param {string} sendResponse
  * Responds to changes in content script
  */
-function handleMessage(msg, sender, sendResponse) {
+function handleMessage(msg) {
   if (msg.type === 'OPEN_COMPLETE_OVERVIEW') {
     chrome.tabs.create({ url: chrome.runtime.getURL('content/overview.html') });
   }

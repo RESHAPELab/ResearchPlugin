@@ -232,21 +232,6 @@
   perspective: 75rem;
 }
 
-.link-row {
-  color: #000;
-  display: block;
-  text-transform: capitalize;
-}
-
-.complete-list-link {
-  color: blue;
-  text-decoration: underline;
-}
-
-.complete-list-link:hover {
-  cursor: pointer;
-}
-
 .graph {
   width: 50% !important;
   height: 50% !important;
@@ -317,4 +302,57 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
+}
+
+#houseImage {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+  margin-right: 6px;
+}
+
+.avatar-user:hover {
+  -o-transition: 0.5s;
+  -ms-transition: 0.5s;
+  -moz-transition: 0.5s;
+  -webkit-transition: 0.5s;
+  transition: 0.2s;
+  box-shadow: 7px 7px 5px #888888;
+}
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
 }

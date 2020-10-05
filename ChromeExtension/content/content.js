@@ -1,16 +1,6 @@
 let injected = false;
 
-window.onload = async () => {
-  const currentPageUrl = document.location.pathname;
-
-  if (!injected) {
-    injected = true;
-
-    checkUrl(currentPageUrl);
-  }
-};
-
-class ToolTipIcon {
+class ToolTip {
   constructor(toolTipElement, toolTipClass, toolTipText, gitHubElement) {
     this.toolTipElement = toolTipElement;
     this.toolTipClass = toolTipClass;
@@ -23,40 +13,62 @@ class ToolTipIcon {
     toolTipContainer.className = this.toolTipClass;
 
     toolTipContainer.innerHTML = `<span class="helpIconCircle">?</span>
-                                  <span class="helpIconText">${this.toolTipText}</span>`;
+                                    <span class="helpIconText">${this.toolTipText}</span>`;
 
     this.toolTipElement = toolTipContainer;
   }
+
+  insertIconBeforeElement() {
+    $(this.toolTipElement).insertBefore(this.gitHubElement);
+  }
+
+  insertIconAfterElement() {
+    $(this.toolTipElement).insertAfter(this.gitHubElement);
+  }
 }
+
+window.onload = () => {
+  const currentPageUrl = document.location.pathname;
+
+  if (!injected) {
+    injected = true;
+
+    checkUrl(currentPageUrl);
+  }
+};
 
 /**
  * Function name: checkUrl
  * Checks the windows current URL to determine which tooltips to display
  */
 function checkUrl(currentUrl) {
-  // check if the user wants to edit a file that they are not an owner of
-  if (checkIsEditingForkedFile()) {
-    createForkedFileToolTips();
-  } else if (currentUrl.includes('/edit/')) {
-    createFileEditorToolTips();
-  } else if (currentUrl.includes('/compare/')) {
-    createConfirmPullRequestToolTips();
-  }
-  // if the user is reviewing a pull request
-  else if (currentUrl.includes('/pull/')) {
-    createReviewPullRequestToolTips();
-  }
-  // if the user is opening a pull request
-  else if (document.getElementsByClassName('h-card').length !== 0) {
-    updateProfileCard();
-  }
-  // if the user is creating a new issue
-  else if (currentUrl.includes('/issues/new')) {
-    createReportIssueToolTips();
-  } else if (currentUrl.includes('/issues/')) {
-    createReviewIssueToolTips();
-  } else {
-    // do nothing
+  const urlArray = [
+    {
+      name: '/edit/',
+      runFunction: createFileEditorToolTips,
+    },
+    {
+      name: '/compare/',
+      runFunction: createConfirmPullRequestToolTips,
+    },
+    {
+      name: '/pull/',
+      runFunction: createReviewPullRequestToolTips,
+    },
+    {
+      name: '/upload/',
+      runFunction: updateUploadPage,
+    },
+  ];
+
+  try {
+    const foundUrl = urlArray.find((object) => currentUrl.includes(object.name));
+
+    foundUrl.runFunction();
+  } catch (error) {
+    if (document.getElementsByClassName('h-card').length !== 0) {
+      updateProfileCard();
+    }
   }
 }
 
@@ -85,7 +97,6 @@ function checkIsEditingForkedFile() {
     const pencilIconLabel = document
       .getElementsByClassName('tooltipped')[2]
       .getAttribute('aria-label');
-
     // check if there is a pencil icon with this aria label
     return pencilIconLabelsList.includes(pencilIconLabel);
   } catch (error) {
@@ -95,7 +106,7 @@ function checkIsEditingForkedFile() {
 
 /**
  * Function name: createForkedFileToolTips
- * Edits tooltips when viewing a repository that you are not a contributor of
+ * Edits pencil label when viewing a file in a repository that you are not a contributor of
  */
 function createForkedFileToolTips() {
   $('.tooltipped-nw:nth-child(2)').attr('aria-label', 'Edit File');
@@ -204,76 +215,84 @@ function createFileEditorToolTips() {
   }
 
   // icon to right of file name input
-  const fileNameChangeText =
+  const fileNameChangeIconText =
     'This is the file name, changing it will create a new file with the new name.';
 
   const breadCrumbDiv = '.d-md-inline-block';
 
-  const fileNameChangeIcon = new ToolTipIcon('H4', 'helpIcon', fileNameChangeText, breadCrumbDiv);
+  const fileNameChangeIcon = new ToolTip('H4', 'helpIcon', fileNameChangeIconText, breadCrumbDiv);
 
   fileNameChangeIcon.createIcon();
+  fileNameChangeIcon.insertIconAfterElement();
 
-  $(fileNameChangeIcon.toolTipElement).insertAfter(fileNameChangeIcon.gitHubElement);
-
-  // banner above commit message input
-  const commitTitleText =
-    'This is the title of the pull request. Give a brief description of the change. Be short and objective.';
-
+  // text next to commit title input
   const inputTitleLabel = document.createElement('h3');
   inputTitleLabel.innerHTML = 'Insert a title here';
   inputTitleLabel.className = 'label-margin-right';
 
   $(inputTitleLabel).insertBefore('#commit-summary-input');
 
-  const commitMessageIcon = new ToolTipIcon(
+  // icon next to commit title input
+  const commitMessageIconText =
+    'This is the title of the pull request. Give a brief description of the change. Be short and objective.';
+
+  const commitMessageIcon = new ToolTip(
     'H4',
     'helpIcon',
-    commitTitleText,
+    commitMessageIconText,
     '#commit-summary-input'
   );
 
   commitMessageIcon.createIcon();
+  commitMessageIcon.insertIconAfterElement();
 
-  $(commitMessageIcon.toolTipElement).insertAfter('#commit-summary-input');
-
-  const descriptionText =
-    'Add a more detailed description of the pull request if needed. Here you can present your arguments and reasoning that lead to change.';
-
+  // text next to commit description input
   const inputDescriptionLabel = document.createElement('h3');
   inputDescriptionLabel.innerHTML = 'Insert a <br> description here';
   inputDescriptionLabel.className = 'label-margin-right';
 
   $(inputDescriptionLabel).insertBefore('#commit-description-textarea');
 
-  const extendedDescIcon = new ToolTipIcon(
+  // icon next to commit description input
+  const extendedDescIconText =
+    'Add a more detailed description of the pull request if needed. Here you can present your arguments and reasoning that lead to change.';
+
+  const extendedDescIcon = new ToolTip(
     'H4',
     'helpIcon',
-    descriptionText,
+    extendedDescIconText,
     '#commit-description-textarea'
   );
 
   extendedDescIcon.createIcon();
+  extendedDescIcon.insertIconAfterElement();
 
-  $(extendedDescIcon.toolTipElement).insertAfter(extendedDescIcon.gitHubElement);
-
-  let commitChangesText =
+  // icon next to commit and cancel buttons
+  let submitChangesIconText =
     'By clicking the Commit Changes button the changes will automatically be pushed to the repo';
 
   const buttonText = document.getElementsByClassName('btn-primary')[1].innerText;
 
   if (buttonText === 'Propose changes') {
-    commitChangesText =
+    submitChangesIconText =
       'By clicking the Propose changes button you will start the pull request submission process. You will have the chance to check your changes before finalizing it.';
   }
 
-  const submitChangesIcon = new ToolTipIcon('H4', 'helpIcon', commitChangesText, '#submit-file');
+  const submitChangesIcon = new ToolTip('H4', 'helpIcon', submitChangesIconText, '#submit-file');
 
   submitChangesIcon.createIcon();
-
   submitChangesIcon.toolTipElement.style.marginRight = '20px';
-
-  $(submitChangesIcon.toolTipElement).insertBefore(submitChangesIcon.gitHubElement);
+  submitChangesIcon.insertIconBeforeElement();
 }
+
+/**
+ * Custom jQuery function to toggle text
+ */
+$.fn.extend({
+  toggleText(firstElement, secondElement) {
+    return this.text(this.text() === secondElement ? firstElement : secondElement);
+  },
+});
 
 $('input[name="commit-choice"]').click(() => {
   const pullChangesText =
@@ -286,15 +305,6 @@ $('input[name="commit-choice"]').click(() => {
 });
 
 /**
- * Custom jQuery function to toggle text
- */
-$.fn.extend({
-  toggleText: function (a, b) {
-    return this.text(this.text() === b ? a : b);
-  },
-});
-
-/**
  * Function name: createConfirmPullRequestToolTips
  * Creates tooltips when confirming a change to file (Second step)
  */
@@ -303,52 +313,44 @@ function createConfirmPullRequestToolTips() {
 
   addProgressBar(2, 3, '.repository-content', steps);
 
-  $('#pull_request_body').attr(
-    'placeholder',
-    'You can add a more detailed description of the pull request here if needed.'
-  );
+  // change placeholder of pull request comment input
+  const newPullRequestPlaceHolderText =
+    'You can add a more detailed description of the pull request here if needed.';
 
-  let branchName = '';
+  $('#pull_request_body').attr('placeholder', newPullRequestPlaceHolderText);
+
   let isComparingBranch = false;
-  try {
-    branchName = document.getElementsByClassName('branch-name')[0].innerText;
-  } catch (error) {
+
+  if (document.getElementsByClassName('branch-name').length > 0) {
     isComparingBranch = true;
   }
 
-  let newHeaderText = `Finish the pull request submission below to allow others to accept the changes. These changes can be viewed later under the branch name:
-    ${branchName}`;
-
+  // change header of different element when comparing a branch pull request
   if (isComparingBranch) {
-    newHeaderText =
-      'Finish the pull request submission below to allow others to accept the changes';
-
     $('.Subhead-heading').text('Create Pull Request');
   }
 
-  $('.Subhead-description').text(newHeaderText);
-
+  // change header in top of editor
   const pullRequestTitle = document.getElementsByClassName('Subhead-heading')[1];
   pullRequestTitle.innerHTML = 'Create pull request';
 
-  const branchContainerText =
-    'This represents the origin and destination of your pull request. If you are not sure, leave it how it is, this is common for small changes.';
-
+  // adjust width of navbar for new icon element
   const topRibbon = document.getElementsByClassName('js-range-editor')[0];
   topRibbon.style.width = '93%';
   topRibbon.style.display = 'inline-block';
 
   // icon next to current branch and new pull request branch name
-  const currentBranchIcon = new ToolTipIcon(
+  const currentBranchIconIconText =
+    'This represents the origin and destination of your pull request.';
+  const currentBranchIcon = new ToolTip(
     'H4',
     'helpIcon',
-    branchContainerText,
-    '.js-range-editor'
+    currentBranchIconIconText,
+    '.js-range-editor:eq(0)'
   );
 
   currentBranchIcon.createIcon();
-
-  $(currentBranchIcon.toolTipElement).insertAfter(currentBranchIcon.gitHubElement);
+  currentBranchIcon.insertIconAfterElement();
 
   // move button row to left side of editor
   if (!isComparingBranch) {
@@ -357,27 +359,21 @@ function createConfirmPullRequestToolTips() {
     buttonRow.classList.add('flex-justify-start');
   }
 
-  const confirmPullRequestText =
+  // icon next to create pull request button
+  const createPullRequestButtonIconText =
     'By clicking this button you will create the pull request to allow others to view your changes and accept them into the repository.';
 
   const submitButtonClass = '.js-pull-request-button';
 
-  // icon next to create pull request button
-  const createPullRequestBtn = new ToolTipIcon(
+  const createPullRequestButtonIcon = new ToolTip(
     'H4',
     'helpIcon',
-    confirmPullRequestText,
+    createPullRequestButtonIconText,
     submitButtonClass
   );
 
-  createPullRequestBtn.createIcon();
-
-  $(createPullRequestBtn.toolTipElement).insertAfter(createPullRequestBtn.gitHubElement);
-
-  const summaryText =
-    'This shows the amount of commits in the pull request, the amount of files you changed in the pull request, how many comments were on the commits for the pull request and the ammount of people who worked together on this pull request.';
-
-  const summaryClass = '.overall-summary';
+  createPullRequestButtonIcon.createIcon();
+  createPullRequestButtonIcon.insertIconAfterElement();
 
   // override the container width and display to add icon
   const numbersSummaryContainer = document.getElementsByClassName('files-bucket')[0];
@@ -385,169 +381,112 @@ function createConfirmPullRequestToolTips() {
   numbersSummaryContainer.style.display = 'inline-block';
 
   // icon above summary of changes and commits
-  const requestSummaryIcon = new ToolTipIcon('H4', 'helpIcon', summaryText, summaryClass);
+
+  const requestSummaryIconText =
+    'This shows the amount of commits in the pull request, the amount of files you changed in the pull request, how many comments were on the commits for the pull request and the ammount of people who worked together on this pull request.';
+
+  const summaryClass = '.overall-summary';
+
+  const requestSummaryIcon = new ToolTip('H4', 'helpIcon', requestSummaryIconText, summaryClass);
 
   requestSummaryIcon.createIcon();
-
   requestSummaryIcon.toolTipElement.style = 'float:right;';
+  requestSummaryIcon.insertIconAfterElement();
 
-  $(requestSummaryIcon.toolTipElement).insertAfter(requestSummaryIcon.gitHubElement);
-
-  const comparisonClass = '.details-collapse';
-
-  const changesText =
-    'This shows the changes between the orginal file and your version. Green(+) represents lines added. Red(-) represents removed lines';
-
-  // icon above container for changes in current pull request
-  const comparisonIcon = new ToolTipIcon('H4', 'helpIcon', changesText, comparisonClass);
-
-  comparisonIcon.createIcon();
-
+  // adjust width of github container for new icon element
   const commitSummaryContainer = document.getElementsByClassName('details-collapse')[0];
 
   commitSummaryContainer.style.width = '93%';
   commitSummaryContainer.style.display = 'inline-block';
 
-  $(comparisonIcon.toolTipElement).insertAfter(comparisonIcon.gitHubElement);
+  // icon above container for changes in current pull request
+  const comparisonIconText =
+    'This shows the changes between the orginal file and your version. Green(+) represents lines added. Red(-) represents removed lines';
 
-  setTimeout(changeMergeText, 2500);
+  const comparisonClass = '.details-collapse';
+
+  const comparisonIcon = new ToolTip('H4', 'helpIcon', comparisonIconText, comparisonClass);
+
+  comparisonIcon.createIcon();
+
+  comparisonIcon.insertIconAfterElement();
 }
 
-/**
- * Function name: changeMergeText
- * Updates text when there is a merge conflict in a pull request
- */
-function changeMergeText() {
-  let canMerge = false;
-  try {
-    document.getElementsByClassName('text-red')[0].innerText;
-  } catch (error) {
-    // if the 'text-red' element does not exist, then the pull request can be merged automatically
-    canMerge = true;
-  }
-
-  if (!canMerge) {
-    $('.pre-mergability').html(
-      "<strong class='text-red'>There is a merge conflict, but this can be fixed by creating the pull request.</strong>Don't worry, the owner of the repository will fix this for you."
-    );
-  }
-}
 /**
  * Function name: createReviewPullRequestToolTips
  * Adds tooltips when reviewing a pull request (Final step)
  */
 function createReviewPullRequestToolTips() {
+  const BUTTONS_IN_REPO = 4;
+
   const steps = ['Edit File', 'Confirm Pull Request', 'Pull Request Opened'];
 
   addProgressBar(3, 3, '.gh-header-show', steps);
 
   const pullRequestName = document.getElementsByClassName('js-issue-title')[0].innerText;
 
-  const branchContainerText =
+  const pullRequestStatusIconText =
     'This indicates that the pull request is open meaning someone will get to it soon.';
-
-  const pullRequestStatusIcon = new ToolTipIcon(
+  const pullRequestStatusIcon = new ToolTip(
     'H4',
     'helpIcon',
-    branchContainerText,
+    pullRequestStatusIconText,
     '.gh-header-meta:nth-child(1)'
   );
 
   pullRequestStatusIcon.createIcon();
+  pullRequestStatusIcon.insertIconAfterElement();
 
-  $(pullRequestStatusIcon.toolTipElement).insertBefore(pullRequestStatusIcon.gitHubElement);
-
-  const requestButtonsText =
-    'This will close the pull request meaning people cannot view this! Do not click close unless the request was solved.';
-
-  const requestButtonsClass = '.js-comment-and-button';
-
-  const closePullRequestIcon = new ToolTipIcon(
+  const pullRequestNavIconText =
+    'Feel free to explore this menu, you can discuss with project contributors, see the commits made, check the review process and see the changes made in the file related to this pull request.';
+  const pullRequestNavIcon = new ToolTip(
     'H4',
     'helpIcon',
-    requestButtonsText,
-    requestButtonsClass
+    pullRequestNavIconText,
+    '.diffstat:eq(0)'
   );
 
-  closePullRequestIcon.createIcon();
+  pullRequestNavIcon.createIcon();
+  pullRequestNavIcon.insertIconBeforeElement();
 
-  $(closePullRequestIcon.toolTipElement).insertBefore(closePullRequestIcon.gitHubElement);
+  const contributorRequestIconText = `Use"&#64;" to mention a project contributor.`;
+  const contributorRequestIcon = new ToolTip(
+    'H4',
+    'helpIcon',
+    contributorRequestIconText,
+    '.tabnav-tabs:eq(2)'
+  );
 
-  closePullRequestIcon.toolTipElement.style.marginRight = '20px';
+  contributorRequestIcon.createIcon();
+  contributorRequestIcon.insertIconAfterElement();
+
+  // check if the close pull request and comment buttons are present in page
+  if ($('.form-actions > button').length === BUTTONS_IN_REPO) {
+    const closePullRequestIconText =
+      'This will close the pull request meaning people cannot view this! Do not click close unless the request was solved.';
+
+    const requestButtonsClass = '.bg-gray-light:eq(4)';
+
+    const closePullRequestIcon = new ToolTip(
+      'H4',
+      'helpIcon',
+      closePullRequestIconText,
+      requestButtonsClass
+    );
+
+    closePullRequestIcon.createIcon();
+
+    closePullRequestIcon.insertIconBeforeElement();
+
+    closePullRequestIcon.toolTipElement.style.marginRight = '20px';
+  }
 
   const submitButtons = document.getElementsByClassName('d-flex flex-justify-end')[0];
   submitButtons.classList.remove('flex-justify-end');
   submitButtons.classList.add('flex-justify-start');
 
-  $('.js-quick-submit-alternative').click((event) => {
+  $('button[name="comment_and_close"]').click((event) => {
     if (!confirm(`Are you sure that you want to close the pull request: ${pullRequestName}?`)) {
-      event.preventDefault();
-    }
-  });
-}
-
-/**
- * Function name: createReportIssueToolTips
- * Adds tooltips to page when opening a new issue report (First step)
- */
-function createReportIssueToolTips() {
-  const steps = ['Report Issue', 'Issue Submitted'];
-
-  // progress bar above editor
-  addProgressBar(1, 2, '.new_issue', steps);
-
-  $('.input-block').css({ width: '90%', display: 'inline-block' });
-
-  const iconTitleText = 'Enter a descriptive name of the issue report here. This is required';
-
-  const titleIcon = new ToolTipIcon('H4', 'helpIcon', iconTitleText, '.input-block');
-
-  titleIcon.createIcon();
-
-  $(titleIcon.toolTipElement).insertAfter(titleIcon.gitHubElement);
-
-  const submitButtonText =
-    'By clicking this, it will submit the issue to the owner of the repository';
-
-  const submitButtonClass = '.flex-justify-end button:eq(0)';
-
-  const submitButtonIcon = new ToolTipIcon('H4', 'helpIcon', submitButtonText, submitButtonClass);
-
-  submitButtonIcon.createIcon();
-
-  $(submitButtonIcon.toolTipElement).insertAfter(submitButtonIcon.gitHubElement);
-}
-
-/**
- * Function name: createReviewIssueToolTips
- * Adds tooltips to page when reviewing a new issue report (Final step)
- */
-function createReviewIssueToolTips() {
-  const issueTitle = document.getElementsByClassName('js-issue-title')[0].innerText;
-
-  const steps = ['Report Issue', 'Issue Submitted'];
-
-  addProgressBar(2, 2, '.repository-content', steps);
-
-  const buttonRow = document.getElementsByClassName('d-flex flex-justify-end')[0];
-  buttonRow.classList.remove('flex-justify-end');
-  buttonRow.classList.add('flex-justify-start');
-
-  const closeIssueIconText =
-    'This will close the issue request meaning people cannot view this! Do not click close unless the request was solved. ';
-
-  const closeButtonClass = '.flex-justify-end button:eq(0)';
-
-  const submitButtonIcon = new ToolTipIcon('H4', 'helpIcon', closeIssueIconText, closeButtonClass);
-
-  submitButtonIcon.createIcon();
-
-  submitButtonIcon.toolTipElement.style.marginRight = '20px';
-
-  $(submitButtonIcon.toolTipElement).insertBefore(submitButtonIcon.gitHubElement);
-
-  $('.js-quick-submit-alternative').click(function (event) {
-    if (!confirm(`Are you sure that you want to close the issue: ${issueTitle}?`)) {
       event.preventDefault();
     }
   });
@@ -564,27 +503,27 @@ function updateProfileCard() {
 
   const username = document.getElementsByClassName('vcard-username')[0].innerHTML;
 
-  createCardContainer();
+  try {
+    createCardContainer();
 
-  getRepos(username);
+    getRepos(username);
 
-  getApis(username);
+    getApis(username);
 
-  $(toggleButton).insertAfter('.contrib-footer ');
+    $(toggleButton).insertAfter('.contrib-footer ');
+  } catch (error) {
+    // do nothing
+  }
 
   $('.toggleBtn').click(() => {
-    if ($('.toggleBtn').text() === 'Show more information') {
-      $('.toggleBtn').text('X');
-      $('.toggleBtn').addClass('closeButton');
-      $('.toggleBtn').removeClass('btn-primary');
-      $('.toggleBtn').removeClass('ml-md-3');
-    } else {
-      $('.toggleBtn').text('Show more information');
-      $('.toggleBtn').removeClass('closeButton');
-      $('.toggleBtn').addClass('btn-primary');
-      $('.toggleBtn').addClass('ml-md-3');
-    }
+    $('.toggleBtn').toggleText('Show more information', 'X');
+
+    $('.toggleBtn').toggleClass('closeButton');
+    $('.toggleBtn').toggleClass('btn-primary');
+    $('.toggleBtn').toggleClass('ml-md-3');
+
     $('.back').toggleClass('hovered');
+
     $('#js-contribution-activity').toggleClass('hidden');
     $('#user-activity-overview').toggleClass('hidden');
   });
@@ -597,35 +536,35 @@ function updateProfileCard() {
 function createCardContainer() {
   const outerContainer = document.getElementsByClassName('graph-before-activity-overview')[0];
 
-  outerContainer.className += ' card-container';
+  try {
+    outerContainer.className += ' card-container';
 
-  const cardBack = document.createElement('div');
-  cardBack.className = 'back';
+    const cardBack = document.createElement('div');
+    cardBack.className = 'back';
 
-  cardBack.innerHTML = `<div class="link-row">
-                          <h4 id="test">View all information<span class="complete-list-link" id="overviewLink"> here</span></h4>
+    cardBack.innerHTML = `<div class="link-row">
+                          <button class="btn btn-primary btn-blck mb-3 complete-list-link">View all information here</button>
                         </div>
                         <canvas class="graph" id="myChart"></canvas>
                         <canvas class="graph" id="skillGraph"></canvas>
                         <canvas class="graph" id="commitsGraph"></canvas>
                         <canvas class="graph" id="languagesGraph"></canvas>`;
 
-  outerContainer.appendChild(cardBack);
-}
+    outerContainer.appendChild(cardBack);
+  } catch (error) {
+    throw new Error("Can't append new container");
+  }
 
-$(document).ready(() => {
-  $(document).click((event) => {
-    if (event.target.className === 'complete-list-link') {
-      const githubUsername = document.getElementsByClassName('vcard-username')[0].innerHTML;
+  $('.complete-list-link').click(() => {
+    const githubUsername = document.getElementsByClassName('vcard-username')[0].innerHTML;
 
-      chrome.storage.sync.set({ username: githubUsername });
+    chrome.storage.sync.set({ username: githubUsername });
 
-      chrome.runtime.sendMessage({
-        type: 'OPEN_COMPLETE_OVERVIEW',
-      });
-    }
+    chrome.runtime.sendMessage({
+      type: 'OPEN_COMPLETE_OVERVIEW',
+    });
   });
-});
+}
 
 /**
  * Function name: getCommits
@@ -634,8 +573,7 @@ $(document).ready(() => {
  */
 async function getCommits(repositories, username) {
   const skillGraphContainer = document.getElementById('skillGraph');
-
-  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
+  const oAuthToken = '91994454ec657214a0b6f969d3fc4ea7271a1f6a';
 
   const apiHeader = {
     Authorization: `Token ${oAuthToken}`,
@@ -689,7 +627,7 @@ async function getRepos(username) {
   const repositoryNames = [];
   const repositoriesObject = {};
 
-  const oAuthToken = '28db103714940724658ee37c92501fbfd7ec76a5';
+  const oAuthToken = '91994454ec657214a0b6f969d3fc4ea7271a1f6a';
 
   const apiHeader = {
     Authorization: `Token ${oAuthToken}`,
@@ -728,11 +666,7 @@ async function getRepos(username) {
   graphLabels = Object.keys(repositoriesObject);
   graphDataSet = Object.values(repositoriesObject);
 
-  // use b - a for desc order and a - b for asc order
-  graphLabels.sort((a, b) => {
-    return repositoriesObject[b] - repositoriesObject[a];
-  });
-
+  sortArrayInDescendingOrder(graphLabels);
   sortArrayInDescendingOrder(graphDataSet);
 
   createNewBarGraph(repoGraphContainer, graphTitle, graphLabels, graphDataSet);
@@ -791,24 +725,11 @@ function createApiGraph(userData, username) {
  * Function name: createNewBarGraph
  * @param {string} container - container to append new chart
  * @param {string} graphTitle - title of graph
- * @param {[string]} graphLabels - labels for each bar in graph
- * @param {[int]} graphData - data points for each bar in graph
+ * @param {string} graphLabels - labels for each bar in graph
+ * @param {int} graphData - data points for each bar in graph
+ * Creates new bar graph and appends to canvas in DOM
  */
 function createNewBarGraph(container, graphTitle, graphLabels, graphData) {
-  const colors = [
-    '#00498D',
-    '#01579B',
-    '#00498D',
-    '#0277BD',
-    '#0288D1',
-    '#039BE5',
-    '#03A9F4',
-    '#29B6F6',
-    '#4FC3F7',
-    '#81D4FA',
-    '#B3E5FC',
-  ];
-
   const barGraph = new Chart(container, {
     type: 'bar',
     data: {
@@ -816,7 +737,7 @@ function createNewBarGraph(container, graphTitle, graphLabels, graphData) {
       datasets: [
         {
           label: 'Commits',
-          backgroundColor: colors,
+          backgroundColor: 'rgb(64, 196, 99)',
           data: graphData,
         },
       ],
@@ -877,6 +798,90 @@ function createNewBarGraph(container, graphTitle, graphLabels, graphData) {
         },
       },
     },
+  });
+}
+
+/**
+ * Function name: updateUploadPage
+ * Updates page when uploading a file to a repository
+ */
+function updateUploadPage() {
+  if ($('.blankslate p:first').text() === 'File uploads require push access to this repository.') {
+    $('.blankslate p:first').text(
+      'In order to upload files, click the fork button on the upper right'
+    );
+
+    const forkRepoText = document.getElementsByClassName('px-4 py-2').textContent;
+
+    // Change the fork button to be green to let the user know they can fork the repo
+    if (forkRepoText !== `You've already forked ResearchPlugin`) {
+      $('.btn-with-count:eq(3)').addClass('btn-primary');
+    }
+  }
+  const commitTitleIcon = new ToolTip(
+    'H4',
+    'helpIcon',
+    'This is the title of the commit. Give a brief description of the change. Be short and objective.',
+    '.js-new-blob-commit-summary'
+  );
+
+  commitTitleIcon.createIcon();
+
+  $(commitTitleIcon.toolTipElement).insertAfter(commitTitleIcon.gitHubElement);
+
+  const commitDescription = new ToolTip(
+    'H4',
+    'helpIcon',
+    'Add a more detailed description of the commit if needed. Here you can describe the files uploaded.',
+    '.comment-form-textarea'
+  );
+
+  commitDescription.createIcon();
+
+  $(commitDescription.toolTipElement).insertAfter(commitDescription.gitHubElement);
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+
+  const modalContent = document.createElement('div');
+  modalContent.className = 'modal-content';
+  modalContent.innerHTML = `<span id="close-modal">&times;</span>
+                     <p>Are you sure you want to fork this repository?</p>
+                    <button id="confirm" class="btn btn-primary" type="submit">yes</button> 
+                    <button id="cancel" class="btn btn-danger">cancel</button>`;
+
+  modal.appendChild(modalContent);
+
+  $(modal).insertBefore('.js-header-wrapper');
+
+  $('.btn-link:eq(14)').attr('type', 'button');
+  $('.btn-link:eq(14)').attr('id', 'repoLink');
+
+  $('#repoLink').click(() => {
+    modal.style.display = 'block';
+  });
+
+  modal.style.display = 'block';
+
+  $('#close-modal').click(() => {
+    modal.style.display = 'none';
+  });
+
+  $('#cancel').click(() => {
+    modal.style.display = 'none';
+  });
+
+  chrome.storage.sync.set({ hasForked: true });
+
+  $('.button_to:eq(0)').text('testing');
+  $('.button_to:eq(0)').submit((event) => {
+    /* if (!confirm(`Are you sure that you want to fork this repository?`)) {
+      event.preventDefault();
+    } */
+    event.preventDefault();
+    confirm(`Are you sure that you want to fork this repository?`);
+
+    chrome.storage.sync.set({ hasForked: true });
   });
 }
 

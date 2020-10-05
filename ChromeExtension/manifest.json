@@ -1,0 +1,28 @@
+{
+  "name": "GitHub Tool Tips",
+  "version": "1",
+  "manifest_version": 2,
+  "description": "Helps newcomers navigate GitHub and successfully contribute to open source projects.",
+  "permissions": ["tabs", "activeTab", "webNavigation", "<all_urls>", "storage"],
+  "browser_action": {
+    "default_icon": "popup/icon.png",
+    "default_popup": "popup/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "css": ["styles/styles.css"],
+      "js": [
+        "libraries/jquery.min.js",
+        "libraries/Chart.bundle.js",
+        "content/content.js",
+        "content/repositoryLayout.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": ["background/background.js"]
+  },
+  "web_accessible_resources": ["*.json", "*.css", "images/house.png", "libraries/jquery.min.js"]
+}

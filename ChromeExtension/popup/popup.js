@@ -31,16 +31,13 @@ function iconPopUp() {
  * Toggles display for ribbon on page, if any
  */
 function ribbonPopUp(value) {
-  console.log(value);
   chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
     const activeTab = tabs[0];
     chrome.tabs.sendMessage(activeTab.id, { message: 'ribbon' });
   });
 }
 
-function buttonChanged(buttonName) {
-  console.log(buttonName);
-}
+function buttonChanged(buttonName) {}
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('iconBtn').checked = false;
