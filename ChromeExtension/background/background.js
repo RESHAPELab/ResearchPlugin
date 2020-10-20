@@ -7,11 +7,11 @@ chrome.tabs.onUpdated.addListener((tabId) => {
   });
 });
 
+chrome.runtime.onMessage.addListener(handleMessage);
+
 /**
  * Function name: handleMessage
  * @param {string} msg
- * @param {string} sender
- * @param {string} sendResponse
  * Responds to changes in content script
  */
 function handleMessage(msg) {
@@ -19,5 +19,3 @@ function handleMessage(msg) {
     chrome.tabs.create({ url: chrome.runtime.getURL('content/overview.html') });
   }
 }
-
-chrome.runtime.onMessage.addListener(handleMessage);

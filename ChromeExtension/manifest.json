@@ -1,9 +1,10 @@
 {
-  "name": "GitHub Tool Tips",
-  "version": "1",
+  "name": "NAU OSL Research Plugin",
+  "version": "1.0",
   "manifest_version": 2,
   "description": "Helps newcomers navigate GitHub and successfully contribute to open source projects.",
-  "permissions": ["tabs", "activeTab", "webNavigation", "<all_urls>", "storage"],
+  "author": "NAU OSL",
+  "permissions": ["tabs", "activeTab", "webNavigation", "storage"],
   "browser_action": {
     "default_icon": "popup/icon.png",
     "default_popup": "popup/index.html"
@@ -11,6 +12,9 @@
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
+      "exclude_matches":[
+        "https://github.com/search*"
+      ],
       "css": ["styles/styles.css"],
       "js": [
         "libraries/jquery.min.js",

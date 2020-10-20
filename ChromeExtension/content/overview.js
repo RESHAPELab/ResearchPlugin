@@ -194,7 +194,7 @@ async function getAllCommits(repositoryName, username, page) {
  * Gets api url and returns json from GitHub
  */
 async function parseGithubUrl(apiUrl) {
-  const oAuthToken = '91994454ec657214a0b6f969d3fc4ea7271a1f6a';
+  const oAuthToken = '32921960607cb6a5861f9e2f01d46b37e34238ee';
 
   const apiHeaders = {
     Authorization: `Token ${oAuthToken}`,

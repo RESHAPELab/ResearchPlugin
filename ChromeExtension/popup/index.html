@@ -17,7 +17,7 @@
 
     #header-row {
       overflow: hidden;
-      background-color: #24292e;
+      background-color: #003466;
       line-height: 1.5;
       color: hsla(0, 0%, 100%, 0.7);
       display: flex;
@@ -33,19 +33,12 @@
     .switch {
       position: relative;
       display: inline-block;
-      width: 60px;
+      width: 90px;
       height: 34px;
-      margin-left: 50px;
-    }
-
-    .buttonLabel {
-      display: inline-block;
     }
 
     .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
+      display: none;
     }
 
     .slider {
@@ -55,9 +48,10 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #ccc;
+      background-color: #ca2222;
       -webkit-transition: 0.4s;
       transition: 0.4s;
+      border-radius: 34px;
     }
 
     .slider:before {
@@ -70,64 +64,86 @@
       background-color: white;
       -webkit-transition: 0.4s;
       transition: 0.4s;
+      border-radius: 50%;
     }
 
     input:checked + .slider {
-      background-color: #2ea44f;
+      background-color: #2ab934;
     }
 
     input:focus + .slider {
-      box-shadow: 0 0 1px #2ea44f;
+      box-shadow: 0 0 1px #2196f3;
     }
 
     input:checked + .slider:before {
       -webkit-transform: translateX(26px);
       -ms-transform: translateX(26px);
-      transform: translateX(26px);
+      transform: translateX(55px);
     }
 
-    /* Rounded sliders */
-    .slider.round {
-      border-radius: 34px;
+    .slider:after {
+      content: 'OFF';
+      color: white;
+      display: block;
+      position: absolute;
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 50%;
+      font-size: 10px;
+      font-family: Verdana, sans-serif;
     }
 
-    .slider.round:before {
-      border-radius: 50%;
+    input:checked + .slider:after {
+      content: 'ON';
+    }
+
+    .toggle-row {
+      margin-top: 50px;
+    }
+
+    .row {
+      margin-top: 30%;
+    }
+
+    .toggle-row,
+    .row {
+      text-align: center;
+    }
+
+    .link {
+      text-decoration: none;
+      font-size: 16px;
+      color: #000000;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    #label {
+      vertical-align: top;
+      margin-right: 30px;
     }
   </style>
   <body>
     <div id="container">
       <div id="header-row">
-        <h2 id="main-header">GitHub Plugin Settings</h2>
+        <h2 id="main-header">NAU OSL Research Plugin</h2>
       </div>
     </div>
 
     <div class="toggle-row">
+      <label for="toggleButton" id="label">Toggle Extension</label>
       <label class="switch">
-        <input type="checkbox" id="iconBtn" checked />
-        <span class="slider round"></span>
+        <input type="checkbox" id="togBtn" name="toggleButton" checked />
+        <div class="slider round"></div>
       </label>
-      <h4 class="buttonLabel">Show Icons</h4>
     </div>
 
-    <div class="toggle-row">
-      <label class="switch">
-        <input type="checkbox" id="ribbonBtn" checked />
-        <span class="slider round"></span>
-      </label>
-      <h4 class="buttonLabel">Show Ribbons</h4>
+    <div class="row">
+      <a href="https://github.com/NAU-OSL/ResearchPlugin" class="link" target="_blank">GitHub</a>
     </div>
-
-    <div class="toggle-row">
-      <label class="switch">
-        <input type="checkbox" id="progressBarBtn" checked />
-        <span class="slider round"></span>
-      </label>
-      <h4 class="buttonLabel">Show Progress Bar</h4>
-    </div>
-
-    <a href="https://github.com/NAU-OSL/ResearchPlugin" target="_blank">GitHub</a>
-
+    <script src="../libraries/jquery.min.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

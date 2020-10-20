@@ -1,21 +1,25 @@
-try {
-  updateLink();
-
-  createHomePage();
-} catch (error) {
-  // do nothing
-}
-
 /**
  * Function name: updateLink
  * Updates id of code link in nav bar
  */
-function updateLink() {
+function updateCodeLink() {
   const codeNavLinkText = $('.js-selected-navigation-item:eq(4)').text().trim();
 
   if (codeNavLinkText === 'Code') {
     $('.js-selected-navigation-item:eq(4)').attr('id', 'codeLink');
   }
+
+  $('#codeLink').click((event) => {
+    const $currentLinkText = $('.selected:eq(0)').text().trim();
+
+    if ($currentLinkText === 'Home' || $currentLinkText === 'Code') {
+      event.preventDefault();
+    }
+
+    chrome.storage.sync.set({ activePage: 'code' });
+
+    createHomePage();
+  });
 }
 
 /**
@@ -25,18 +29,26 @@ function updateLink() {
 async function createHomePage() {
   createHomePageLink();
 
-  const hasForked = await checkForkStatus();
+  const currentPage = await getCurrentRepositoryPage();
+  const canUpdateHomePage = checkCurrentUrl();
 
-  if (hasForked) {
-    createForkedMessage();
+  const hasForked = await checkForkStatus();
+  const hasUploadedFile = await checkIfUploadedNewFile();
+
+  const forkedMessage = 'The repository was successfully forked';
+  const filesMessage = 'The files were successfully added';
+
+  if (hasForked && !document.location.pathname.includes('upload')) {
+    createNewMessage(forkedMessage);
+  } else if (hasUploadedFile && !document.location.pathname.includes('upload')) {
+    createNewMessage(filesMessage);
   }
 
-  const currentPage = await getCurrentRepositoryPage();
-
-  if (currentPage === 'home') {
+  if (currentPage === 'home' && canUpdateHomePage) {
     // toggle display for files in repo
-    const $filesContainer = $('.Box:eq(3)');
-    $filesContainer.addClass('hiddenDisplay');
+    const filesContainer = $('.Box:contains("commits")');
+
+    filesContainer.addClass('hiddenDisplay');
     $('.file-navigation:eq(0)').addClass('hiddenDisplay');
 
     $('.Details-content--hidden-not-important:eq(1)').removeClass('d-md-block');
@@ -49,7 +61,10 @@ async function createHomePage() {
     }
 
     $('.selected:eq(0)').removeClass('selected');
-    $('#homePage').addClass('selected');
+
+    if (canUpdateHomePage) {
+      $('#homePage').addClass('selected');
+    }
 
     $('#readme').removeClass('hiddenDisplay');
   } else if (currentPage === 'code') {
@@ -84,25 +99,72 @@ async function createHomePage() {
 
     $(readmeIcon.toolTipElement).insertAfter(readmeIcon.gitHubElement);
   }
+
+  const currentLink = $('.selected:eq(0)').text().trim();
+
+  if (currentLink === 'Code' && document.location.pathname.includes('/pull')) {
+    $('.selected:eq(0)').removeClass('selected');
+  }
 }
 
 /**
  * Function name: createForkedMessage
  * Creates green ribbon above files in repository after the repo has been forked
  */
-function createForkedMessage() {
+function createNewMessage(newMessageContent) {
   const successRibbonContainer = document.createElement('div');
   successRibbonContainer.className = 'successRibbon text-center';
 
-  const ribbonMessage = document.createTextNode(
-    `The repository was successfully forked, feel free to contribute and add new files`
-  );
+  const ribbonMessage = document.createTextNode(newMessageContent);
 
   successRibbonContainer.appendChild(ribbonMessage);
 
   $(successRibbonContainer).insertBefore('.Box:eq(3)');
 
-  chrome.storage.sync.set({ hasForked: false });
+  if (newMessageContent.includes('file')) {
+    chrome.storage.sync.set({ hasUploadedNewFile: false });
+  } else {
+    chrome.storage.sync.set({ hasForked: false });
+  }
+}
+
+/**
+ * Function name: createAccordionLayout
+ * Display files in repository inside an dropdown menu
+ */
+function createAccordionLayout() {
+  const canUpdateFiles = checkCurrentUrl();
+
+  try {
+    if (
+      canUpdateFiles &&
+      !document.location.pathname.includes('pull') &&
+      !document.location.pathname.includes('commits')
+    ) {
+      $('.Box-header:eq(2)').addClass('accordion');
+      $('.js-details-container:eq(2)').addClass('panel');
+
+      const filesContainer = $('.Box:contains("commits")');
+      filesContainer.removeClass('hiddenDisplay');
+
+      $('.file-navigation:eq(0)').removeClass('hiddenDisplay');
+
+      $('.Details-content--hidden-not-important:eq(1)').addClass('d-md-block');
+      $('.file-navigation:eq(0)').addClass('d-flex');
+
+      $('.selected:eq(0)').removeClass('selected');
+
+      $('#codeLink').addClass('selected');
+
+      $('#readme').addClass('hiddenDisplay');
+    }
+  } catch (error) {
+    // do nothing
+  }
+
+  $('.accordion').click(() => {
+    toggleAccordion();
+  });
 }
 
 /**
@@ -120,34 +182,17 @@ async function checkForkStatus() {
 }
 
 /**
- * Function name: createAccordionLayout
- * Display files in repository inside an dropdown menu
+ * Function name: checkIfUploadedNewFile
+ * Retrieves stored value to check if current repository was just forked
  */
-function createAccordionLayout() {
-  try {
-    $('.Box-header:eq(2)').addClass('accordion');
-    $('.js-details-container:eq(2)').addClass('panel');
-  } catch (error) {
-    // do nothing
-  }
+async function checkIfUploadedNewFile() {
+  const hasUploadedFile = new Promise((resolve) => {
+    chrome.storage.sync.get('hasUploadedNewFile', (result) => {
+      resolve(result.hasUploadedNewFile);
+    });
+  });
 
-  const $filesContainer = $('.Box:eq(3)');
-  $filesContainer.removeClass('hiddenDisplay');
-
-  $('.file-navigation:eq(0)').removeClass('hiddenDisplay');
-
-  $('.Details-content--hidden-not-important:eq(1)').addClass('d-md-block');
-  $('.file-navigation:eq(0)').addClass('d-flex');
-
-  $('.selected:eq(0)').removeClass('selected');
-
-  $('#codeLink').addClass('selected');
-  $('#readme').addClass('hiddenDisplay');
-
-  if (!document.location.pathname.includes('/upload/')) {
-    const accordion = document.getElementsByClassName('accordion')[0];
-    accordion.addEventListener('click', toggleAccordion);
-  }
+  return hasUploadedFile;
 }
 
 /**
@@ -192,31 +237,19 @@ function createHomePageLink() {
 
     $('.UnderlineNav-body').prepend(newNavLink);
   }
+
+  $('#homePage').click((event) => {
+    const currentLinkText = $('.selected:eq(0)').text().trim();
+
+    if (currentLinkText === 'Home' || currentLinkText === 'Code') {
+      event.preventDefault();
+    }
+
+    chrome.storage.sync.set({ activePage: 'home' });
+
+    createHomePage();
+  });
 }
-
-// global click listeners for home and code navbar links
-$('#homePage').click((event) => {
-  const currentLinkText = $('.selected:eq(0)').text().trim();
-  if (currentLinkText === 'Home' || currentLinkText === 'Code') {
-    event.preventDefault();
-  }
-
-  chrome.storage.sync.set({ activePage: 'home' });
-
-  createHomePage();
-});
-
-$('#codeLink').click((event) => {
-  const $currentLinkText = $('.selected:eq(0)').text().trim();
-
-  if ($currentLinkText === 'Home' || $currentLinkText === 'Code') {
-    event.preventDefault();
-  }
-
-  chrome.storage.sync.set({ activePage: 'code' });
-
-  createHomePage();
-});
 
 /**
  * Function name: getCurrentRepositoryPage
@@ -255,8 +288,21 @@ function updatePencilIcon() {
 }
 
 /**
+ * Function name: checkCurrentUrl
+ * Returns if current page is within a repository or not
+ */
+function checkCurrentUrl() {
+  return (
+    !document.location.pathname.includes('/blob/') &&
+    !document.location.pathname.includes('/pulls') &&
+    !document.location.pathname.includes('/issues')
+  );
+}
+
+/**
  * Listen to page changes from the background
  */
+
 chrome.runtime.onMessage.addListener((msg) => {
   const currentUrlPath = document.location.pathname;
 
@@ -265,6 +311,11 @@ chrome.runtime.onMessage.addListener((msg) => {
       updatePencilIcon();
     }
 
-    createHomePageLink();
+    try {
+      updateCodeLink();
+      createHomePage();
+    } catch (error) {
+      // do nothing
+    }
   }
 });
