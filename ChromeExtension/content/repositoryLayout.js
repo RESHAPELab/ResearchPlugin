@@ -28,7 +28,6 @@ function updateCodeLink() {
  */
 async function createHomePage() {
   createHomePageLink();
-
   const currentPage = await getCurrentRepositoryPage();
   const canUpdateHomePage = checkCurrentUrl();
 
@@ -37,16 +36,17 @@ async function createHomePage() {
 
   const forkedMessage = 'The repository was successfully forked';
   const filesMessage = 'The files were successfully added';
+  const filesContainer = $('.Box:contains("commits")');
 
-  if (hasForked && !document.location.pathname.includes('upload')) {
+  if (hasForked && !document.location.pathname.includes('upload') && filesContainer.length === 1) {
     createNewMessage(forkedMessage);
-  } else if (hasUploadedFile && !document.location.pathname.includes('upload')) {
+  }
+  if (hasUploadedFile && !document.location.pathname.includes('upload')) {
     createNewMessage(filesMessage);
   }
 
   if (currentPage === 'home' && canUpdateHomePage) {
     // toggle display for files in repo
-    const filesContainer = $('.Box:contains("commits")');
 
     filesContainer.addClass('hiddenDisplay');
     $('.file-navigation:eq(0)').addClass('hiddenDisplay');
@@ -87,7 +87,7 @@ async function createHomePage() {
 
   const totalIcons = $('.helpIcon').length;
 
-  if (totalIcons < 1 && currentPage === 'home') {
+  if (totalIcons < 1 && currentPage === 'home' && !document.location.pathname.includes('upload')) {
     const readmeIcon = new ToolTip(
       'H4',
       'helpIcon',
@@ -119,7 +119,7 @@ function createNewMessage(newMessageContent) {
 
   successRibbonContainer.appendChild(ribbonMessage);
 
-  $(successRibbonContainer).insertBefore('.Box:eq(3)');
+  $(successRibbonContainer).insertBefore('.Box:contains("commits")');
 
   if (newMessageContent.includes('file')) {
     chrome.storage.sync.set({ hasUploadedNewFile: false });
@@ -139,9 +139,11 @@ function createAccordionLayout() {
     if (
       canUpdateFiles &&
       !document.location.pathname.includes('pull') &&
-      !document.location.pathname.includes('commits')
+      !document.location.pathname.includes('commits') &&
+      !document.location.pathname.includes('tree')
     ) {
-      $('.Box-header:eq(2)').addClass('accordion');
+      // find the row with commit history information and update the css class to be an accordion
+      $('.Box:contains("commits") > .Box-header').addClass('accordion');
       $('.js-details-container:eq(2)').addClass('panel');
 
       const filesContainer = $('.Box:contains("commits")');
@@ -292,11 +294,8 @@ function updatePencilIcon() {
  * Returns if current page is within a repository or not
  */
 function checkCurrentUrl() {
-  return (
-    !document.location.pathname.includes('/blob/') &&
-    !document.location.pathname.includes('/pulls') &&
-    !document.location.pathname.includes('/issues')
-  );
+  const urls = ['/blob/', '/pull', '/issues', '/settings', '/actions'];
+  return !urls.includes(document.location.pathname);
 }
 
 /**

@@ -105,6 +105,7 @@
 .toggleBtn {
   z-index: 999;
 }
+
 /** Icon tooltip styles **/
 .helpIcon {
   position: relative;
@@ -122,7 +123,6 @@
   border-radius: 6px;
   padding: 5px;
   font-size: 14px !important;
-  /* Position the tooltip */
   position: absolute;
   z-index: 10;
   bottom: 150%;
@@ -270,6 +270,7 @@
   justify-content: center !important;
 }
 
+/* File accordion styles */
 .accordion {
   background-color: #eee;
   color: #444;
@@ -308,18 +309,10 @@
   transition: max-height 0.2s ease-out;
 }
 
+/* New Navbar option styles */
 #houseImage {
   width: 16px;
   height: 16px;
   opacity: 0.5;
   margin-right: 6px;
-}
-
-.avatar-user:hover {
-  -o-transition: 0.5s;
-  -ms-transition: 0.5s;
-  -moz-transition: 0.5s;
-  -webkit-transition: 0.5s;
-  transition: 0.2s;
-  box-shadow: 7px 7px 5px #888888;
 }

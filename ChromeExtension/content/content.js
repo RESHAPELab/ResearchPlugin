@@ -32,39 +32,7 @@ const plugin = {
   currentPageUrl: document.location.pathname,
   injectedContent: false,
   addedNewComment: false,
-  oAuthToken: '32921960607cb6a5861f9e2f01d46b37e34238ee',
-
-  /**
-   * Function name: checkCurrentBrowser
-   * Checks current browser to determine which browser api to use
-   */
-  currentBrowser: () => {
-    // Get the user-agent string
-    const userAgentString = navigator.userAgent;
-    const index = 0;
-
-    const browsers = {
-      chromeAgent: userAgentString.indexOf('Chrome') > -1,
-      IExplorerAgent: userAgentString.indexOf('MSIE') > -1 || userAgentString.indexOf('rv:') > -1,
-      firefoxAgent: userAgentString.indexOf('Firefox') > -1,
-      safariAgent: userAgentString.indexOf('Safari') > -1,
-      operaAgent: userAgentString.indexOf('OP') > -1,
-    };
-
-    // Discard Safari since it also matches Chrome
-    if (browsers.chromeAgent && browsers.safariAgent) browsers.safariAgent = false;
-
-    // Discard Chrome since it also matches Opera
-    if (browsers.chromeAgent && browsers.operaAgent) browsers.chromeAgent = false;
-
-    const browsersNames = Object.keys(browsers);
-
-    const filtered = browsersNames.filter((browser) => {
-      return browsers[browser];
-    });
-
-    return filtered[index];
-  },
+  oAuthToken: 'bad8ab76f664d3f0217b7e456d9239fba661e920',
 
   /**
    * Function name: checkUrl
@@ -98,7 +66,7 @@ const plugin = {
       const foundUrl = urlArray.find((object) => plugin.currentPageUrl.includes(object.name));
       foundUrl.runFunction();
     } catch (error) {
-      if (document.getElementsByClassName('h-card').length !== 0) {
+      if (document.getElementsByClassName('h-card').length !== 0 && !document.URL.includes('tab')) {
         updateProfileCard();
       }
     }
@@ -435,10 +403,12 @@ function createReviewPullRequestToolTips() {
     }
   });
 
-  $('button:contains("Comment")').click(() => {
+  $('.js-new-comment-form').submit((event) => {
+    event.preventDefault();
+
     chrome.storage.sync.set({ hasSubmittedMessage: true });
 
-    createSuccessRibbon();
+    window.location.reload();
   });
 }
 
@@ -555,37 +525,26 @@ async function createSuccessRibbon() {
 
   const hasSubmittedMessage = await checkIfMessageSubmitted();
 
-  if (document.location.pathname.includes('/pull')) {
-    const successRibbonContainer = document.createElement('div');
-    successRibbonContainer.className = 'successRibbon text-center';
+  const successRibbonContainer = document.createElement('div');
+  successRibbonContainer.className = 'successRibbon text-center';
 
+  if (document.location.pathname.includes('/pull') && !hasSubmittedMessage) {
     ribbonMessage = 'The pull request was created successfully and will be reviewed shortly';
-
-    const ribbonTextNode = document.createTextNode(ribbonMessage);
-
-    successRibbonContainer.appendChild(ribbonTextNode);
-
-    $(successRibbonContainer).insertBefore('.container');
   }
 
   if (hasSubmittedMessage) {
-    const successRibbonContainer = document.createElement('div');
-    successRibbonContainer.className = 'successRibbon text-center';
-
     ribbonMessage = `The mentioned user will receive a notification and may help you work on the pull request.`;
-
-    const ribbonTextNode = document.createTextNode(ribbonMessage);
-
-    successRibbonContainer.appendChild(ribbonTextNode);
-
-    $(successRibbonContainer).insertBefore('.container');
   }
 
-  /*
-  if (hasSubmittedMessage) {
+  const ribbonTextNode = document.createTextNode(ribbonMessage);
+
+  successRibbonContainer.appendChild(ribbonTextNode);
+
+  $(successRibbonContainer).insertBefore('.container');
+
+  if (hasSubmittedMessage && $('.container').length === 1) {
     chrome.storage.sync.set({ hasSubmittedMessage: false });
   }
-  */
 }
 
 /**
@@ -616,21 +575,15 @@ $.fn.extend({
  */
 function addFileHistoryLink() {
   // update three dots to appear as a button
+  const newButton = document.createElement('span');
+  newButton.className = 'btn btn-primary';
+  newButton.id = 'moreOptionsButton';
 
-  const buttonContainers = document.getElementsByClassName('height-full');
-  let index;
+  newButton.innerHTML = 'More Options';
 
-  for (index = 3; index < buttonContainers.length; index += 2) {
-    const newButton = document.createElement('span');
-    newButton.className = 'btn btn-primary';
-    newButton.id = 'moreOptionsButton';
+  $('.octicon-kebab-horizontal').remove();
 
-    newButton.innerHTML = 'More Options';
-
-    $('.octicon-kebab-horizontal').remove();
-
-    $(`.height-full:eq(${index})`).append(newButton);
-  }
+  $(`.height-full:eq(3)`).append(newButton);
 
   const fileHistoryLink = document.createElement('a');
   fileHistoryLink.className = 'pl-5 dropdown-item btn-link';
@@ -706,26 +659,17 @@ function createCardContainer() {
 
     outerContainer.appendChild(cardBack);
   } catch (error) {
-    throw new Error("Can't append new container");
+    // do nothing
   }
 
   $('.complete-list-link').click(() => {
-    const currentBrowser = plugin.currentBrowser();
-
     const githubUsername = document.getElementsByClassName('vcard-username')[0].innerHTML;
 
-    if (currentBrowser.includes('chrome')) {
-      chrome.storage.sync.set({ username: githubUsername });
+    chrome.storage.sync.set({ username: githubUsername });
 
-      chrome.runtime.sendMessage({
-        type: 'OPEN_COMPLETE_OVERVIEW',
-      });
-    } else {
-      browser.storage.set({ username: githubUsername });
-      browser.runtime.sendMessage({
-        type: 'OPEN_COMPLETE_OVERVIEW',
-      });
-    }
+    chrome.runtime.sendMessage({
+      type: 'OPEN_COMPLETE_OVERVIEW',
+    });
   });
 }
 
@@ -1000,12 +944,10 @@ function updateUploadPage() {
 
   $(commitDescription.toolTipElement).insertAfter(commitDescription.gitHubElement);
 
-  $('button[data-edit-text="Commit changes"]').click(() => {
-    chrome.storage.sync.set({ hasUploadedNewFile: true });
-  });
-
-  $('button[name="organization"]').click(() => {
-    chrome.storage.sync.set({ hasForked: true });
+  $('summary[role="button"]').click(() => {
+    $('button[name="organization"]').click(() => {
+      chrome.storage.sync.set({ hasForked: true });
+    });
   });
 }
 
@@ -1036,7 +978,7 @@ chrome.runtime.onMessage.addListener((msg) => {
       plugin.currentPageUrl = document.location.pathname;
 
       plugin.checkUrl();
-    } else if (
+    } /* else if (
       (document.location.pathname.includes('files') &&
         document.location.pathname.includes('pull')) ||
       document.location.pathname.includes('/pull/')
@@ -1050,16 +992,20 @@ chrome.runtime.onMessage.addListener((msg) => {
       $('#moreOptionsButton').remove();
       $('#fileHistoryLink').remove();
 
-      plugin.checkUrl();
-    }
+      addFileHistoryLink();
+    } */
     if (checkIsEditingForkedFile()) {
       createForkedFileToolTips();
     }
   } else if (msg.type === 'TOGGLE_EXTENSION') {
-    $('.helpIcon').toggleClass('hiddenDisplay');
-
-    $('.successRibbon').toggleClass('hiddenDisplay');
-
-    $('.container').toggleClass('hiddenDisplay');
+    toggleExtension();
   }
 });
+
+function toggleExtension() {
+  $('.helpIcon').toggleClass('hiddenDisplay');
+
+  $('.successRibbon').toggleClass('hiddenDisplay');
+
+  $('.container').toggleClass('hiddenDisplay');
+}
