@@ -72,6 +72,10 @@ async function createHomePage() {
     createAccordionLayout();
   }
 
+  $('.accordion').click(() => {
+    toggleAccordion();
+  });
+
   let pencilIconClass = '.octicon-pencil';
 
   try {
@@ -87,7 +91,7 @@ async function createHomePage() {
 
   const totalIcons = $('.helpIcon').length;
 
-  if (totalIcons < 1 && currentPage === 'home' && !document.location.pathname.includes('upload')) {
+  if (totalIcons < 1 && currentPage === 'home' && checkCurrentUrl()) {
     const readmeIcon = new ToolTip(
       'H4',
       'helpIcon',
@@ -102,7 +106,7 @@ async function createHomePage() {
 
   const currentLink = $('.selected:eq(0)').text().trim();
 
-  if (currentLink === 'Code' && document.location.pathname.includes('/pull')) {
+  if (currentLink === 'Code' && !canUpdateHomePage) {
     $('.selected:eq(0)').removeClass('selected');
   }
 }
@@ -119,7 +123,7 @@ function createNewMessage(newMessageContent) {
 
   successRibbonContainer.appendChild(ribbonMessage);
 
-  $(successRibbonContainer).insertBefore('.Box:contains("commits")');
+  $(successRibbonContainer).insertBefore('.Box:contains("commits"):eq(0)');
 
   if (newMessageContent.includes('file')) {
     chrome.storage.sync.set({ hasUploadedNewFile: false });
@@ -143,7 +147,7 @@ function createAccordionLayout() {
       !document.location.pathname.includes('tree')
     ) {
       // find the row with commit history information and update the css class to be an accordion
-      $('.Box:contains("commits") > .Box-header').addClass('accordion');
+      $('.Box:contains("commits") > .Box-header--blue').addClass('accordion');
       $('.js-details-container:eq(2)').addClass('panel');
 
       const filesContainer = $('.Box:contains("commits")');
@@ -158,15 +162,13 @@ function createAccordionLayout() {
 
       $('#codeLink').addClass('selected');
 
-      $('#readme').addClass('hiddenDisplay');
+      if (!document.location.pathname.includes('blob')) {
+        $('#readme').addClass('hiddenDisplay');
+      }
     }
   } catch (error) {
     // do nothing
   }
-
-  $('.accordion').click(() => {
-    toggleAccordion();
-  });
 }
 
 /**
@@ -203,7 +205,9 @@ async function checkIfUploadedNewFile() {
  */
 function toggleAccordion() {
   $('.accordion').toggleClass('active');
+
   const panel = document.getElementsByClassName('panel')[0];
+
   if (panel.style.maxHeight) {
     panel.style.maxHeight = null;
   } else {
@@ -294,8 +298,25 @@ function updatePencilIcon() {
  * Returns if current page is within a repository or not
  */
 function checkCurrentUrl() {
-  const urls = ['/blob/', '/pull', '/issues', '/settings', '/actions'];
-  return !urls.includes(document.location.pathname);
+  const urls = [
+    '/blob/',
+    '/pull',
+    '/issues',
+    '/settings',
+    '/actions',
+    '/projects',
+    '/wiki',
+    'pulse',
+  ];
+
+  let isCurrentlyOnHomeorCodePage = true;
+
+  urls.forEach((url) => {
+    if (document.location.pathname.includes(url)) {
+      isCurrentlyOnHomeorCodePage = false;
+    }
+  });
+  return isCurrentlyOnHomeorCodePage;
 }
 
 /**

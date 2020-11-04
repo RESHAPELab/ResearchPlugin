@@ -949,6 +949,10 @@ function updateUploadPage() {
       chrome.storage.sync.set({ hasForked: true });
     });
   });
+
+  $('button[data-edit-text="Commit changes"]').click(() => {
+    chrome.storage.sync.set({ hasUploadedNewFile: true });
+  });
 }
 
 /**
@@ -978,22 +982,7 @@ chrome.runtime.onMessage.addListener((msg) => {
       plugin.currentPageUrl = document.location.pathname;
 
       plugin.checkUrl();
-    } /* else if (
-      (document.location.pathname.includes('files') &&
-        document.location.pathname.includes('pull')) ||
-      document.location.pathname.includes('/pull/')
-    ) {
-      plugin.currentPageUrl = document.location.pathname;
-      plugin.injectedContent = true;
-
-      $('.successRibbon').remove();
-      $('.helpIcon').remove();
-      $('.container').remove();
-      $('#moreOptionsButton').remove();
-      $('#fileHistoryLink').remove();
-
-      addFileHistoryLink();
-    } */
+    }
     if (checkIsEditingForkedFile()) {
       createForkedFileToolTips();
     }
