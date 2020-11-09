@@ -1,7 +1,9 @@
-chrome.tabs.onUpdated.addListener((tabId) => {
-  chrome.tabs.sendMessage(tabId, {
-    type: 'CHECK_URL',
-  });
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && tab.status === 'complete' && tab.url !== undefined) {
+    chrome.tabs.sendMessage(tabId, {
+      type: 'CHECK_URL',
+    });
+  }
   chrome.tabs.sendMessage(tabId, {
     type: 'UPDATE_REPO_LAYOUT',
   });

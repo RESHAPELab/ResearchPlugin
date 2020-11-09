@@ -64,6 +64,7 @@ const plugin = {
 
     try {
       const foundUrl = urlArray.find((object) => plugin.currentPageUrl.includes(object.name));
+
       foundUrl.runFunction();
     } catch (error) {
       if (document.getElementsByClassName('h-card').length !== 0 && !document.URL.includes('tab')) {
@@ -397,18 +398,27 @@ function createReviewPullRequestToolTips() {
   submitButtons.classList.remove('flex-justify-end');
   submitButtons.classList.add('flex-justify-start');
 
+  /* Detect when the user closes the pull request */
   $('button[name="comment_and_close"]').click((event) => {
     if (!confirm(`Are you sure that you want to close the pull request: ${pullRequestName}?`)) {
       event.preventDefault();
     }
   });
 
+  /* Detect when user submits a comment in pull request and reload page */
   $('.js-new-comment-form').submit((event) => {
     event.preventDefault();
 
     chrome.storage.sync.set({ hasSubmittedMessage: true });
 
     window.location.reload();
+  });
+
+  /* Force the page to re-load to properly display plugin */
+  $(document).ready(() => {
+    $('.tabnav-tab').click((event) => {
+      window.location.assign(event.target.href);
+    });
   });
 }
 
@@ -560,6 +570,7 @@ async function checkIfMessageSubmitted() {
 
   return hasSubmittedMessage;
 }
+
 /**
  * Custom jQuery function to toggle text
  */
@@ -622,6 +633,7 @@ function updateProfileCard() {
     // do nothing
   }
 
+  /* Detect when the user selects a direct commit to repo or a pull request */
   $('.toggleBtn').click(() => {
     $('.toggleBtn').toggleText('Show more information', 'X');
 
@@ -662,6 +674,7 @@ function createCardContainer() {
     // do nothing
   }
 
+  /* Detect when the user opens the compelte overview page button */
   $('.complete-list-link').click(() => {
     const githubUsername = document.getElementsByClassName('vcard-username')[0].innerHTML;
 
@@ -915,12 +928,7 @@ function updateUploadPage() {
       'In order to upload files, click the fork button on the upper right'
     );
 
-    const forkRepoText = document.getElementsByClassName('px-4 py-2').textContent;
-
-    // Change the fork button to be green to let the user know they can fork the repo
-    if (forkRepoText !== `You've already forked ResearchPlugin`) {
-      $('.btn-with-count:eq(3)').addClass('btn-primary');
-    }
+    $('.btn-with-count:eq(3)').addClass('btn-primary');
   }
   const commitTitleIcon = new ToolTip(
     'H4',
@@ -944,12 +952,14 @@ function updateUploadPage() {
 
   $(commitDescription.toolTipElement).insertAfter(commitDescription.gitHubElement);
 
+  /* Detect when the user creates a fork of the repository */
   $('summary[role="button"]').click(() => {
     $('button[name="organization"]').click(() => {
       chrome.storage.sync.set({ hasForked: true });
     });
   });
 
+  /* Detect when the user uploades a new file to the repository */
   $('button[data-edit-text="Commit changes"]').click(() => {
     chrome.storage.sync.set({ hasUploadedNewFile: true });
   });
