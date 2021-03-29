@@ -3,13 +3,13 @@
  * Updates id of code link in nav bar
  */
 function updateCodeLink() {
-  const codeNavLinkText = $('.js-selected-navigation-item:eq(4)').text().trim();
+  const codeNavLinkText = $('.UnderlineNav-body:eq(0) a:eq(0)').text().trim();
 
   if (codeNavLinkText === 'Code') {
-    $('.js-selected-navigation-item:eq(4)').attr('id', 'codeLink');
+    $('.js-repo-nav a:eq(0)').prop('id', 'codeLink');
   }
 
-  $('#codeLink').click((event) => {
+  $('#codeLink').on('click', (event) => {
     const $currentLinkText = $('.selected:eq(0)').text().trim();
 
     if ($currentLinkText === 'Home' || $currentLinkText === 'Code') {
@@ -29,7 +29,7 @@ function updateCodeLink() {
 async function createHomePage() {
   createHomePageLink();
   const currentPage = await getCurrentRepositoryPage();
-  const canUpdateHomePage = checkCurrentUrl();
+  const canUpdateHomePage = isOnHomeOrCodePage();
 
   const hasForked = await checkForkStatus();
   const hasUploadedFile = await checkIfUploadedNewFile();
@@ -37,8 +37,15 @@ async function createHomePage() {
   const forkedMessage = 'The repository was successfully forked';
   const filesMessage = 'The files were successfully added';
   const filesContainer = $('.Box:contains("commits")');
+  const totalIcons = $('.helpIcon').length;
 
-  if (hasForked && !document.location.pathname.includes('upload') && filesContainer.length === 1) {
+  let pencilIconClass = '.octicon-pencil';
+
+  if (
+    hasForked &&
+    !document.location.pathname.includes('upload') &&
+    filesContainer.length === 1
+  ) {
     createNewMessage(forkedMessage);
   }
   if (hasUploadedFile && !document.location.pathname.includes('upload')) {
@@ -47,36 +54,46 @@ async function createHomePage() {
 
   if (currentPage === 'home' && canUpdateHomePage) {
     // toggle display for files in repo
-
     filesContainer.addClass('hiddenDisplay');
     $('.file-navigation:eq(0)').addClass('hiddenDisplay');
 
     $('.Details-content--hidden-not-important:eq(1)').removeClass('d-md-block');
     $('.file-navigation:eq(0)').removeClass('d-flex');
 
-    const codeLink = $('#codeLink');
-
-    if (codeLink.attr('aria-current')) {
-      codeLink.removeAttr('aria-current');
-    }
-
     $('.selected:eq(0)').removeClass('selected');
 
-    if (canUpdateHomePage) {
-      $('#homePage').addClass('selected');
+    $('#homePage').addClass('selected');
+
+    if ($('#codeLink').attr('aria-current') === 'page') {
+      $('#codeLink').addClass('repoNavButton');
+      $('#codeLink').attr('aria-current', 'false');
     }
 
     $('#readme').removeClass('hiddenDisplay');
-  } else if (currentPage === 'code') {
+
+    if (totalIcons < 1) {
+      const readmeIcon = new ToolTip(
+        'H4',
+        'helpIcon',
+        'To edit this file, go to the "code" tab above, and select the file you want to edit.',
+        pencilIconClass
+      );
+
+      readmeIcon.createIcon();
+
+      $(readmeIcon.toolTipElement).insertAfter(readmeIcon.gitHubElement);
+
+      $(readmeIcon.toolTipElement).on('click', (event) => {
+        event.preventDefault();
+      });
+    }
+  } else if (currentPage === 'code' && canUpdateHomePage) {
     $('.selected:eq(0)').removeClass('selected');
+    $('#codeLink').addClass('selected');
+    $('#codeLink').attr('aria-current', 'page');
+
     createAccordionLayout();
   }
-
-  $('.accordion').click(() => {
-    toggleAccordion();
-  });
-
-  let pencilIconClass = '.octicon-pencil';
 
   try {
     if (
@@ -87,27 +104,6 @@ async function createHomePage() {
     }
   } catch (error) {
     // do nothing
-  }
-
-  const totalIcons = $('.helpIcon').length;
-
-  if (totalIcons < 1 && currentPage === 'home' && checkCurrentUrl()) {
-    const readmeIcon = new ToolTip(
-      'H4',
-      'helpIcon',
-      'To edit this file, go to the "code" tab above, and select the file you want to edit.',
-      pencilIconClass
-    );
-
-    readmeIcon.createIcon();
-
-    $(readmeIcon.toolTipElement).insertAfter(readmeIcon.gitHubElement);
-  }
-
-  const currentLink = $('.selected:eq(0)').text().trim();
-
-  if (currentLink === 'Code' && !canUpdateHomePage) {
-    $('.selected:eq(0)').removeClass('selected');
   }
 }
 
@@ -137,15 +133,10 @@ function createNewMessage(newMessageContent) {
  * Display files in repository inside an dropdown menu
  */
 function createAccordionLayout() {
-  const canUpdateFiles = checkCurrentUrl();
+  const canUpdateFiles = isOnHomeOrCodePage();
 
   try {
-    if (
-      canUpdateFiles &&
-      !document.location.pathname.includes('pull') &&
-      !document.location.pathname.includes('commits') &&
-      !document.location.pathname.includes('tree')
-    ) {
+    if (canUpdateFiles) {
       // find the row with commit history information and update the css class to be an accordion
       $('.Box:contains("commits") > .Box-header--blue').addClass('accordion');
       $('.js-details-container:eq(2)').addClass('panel');
@@ -208,14 +199,12 @@ function toggleAccordion() {
 
   const panel = document.getElementsByClassName('panel')[0];
 
-  if (panel.style.maxHeight) {
-    panel.style.maxHeight = null;
-  } else {
-    panel.style.maxHeight = panel.scrollHeight + 'px';
-  }
+  panel.style.maxHeight
+    ? (panel.style.maxHeight = null)
+    : (panel.style.maxHeight = panel.scrollHeight + 'px');
 
   // update title of each file within the github repository
-  $('.js-details-container:eq(2) .link-gray-dark').each((index, element) => {
+  $('.js-details-container:eq(2) .Link--primary').each((index, element) => {
     $(element).attr('title', 'To view this file, click here');
   });
 }
@@ -244,7 +233,7 @@ function createHomePageLink() {
     $('.UnderlineNav-body').prepend(newNavLink);
   }
 
-  $('#homePage').click((event) => {
+  $('#homePage').on('click', (event) => {
     const currentLinkText = $('.selected:eq(0)').text().trim();
 
     if (currentLinkText === 'Home' || currentLinkText === 'Code') {
@@ -294,35 +283,37 @@ function updatePencilIcon() {
 }
 
 /**
- * Function name: checkCurrentUrl
- * Returns if current page is within a repository or not
+ * Function name: isOnHomeOrCodePage
+ * Returns if the user is currently on the home or code page of a repository
  */
-function checkCurrentUrl() {
-  const urls = [
+function isOnHomeOrCodePage() {
+  const invalidUrls = [
     '/blob/',
-    '/pull',
+    'pull',
     '/issues',
     '/settings',
     '/actions',
     '/projects',
     '/wiki',
     'pulse',
+    'tree',
+    'commits',
   ];
 
   let isCurrentlyOnHomeorCodePage = true;
 
-  urls.forEach((url) => {
-    if (document.location.pathname.includes(url)) {
+  invalidUrls.forEach((invalidUrl) => {
+    if (document.location.pathname.includes(invalidUrl)) {
       isCurrentlyOnHomeorCodePage = false;
     }
   });
+
   return isCurrentlyOnHomeorCodePage;
 }
 
 /**
  * Listen to page changes from the background
  */
-
 chrome.runtime.onMessage.addListener((msg) => {
   const currentUrlPath = document.location.pathname;
 
@@ -330,12 +321,18 @@ chrome.runtime.onMessage.addListener((msg) => {
     if (currentUrlPath.includes('/blob/') && $('.helpIconCircle').length === 1) {
       updatePencilIcon();
     }
-
+    $(() => {
+      {
+        $('.Box:contains("commits") > .Box-header--blue').on('click', () => {
+          toggleAccordion();
+        });
+      }
+    });
     try {
       updateCodeLink();
       createHomePage();
     } catch (error) {
-      // do nothing
+      window.location.assign(document.location.pathname);
     }
   }
 });

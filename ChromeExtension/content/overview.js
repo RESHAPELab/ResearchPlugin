@@ -50,19 +50,34 @@ class Card {
 }
 
 window.onload = async () => {
-  const githubUsername = await getGitHubUsername();
+  const gitHubUsername = await retrieveGitHubUsername();
 
   document.getElementById(
     'username'
-  ).innerHTML = `<a href="https://github.com/${githubUsername}" target="_blank"><svg aria-label="forks" class="octicon octicon-repo-forked" viewBox="0 0 16 16" version="1.1" width="24" height="24" role="img"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg> ${githubUsername}/<span class="text-gray-dark ">Repositories</span></a>`;
+  ).innerHTML = `<a href="https://github.com/${gitHubUsername}" target="_blank"><svg aria-label="forks" class="octicon octicon-repo-forked" viewBox="0 0 16 16" version="1.1" width="24" height="24" role="img"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg> ${gitHubUsername}/<span class="text-gray-dark ">Repositories</span></a>`;
 
-  $('github-username').text(githubUsername);
+  $('#github-username').html(gitHubUsername);
+  updateOverviewPageLinks(gitHubUsername);
 
-  const userProfileImage = await retrieveProfileImage(githubUsername);
+  const userProfileImage = await retrieveProfileImage(gitHubUsername);
 
   $('#profile-image').attr('src', userProfileImage);
-  getRepos(githubUsername);
+  getRepos(gitHubUsername);
 };
+
+/**
+ * Function name: updateOverviewPageLinks
+ * Updates links to point to current user's GitHub
+ */
+function updateOverviewPageLinks(gitHubUsername) {
+  const baseURL = 'https://github.com';
+
+  $('.user-profile-link').prop('href', `${baseURL}/${gitHubUsername}`);
+  $('#profile-link').prop('href', `${baseURL}/${gitHubUsername}`);
+  $('#repositories-link').prop('href', `${baseURL}/${gitHubUsername}`);
+  $('#projects-link').prop('href', `${baseURL}/${gitHubUsername}?tab=projects`);
+  $('#stars-link').prop('href', `${baseURL}/${gitHubUsername}?tab=stars`);
+}
 
 /**
  * Function name: createCompleteOverview
@@ -108,7 +123,7 @@ async function createCompleteOverview(userData, username) {
     allRepositories.push(repositoryCard);
   }
 
-  sortArrayInDescendingOrder(allRepositories);
+  sortArrayByTotalCommits(allRepositories);
 
   allRepositories.forEach((repository) => {
     repository.createCard(username);
@@ -121,7 +136,8 @@ async function createCompleteOverview(userData, username) {
     newRow.className = 'row';
 
     if (totalRows !== 0) {
-      lastRowCardCount = document.getElementsByClassName('row')[totalRows - 1].childElementCount;
+      lastRowCardCount = document.getElementsByClassName('row')[totalRows - 1]
+        .childElementCount;
     } else if (totalRows === EMPTY_ROW) {
       $(newRow).appendTo('#content');
     }
@@ -138,11 +154,11 @@ async function createCompleteOverview(userData, username) {
 }
 
 /**
- * Function name: sortArrayInDescendingOrder
+ * Function name: sortArrayByTotalCommits
  * @param {Card} array - all repositories for user
  * Sorts given array in descending order
  */
-function sortArrayInDescendingOrder(array) {
+function sortArrayByTotalCommits(array) {
   array.sort((a, b) => {
     return b.commitTotal - a.commitTotal;
   });
@@ -194,7 +210,7 @@ async function getAllCommits(repositoryName, username, page) {
  * Gets api url and returns json from GitHub
  */
 async function parseGithubUrl(apiUrl) {
-  const oAuthToken = '32921960607cb6a5861f9e2f01d46b37e34238ee';
+  const oAuthToken = 'f44aa0127f78ad9c88e9d1c482457bd905079aa1';
 
   const apiHeaders = {
     Authorization: `Token ${oAuthToken}`,
@@ -220,7 +236,6 @@ async function getAllCommitMessages(repository, username, page) {
   const MAX_PAGES = 15;
 
   const commitsUrl = `https://api.github.com/repos/${username}/${repository}/commits?page=${page}&per_page=100`;
-
   const commits = await parseGithubUrl(commitsUrl);
 
   document.getElementById(
@@ -228,10 +243,17 @@ async function getAllCommitMessages(repository, username, page) {
   ).innerHTML = `<svg class="octicon octicon-repo mr-2 text-gray flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path></svg> 
                 <a href="https://github.com/${username}/${repository} target="_blank">${repository}</a>`;
 
+  let modalContainerIsEmpty = true;
   if (commits.length !== 0) {
     commits.forEach((commit) => {
       if (commit.author !== null && commit.author.login === username) {
-        updateModal(commit.commit.message, commit.commit.author.date, commit.html_url);
+        updateRepositoryModal(
+          commit.commit.message,
+          commit.html_url,
+          commit.commit.author.date
+        );
+
+        modalContainerIsEmpty = false;
       }
     });
 
@@ -240,8 +262,11 @@ async function getAllCommitMessages(repository, username, page) {
       getAllCommitMessages(repository, username, page + 1);
     }
 
-    if (document.getElementsByClassName('message-title').length === 0) {
-      updateModal(`There were no commits by ${username} in this repository.`, '');
+    if (modalContainerIsEmpty && page === 1) {
+      updateRepositoryModal(
+        `There were no commits by ${username} in this repository.`,
+        ''
+      );
     }
   }
 }
@@ -278,8 +303,15 @@ async function getTotalIssues(repository, username, page) {
   const issuesUrl = `https://api.github.com/repos/${username}/${repository}/issues?page=${page}&per_page=100`;
 
   const issues = await parseGithubUrl(issuesUrl);
+  let total = 0;
 
-  return issues.length;
+  issues.forEach((issue) => {
+    if (issue.user.login !== null && issue.user.login === username) {
+      total += 1;
+    }
+  });
+
+  return total;
 }
 
 /**
@@ -294,7 +326,14 @@ async function getTotalCommits(repository, username, page) {
 
   const commits = await parseGithubUrl(commitsUrl);
 
-  let total = commits.length;
+  let total = 0;
+
+  commits.forEach((commit) => {
+    if (commit.author !== null && commit.author.login === username) {
+      total += 1;
+    }
+  });
+
   const MAX_PAGE = 25;
 
   if (page < MAX_PAGE && total % 100 === 0) {
@@ -305,13 +344,13 @@ async function getTotalCommits(repository, username, page) {
 }
 
 /**
- * Function name: updateModal
+ * Function name: updateRepositoryModal
  * @param {string} message
  * @param {string} createdDate
  * Appends new commit message to modal
  */
-async function updateRepositoryModal(message, createdDate, commitLink) {
-  const username = await getGitHubUsername();
+async function updateRepositoryModal(message, commitLink, createdDate) {
+  const username = await retrieveGitHubUsername();
 
   const profileImage = await retrieveProfileImage(username);
 
@@ -319,9 +358,8 @@ async function updateRepositoryModal(message, createdDate, commitLink) {
 
   const messageContainer = document.createElement('p');
   messageContainer.className = 'message-title';
-
-  if (createdDate === '') {
-    messageContainer.innerHTML = `<a href="${commitLink}>${message}</a>`;
+  if (createdDate === undefined) {
+    messageContainer.innerHTML = `<a href="${commitLink}">${message}</a>`;
   } else {
     const localTime = new Date(createdDate).toLocaleDateString();
     messageContainer.innerHTML = `<a href="${commitLink}">${message}</a><span class="timeStamp"><img height="20" width="20" alt="@${username}" src="${profileImage}" class="avatar-user"> ${username} Committed at: ${localTime}`;
@@ -356,7 +394,6 @@ async function getLanguageColor(language) {
  */
 async function getAllIssues(repository, username, page) {
   const issuesUrl = `https://api.github.com/repos/${username}/${repository}/issues?page=${page}&per_page=100`;
-
   const issues = await parseGithubUrl(issuesUrl);
 
   issues.forEach((issue) => {
@@ -384,10 +421,10 @@ async function retrieveProfileImage(username) {
 }
 
 /**
- * Function name: getGitHubUsername
+ * Function name: retrieveGitHubUsername
  * Returns username from GitHub stored in browser
  */
-async function getGitHubUsername() {
+async function retrieveGitHubUsername() {
   const localUsername = new Promise((resolve) => {
     chrome.storage.sync.get('username', (result) => {
       resolve(result.username);
@@ -408,7 +445,7 @@ $('#repo-issues-link').click(async () => {
 
     const FIRST_PAGE = 1;
 
-    const username = await getGitHubUsername();
+    const username = await retrieveGitHubUsername();
 
     document.querySelectorAll('.message-title').forEach((element) => element.remove());
 
@@ -425,7 +462,7 @@ $('#commit-messages-link').click(async () => {
 
     const FIRST_PAGE = 1;
 
-    const username = await getGitHubUsername();
+    const username = await retrieveGitHubUsername();
 
     document.querySelectorAll('.message-title').forEach((element) => element.remove());
 
@@ -434,7 +471,7 @@ $('#commit-messages-link').click(async () => {
 });
 
 document.body.onclick = async (event) => {
-  const gitHubUser = await getGitHubUsername();
+  const gitHubUser = await retrieveGitHubUsername();
 
   if (event.target.getAttribute('class') === 'label') {
     const FIRST_PAGE = 1;
@@ -448,4 +485,7 @@ document.getElementsByClassName('close')[0].onclick = () => {
   document.getElementById('modalContainer').style.display = 'none';
   document.querySelectorAll('.message-title').forEach((element) => element.remove());
   document.getElementById('repo-name').innerHTML = '';
+
+  $('#repo-issues-link').removeAttr('aria-current');
+  $('#commit-messages-link').attr('aria-current', 'page');
 };

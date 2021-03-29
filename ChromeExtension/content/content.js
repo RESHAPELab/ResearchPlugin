@@ -32,7 +32,7 @@ const plugin = {
   currentPageUrl: document.location.pathname,
   injectedContent: false,
   addedNewComment: false,
-  oAuthToken: 'bad8ab76f664d3f0217b7e456d9239fba661e920',
+  oAuthToken: 'f44aa0127f78ad9c88e9d1c482457bd905079aa1',
 
   /**
    * Function name: checkUrl
@@ -63,11 +63,16 @@ const plugin = {
     ];
 
     try {
-      const foundUrl = urlArray.find((object) => plugin.currentPageUrl.includes(object.name));
+      const foundUrl = urlArray.find((object) =>
+        plugin.currentPageUrl.includes(object.name)
+      );
 
       foundUrl.runFunction();
     } catch (error) {
-      if (document.getElementsByClassName('h-card').length !== 0 && !document.URL.includes('tab')) {
+      if (
+        document.getElementsByClassName('h-card').length !== 0 &&
+        !document.URL.includes('tab')
+      ) {
         updateProfileCard();
       }
     }
@@ -127,7 +132,12 @@ function createFileEditorToolTips() {
 
   const breadCrumbDiv = '.d-md-inline-block';
 
-  const fileNameChangeIcon = new ToolTip('H4', 'helpIcon', fileNameChangeIconText, breadCrumbDiv);
+  const fileNameChangeIcon = new ToolTip(
+    'H4',
+    'helpIcon',
+    fileNameChangeIconText,
+    breadCrumbDiv
+  );
 
   fileNameChangeIcon.createIcon();
   fileNameChangeIcon.insertIconAfterElement();
@@ -185,13 +195,18 @@ function createFileEditorToolTips() {
       'By clicking the Propose changes button you will start the pull request submission process. You will have the chance to check your changes before finalizing it.';
   }
 
-  const submitChangesIcon = new ToolTip('H4', 'helpIcon', submitChangesIconText, '#submit-file');
+  const submitChangesIcon = new ToolTip(
+    'H4',
+    'helpIcon',
+    submitChangesIconText,
+    '#submit-file'
+  );
 
   submitChangesIcon.createIcon();
   submitChangesIcon.toolTipElement.style.marginRight = '20px';
   submitChangesIcon.insertIconBeforeElement();
 
-  $('input[name="commit-choice"]').click(() => {
+  $('input[name="commit-choice"]').on('click', () => {
     const pullChangesText =
       'By clicking the Propose changes button you will start the pull request submission process. You will have the chance to check your changes before finalizing it.';
 
@@ -289,7 +304,12 @@ function createConfirmPullRequestToolTips() {
 
   const summaryClass = '.overall-summary';
 
-  const requestSummaryIcon = new ToolTip('H4', 'helpIcon', requestSummaryIconText, summaryClass);
+  const requestSummaryIcon = new ToolTip(
+    'H4',
+    'helpIcon',
+    requestSummaryIconText,
+    summaryClass
+  );
 
   requestSummaryIcon.createIcon();
   requestSummaryIcon.toolTipElement.style = 'float:right;';
@@ -307,7 +327,12 @@ function createConfirmPullRequestToolTips() {
 
   const comparisonClass = '.details-collapse';
 
-  const comparisonIcon = new ToolTip('H4', 'helpIcon', comparisonIconText, comparisonClass);
+  const comparisonIcon = new ToolTip(
+    'H4',
+    'helpIcon',
+    comparisonIconText,
+    comparisonClass
+  );
 
   comparisonIcon.createIcon();
 
@@ -369,10 +394,6 @@ function createReviewPullRequestToolTips() {
   const directlyMentionIcon = $('[aria-label="Directly mention a user or team"]');
   directlyMentionIcon.attr('aria-label', 'Use "@" to mention a project contributor.');
 
-  if (document.location.pathname.includes('/files')) {
-    addFileHistoryLink();
-  }
-
   // check if the close pull request and comment buttons are present in page
   if ($('.form-actions > button').length === BUTTONS_IN_REPO) {
     const closePullRequestIconText =
@@ -398,15 +419,23 @@ function createReviewPullRequestToolTips() {
   submitButtons.classList.remove('flex-justify-end');
   submitButtons.classList.add('flex-justify-start');
 
+  if (document.location.pathname.includes('files')) {
+    addFileHistoryLink();
+  }
+
   /* Detect when the user closes the pull request */
-  $('button[name="comment_and_close"]').click((event) => {
-    if (!confirm(`Are you sure that you want to close the pull request: ${pullRequestName}?`)) {
+  $('button[name="comment_and_close"]').on('click', (event) => {
+    if (
+      !confirm(
+        `Are you sure that you want to close the pull request: ${pullRequestName}?`
+      )
+    ) {
       event.preventDefault();
     }
   });
 
   /* Detect when user submits a comment in pull request and reload page */
-  $('.js-new-comment-form').submit((event) => {
+  $('.js-new-comment-form').on('submit', (event) => {
     event.preventDefault();
 
     chrome.storage.sync.set({ hasSubmittedMessage: true });
@@ -415,10 +444,8 @@ function createReviewPullRequestToolTips() {
   });
 
   /* Force the page to re-load to properly display plugin */
-  $(document).ready(() => {
-    $('.tabnav-tab').click((event) => {
-      window.location.assign(event.target.href);
-    });
+  $('.tabnav-tab').on('click', (event) => {
+    window.location.assign(event.target.href);
   });
 }
 
@@ -437,7 +464,7 @@ function sortArrayInDescendingOrder(array) {
  * Function name: checkIsEditingForkedFile
  * Checks if the user is viewing a file that they do not own
  */
-function checkIsEditingForkedFile() {
+function isEditingForkedFile() {
   const pencilIconLabelsList = [
     'Edit the file in your fork of this project',
     'Fork this project and edit the file',
@@ -452,6 +479,16 @@ function checkIsEditingForkedFile() {
   } catch (error) {
     return false;
   }
+}
+
+/**
+ * Function name: currentlyViewingFile
+ * @returns If user is currently viewing a file within a project
+ */
+function isCurrentlyViewingFile() {
+  return (
+    document.location.pathname.includes('blob') && $('.js-file-line-container').length > 0
+  );
 }
 
 /**
@@ -539,7 +576,8 @@ async function createSuccessRibbon() {
   successRibbonContainer.className = 'successRibbon text-center';
 
   if (document.location.pathname.includes('/pull') && !hasSubmittedMessage) {
-    ribbonMessage = 'The pull request was created successfully and will be reviewed shortly';
+    ribbonMessage =
+      'The pull request was created successfully and will be reviewed shortly';
   }
 
   if (hasSubmittedMessage) {
@@ -603,11 +641,11 @@ function addFileHistoryLink() {
 
   const repositoryOwner = $('a[rel="author"]').text();
   const repositoryName = $('a[data-pjax="#js-repo-pjax-container"]').text();
-  const fileName = $('.file-info:eq(0) > .link-gray-dark:eq(0)').text();
+  const fileName = $('.file-info:eq(0) .Link--primary:eq(0)').text();
 
   fileHistoryLink.href = `https://github.com/${repositoryOwner}/${repositoryName}/commits/master/${fileName}`;
 
-  $(fileHistoryLink).insertBefore('.dropdown-item:eq(33)');
+  $(fileHistoryLink).insertAfter('.dropdown-divider:eq(2)');
 }
 
 /**
@@ -619,22 +657,22 @@ function updateProfileCard() {
   toggleButton.className = 'btn btn-primary mb-3 ml-md-3 toggleBtn';
   toggleButton.innerText = 'Show more information';
 
-  const username = document.getElementsByClassName('vcard-username')[0].innerHTML;
+  const username = document.getElementsByClassName('vcard-username')[0].innerHTML.trim();
 
   try {
-    createCardContainer();
+    createCardContainer(username);
 
     getRepos(username);
 
     getApis(username);
 
-    $(toggleButton).insertAfter('.contrib-footer ');
+    $(toggleButton).insertBefore('.graph-before-activity-overview');
   } catch (error) {
     // do nothing
   }
 
   /* Detect when the user selects a direct commit to repo or a pull request */
-  $('.toggleBtn').click(() => {
+  $('.toggleBtn').on('click', () => {
     $('.toggleBtn').toggleText('Show more information', 'X');
 
     $('.toggleBtn').toggleClass('closeButton');
@@ -652,8 +690,10 @@ function updateProfileCard() {
  * Function name: createCardContainer
  * Creates structure of profile overview with graphs
  */
-function createCardContainer() {
-  const outerContainer = document.getElementsByClassName('graph-before-activity-overview')[0];
+function createCardContainer(username) {
+  const outerContainer = document.getElementsByClassName(
+    'graph-before-activity-overview'
+  )[0];
 
   try {
     outerContainer.className += ' card-container';
@@ -674,11 +714,9 @@ function createCardContainer() {
     // do nothing
   }
 
-  /* Detect when the user opens the compelte overview page button */
-  $('.complete-list-link').click(() => {
-    const githubUsername = document.getElementsByClassName('vcard-username')[0].innerHTML;
-
-    chrome.storage.sync.set({ username: githubUsername });
+  /* Detect when the user opens the complete overview page button */
+  $('.complete-list-link').on('click', () => {
+    chrome.storage.sync.set({ username: username });
 
     chrome.runtime.sendMessage({
       type: 'OPEN_COMPLETE_OVERVIEW',
@@ -923,7 +961,10 @@ function createNewBarGraph(container, graphTitle, graphLabels, graphData) {
  * Updates page when uploading a file to a repository
  */
 function updateUploadPage() {
-  if ($('.blankslate p:first').text() === 'File uploads require push access to this repository.') {
+  if (
+    $('.blankslate p:first').text() ===
+    'File uploads require push access to this repository.'
+  ) {
     $('.blankslate p:first').text(
       'In order to upload files, click the fork button on the upper right'
     );
@@ -953,14 +994,14 @@ function updateUploadPage() {
   $(commitDescription.toolTipElement).insertAfter(commitDescription.gitHubElement);
 
   /* Detect when the user creates a fork of the repository */
-  $('summary[role="button"]').click(() => {
-    $('button[name="organization"]').click(() => {
+  $('summary[role="button"]').on('click', () => {
+    $('button[name="organization"]').on('click', () => {
       chrome.storage.sync.set({ hasForked: true });
     });
   });
 
   /* Detect when the user uploades a new file to the repository */
-  $('button[data-edit-text="Commit changes"]').click(() => {
+  $('button[data-edit-text="Commit changes"]').on('click', () => {
     chrome.storage.sync.set({ hasUploadedNewFile: true });
   });
 }
@@ -974,7 +1015,7 @@ function updateViewFilePage() {
     'H4',
     'helpIcon',
     'Use the "History" link <br> to view changes to this <br> file by other contributors.',
-    '.ml-3:eq(2)'
+    '.ml-3:eq(1)'
   );
 
   historyLinkIcon.createIcon();
@@ -993,8 +1034,12 @@ chrome.runtime.onMessage.addListener((msg) => {
 
       plugin.checkUrl();
     }
-    if (checkIsEditingForkedFile()) {
+    if (isEditingForkedFile()) {
       createForkedFileToolTips();
+    }
+    if (isCurrentlyViewingFile()) {
+      plugin.currentPageUrl = document.location.pathname;
+      plugin.checkUrl();
     }
   } else if (msg.type === 'TOGGLE_EXTENSION') {
     toggleExtension();
