@@ -1,11 +1,11 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.status === 'complete' && tab.url !== undefined) {
+  if (changeInfo.status === "complete" && tab.status === "complete" && tab.url) {
     chrome.tabs.sendMessage(tabId, {
-      type: 'CHECK_URL',
+      type: "CHECK_URL",
     });
   }
   chrome.tabs.sendMessage(tabId, {
-    type: 'UPDATE_REPO_LAYOUT',
+    type: "UPDATE_REPO_LAYOUT",
   });
 });
 
@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener(handleMessage);
  * Responds to changes in content script
  */
 function handleMessage(msg) {
-  if (msg.type === 'OPEN_COMPLETE_OVERVIEW') {
-    chrome.tabs.create({ url: chrome.runtime.getURL('content/overview.html') });
+  if (msg.type === "OPEN_COMPLETE_OVERVIEW") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("content/overview.html") });
   }
 }

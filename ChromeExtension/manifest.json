@@ -4,21 +4,30 @@
   "manifest_version": 2,
   "description": "Helps newcomers navigate GitHub and successfully contribute to open source projects.",
   "author": "NAU OSL",
-  "permissions": ["tabs", "activeTab", "webNavigation", "storage"],
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "webNavigation",
+    "storage"
+  ],
   "browser_action": {
     "default_icon": "popup/icon.png",
     "default_popup": "popup/index.html"
   },
   "content_scripts": [
     {
-      "matches": ["https://github.com/*"],
-      "exclude_matches":[
+      "matches": [
+        "https://github.com/*"
+      ],
+      "exclude_matches": [
         "https://github.com/search*"
       ],
-      "css": ["styles/styles.css"],
+      "css": [
+        "styles/styles.css"
+      ],
       "js": [
         "libraries/jquery.min.js",
-        "libraries/Chart.bundle.js",
+        "content/util.js",
         "content/content.js",
         "content/repositoryLayout.js"
       ],
@@ -26,7 +35,14 @@
     }
   ],
   "background": {
-    "scripts": ["background/background.js"]
+    "scripts": [
+      "background/background.js"
+    ]
   },
-  "web_accessible_resources": ["*.json", "*.css", "images/house.png", "libraries/jquery.min.js"]
+  "web_accessible_resources": [
+    "*.json",
+    "*.css",
+    "images/house.png",
+    "libraries/jquery.min.js"
+  ]
 }
