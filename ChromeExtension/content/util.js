@@ -26,17 +26,17 @@ function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
   progressBar.appendChild(progressBarSteps);
 
   progressBarContainer.appendChild(progressBar);
-
   $(progressBarContainer).insertBefore(rootElement);
 
-  if (isProcessCompleted()) {
+  if (isPullRequestOpen()) {
     createSuccessRibbon();
   }
 }
 
 const createIcon = (text) => {
+  const isDarkMode = $("html").attr("data-color-mode") === "dark";
   const toolTipContainer = document.createElement("div");
-  toolTipContainer.className = "helpIcon";
+  toolTipContainer.className = `helpIcon ${isDarkMode ? "darkmode-icon" : ""}`;
 
   toolTipContainer.innerHTML = `<span class="helpIconCircle">?</span>
                                   <span class="helpIconText">${text}</span>`;
@@ -60,6 +60,18 @@ const createIconAfterLastElement = (text, gitHubElement) => {
   const toolTip = createIcon(text);
   $(toolTip).insertAfter(gitHubElement).last();
   return toolTip;
+};
+
+const getValueFromStorage = async (key, defaultValue) => {
+  const result = new Promise((resolve) => {
+    chrome.storage.sync.get(key, (result) => {
+      resolve(result[key]);
+    });
+  });
+
+  const value = await result;
+
+  return value ?? defaultValue;
 };
 
 /**

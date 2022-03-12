@@ -294,24 +294,11 @@ function createForkedFileToolTips() {
   $(".tooltipped-nw:nth-child(2)").attr("aria-label", "Edit File");
 }
 
-/**
- * Checks if issue or pull request was succesfully created and is open in the repo
- */
-function isProcessCompleted() {
-  let status = "";
-  try {
-    status = document.getElementsByClassName("State")[0].getAttribute("title");
-  } catch (error) {
-    return false;
-  }
+const isPullRequestOpen = () => {
+  const gitHubStateElements = document.getElementsByClassName("State");
+  return gitHubStateElements[0]?.getAttribute("title") === "Status: Open" ?? false;
+};
 
-  return status === "Status: Open";
-}
-
-/**
- * Function name: createSuccessRibbon
- * Creates ribbon above progress bar to know the process is successful
- */
 function createSuccessRibbon() {
   if (document.location.pathname.includes("/pull")) {
     const successRibbonContainer = document.createElement("div");
@@ -325,7 +312,7 @@ function createSuccessRibbon() {
 }
 
 const createMessageSubmittedRibbon = async () => {
-  const hasSubmittedMessage = await hasSubmittedMessage();
+  const hasSubmittedMessage = await getValueFromStorage("hasSubmittedMessage", false);
   if (hasSubmittedMessage && $(".successRibbon").length === 1) {
     const ribbonMessage = `The mentioned user will receive a notification and may help you work on the pull request.`;
     $(".successRibbon").html(ribbonMessage);
@@ -336,21 +323,7 @@ const createMessageSubmittedRibbon = async () => {
   }
 };
 
-/**
- * Function name: checkIfMessageSubmitted
- * Returns if the user recently submitted a message to a pull request or not
- */
-async function hasSubmittedMessage() {
-  const hasSubmittedMessage = new Promise((resolve) => {
-    chrome.storage.sync.get("hasSubmittedMessage", (result) => {
-      resolve(result.hasSubmittedMessage);
-    });
-  });
-
-  return hasSubmittedMessage;
-}
-
-async function updateUploadFilesPage() {
+const updateUploadFilesPage = () => {
   const forkButton = ".btn-with-count button:eq(0)";
 
   if (cannotForkRepository()) {
@@ -369,11 +342,10 @@ async function updateUploadFilesPage() {
     "Add a more detailed description of the commit if needed. Here you can describe the files uploaded.";
   createIconAfterElement(commitDescriptionText, "#commit-description-textarea");
 
-  // Detect when the user uploades a new file to the repository
   $('button[data-edit-text="Commit changes"]').on("click", () => {
-    chrome.storage.sync.set({ hasUploadedNewFile: true });
+    chrome.storage.sync.set({ hasUploadedNewFile: true, activePage: "home" });
   });
-}
+};
 
 const cannotForkRepository = () => {
   return (

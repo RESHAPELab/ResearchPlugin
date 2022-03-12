@@ -8,17 +8,7 @@ function updateCodeLink() {
     $(".js-repo-nav a:eq(0)").prop("id", "codeLink");
   }
 
-  $("#codeLink").on("click", (event) => {
-    const $currentLinkText = $(".selected:eq(0)").text().trim();
-
-    if ($currentLinkText === "Home" || $currentLinkText === "Code") {
-      event.preventDefault();
-    }
-
-    chrome.storage.sync.set({ activePage: "code" });
-
-    createHomePage();
-  });
+  createNavLinkClickListener("#codeLink", "code");
 }
 
 /**
@@ -27,8 +17,8 @@ function updateCodeLink() {
 async function createHomePage() {
   const currentPage = await getCurrentRepositoryPage();
   const canUpdateHomePage = isOnHomeOrCodePage();
-  const hasForked = await hasForkedRepository();
-  const hasUploadedFile = await hasUploadedNewFile();
+  const hasForked = await getValueFromStorage("hasForked", false);
+  const hasUploadedFile = await getValueFromStorage("hasUploadedNewFile", false);
   createHomePageLink();
 
   const forkedMessage = "The repository was successfully forked";
@@ -44,10 +34,8 @@ async function createHomePage() {
   }
 
   if (currentPage === "home" && canUpdateHomePage) {
-    filesContainer.addClass("display-none");
-    $(".Box-header:eq(0)").addClass("display-none");
+    hideFilesInRepository();
 
-    $(".Details-content--hidden-not-important:eq(1)").removeClass("d-md-block");
     $(".selected:eq(0)").removeClass("selected");
     $("#homePage").addClass("selected");
 
@@ -72,17 +60,16 @@ async function createHomePage() {
     createAccordionLayout();
   }
 
-  try {
-    if (
-      document.getElementsByClassName("octicon-pencil").length === 0 &&
-      $(".selected:eq(0)").text() !== "Code"
-    ) {
-      pencilIconClass = ".Box-title";
-    }
-  } catch (error) {
-    // do nothing
+  if (!canUpdateHomePage && $(".selected:eq(0)").text().trim() === "Home") {
+    $(".selected:eq(0)").removeClass("selected");
   }
 }
+
+const hideFilesInRepository = () => {
+  $(".file-navigation").addClass("display-none");
+  $(".Box-header:eq(0)").addClass("display-none");
+  $(".Details-content--hidden-not-important:eq(1)").removeClass("d-md-block");
+};
 
 /**
  * Creates green ribbon above files in repository after the repo has been forked
@@ -109,7 +96,6 @@ function createAccordionLayout() {
   const canUpdateFiles = isOnHomeOrCodePage();
 
   if (canUpdateFiles) {
-    // find the row with commit history information and update the css class to be an accordion
     $(".Box-header:eq(0)").addClass("accordion");
     $(".js-details-container:eq(2)").addClass("panel");
 
@@ -117,39 +103,17 @@ function createAccordionLayout() {
     filesContainer.removeClass("display-none");
 
     $(".file-navigation:eq(0)").removeClass("display-none");
-
-    $(".Details-content--hidden-not-important:eq(1)").addClass("d-md-block");
     $(".file-navigation:eq(0)").addClass("d-flex");
 
-    $(".selected:eq(0)").removeClass("selected");
+    $(".Details-content--hidden-not-important:eq(1)").addClass("d-md-block");
 
+    $(".selected:eq(0)").removeClass("selected");
     $("#codeLink").addClass("selected");
 
     if (!document.location.pathname.includes("blob")) {
       $("#readme").addClass("display-none");
     }
   }
-}
-
-async function hasForkedRepository() {
-  const result = new Promise((resolve) => {
-    chrome.storage.sync.get("hasForked", (result) => {
-      resolve(result.hasForked);
-    });
-  });
-  const hasForked = await result;
-  return hasForked ?? false;
-}
-
-async function hasUploadedNewFile() {
-  const result = new Promise((resolve) => {
-    chrome.storage.sync.get("hasUploadedNewFile", (result) => {
-      resolve(result.hasUploadedNewFile);
-    });
-  });
-
-  const hasUploadedFile = await result;
-  return hasUploadedFile ?? false;
 }
 
 /**
@@ -181,9 +145,11 @@ function createHomePageLink() {
     const imageSource = chrome.runtime.getURL("images/house.png");
     const repoLink = $(".js-repo-nav a:eq(0)").attr("href");
     const newNavLink = document.createElement("li");
+    const newNavLinkClass =
+      "js-navigation-item UnderlineNav-item hx_underlinenav-item no-wrap js-responsive-underlinenav-item";
 
     newNavLink.className = "d-flex";
-    newNavLink.innerHTML = `<a class="js-navigation-item UnderlineNav-item hx_underlinenav-item no-wrap js-responsive-underlinenav-item" id="homePage" data-tab-item="code-tab" href="${repoLink}" ">
+    newNavLink.innerHTML = `<a class="${newNavLinkClass}" id="homePage" data-tab-item="code-tab" href="${repoLink}" ">
                               <img src="${imageSource}" id="houseImage"/>
                               Home
                             </a>`;
@@ -191,17 +157,7 @@ function createHomePageLink() {
     $(".UnderlineNav-body").prepend(newNavLink);
   }
 
-  $("#homePage").on("click", (event) => {
-    const currentLinkText = $(".selected:eq(0)").text().trim();
-
-    if (currentLinkText === "Home" || currentLinkText === "Code") {
-      event.preventDefault();
-    }
-
-    chrome.storage.sync.set({ activePage: "home" });
-
-    createHomePage();
-  });
+  createNavLinkClickListener("#homePage", "home");
 }
 
 /**
@@ -236,7 +192,7 @@ function updatePencilIcon() {
  * Returns if the user is currently on the home or code page of a repository
  */
 function isOnHomeOrCodePage() {
-  const currentPath = document.location.pathname;
+  const currentUrl = document.location.pathname;
   const invalidUrls = [
     "/blob/",
     "pull",
@@ -250,18 +206,23 @@ function isOnHomeOrCodePage() {
     "commits",
   ];
 
-  let isCurrentlyOnHomeorCodePage = true;
+  const filteredUrls = invalidUrls.filter((url) => currentUrl.includes(url));
 
-  const filteredUrls = invalidUrls.filter((url) => currentPath.includes(url));
-
-  invalidUrls.forEach((invalidUrl) => {
-    if (document.location.pathname.includes(invalidUrl)) {
-      isCurrentlyOnHomeorCodePage = false;
-    }
-  });
-
-  return isCurrentlyOnHomeorCodePage;
+  return filteredUrls.length === 0;
 }
+
+const createNavLinkClickListener = (targetElement, targetPage) => {
+  $(targetElement).on("click", (event) => {
+    const currentLinkText = $(".selected:eq(0)").text().trim();
+
+    if (currentLinkText === "Home" || currentLinkText === "Code") {
+      event.preventDefault();
+    }
+
+    chrome.storage.sync.set({ activePage: targetPage });
+    createHomePage();
+  });
+};
 
 /**
  * Listen to page changes from the background

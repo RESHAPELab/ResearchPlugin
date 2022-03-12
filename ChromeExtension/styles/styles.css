@@ -112,6 +112,10 @@
   z-index: 999;
 }
 
+.UnderlineNav {
+  justify-content: center !important;
+}
+
 /** Icon tooltip styles **/
 .helpIcon {
   position: relative;
@@ -134,6 +138,17 @@
   bottom: 150%;
   left: 50%;
   margin-left: -60px;
+}
+
+.darkmode-icon .helpIconCircle,
+.darkmode-icon .helpIconText {
+  color: var(--color-btn-text) !important;
+  background: rgb(13, 110, 253) !important;
+  border-color: rgb(13, 110, 253) !important;
+}
+
+.darkmode-icon .helpIconText:before {
+  border-top: 5px solid rgb(13, 110, 253) !important;
 }
 
 .helpIcon:hover .helpIconText {
