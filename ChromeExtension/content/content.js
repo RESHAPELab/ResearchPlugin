@@ -1,8 +1,6 @@
 const plugin = {
   currentPageUrl: document.location.pathname,
   hasInjectedContent: false,
-  addedNewComment: false,
-  oAuthToken: "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",
 
   checkUrl: () => {
     const urlArray = [
@@ -350,23 +348,6 @@ async function hasSubmittedMessage() {
   });
 
   return hasSubmittedMessage;
-}
-
-async function getForksForRepo(gitHubRepository, repositoryOwner) {
-  const commitUrl = `https://api.github.com/repos/${repositoryOwner}/${gitHubRepository}/forks`;
-
-  const apiHeader = {
-    Authorization: `Token ${plugin.oAuthToken}`,
-  };
-
-  const repositoryForks = await fetch(commitUrl, {
-    method: "GET",
-    headers: apiHeader,
-  });
-
-  const repositoryForksJson = await repositoryForks.json();
-
-  return repositoryForksJson;
 }
 
 async function updateUploadFilesPage() {
