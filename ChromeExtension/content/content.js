@@ -1,8 +1,8 @@
 const plugin = {
   currentPageUrl: document.location.pathname,
-  injectedContent: false,
+  hasInjectedContent: false,
   addedNewComment: false,
-  oAuthToken: "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",
+  oAuthToken: "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",
 
   checkUrl: () => {
     const urlArray = [
@@ -28,13 +28,13 @@ const plugin = {
       },
     ];
     const foundUrl = urlArray.find((object) => plugin.currentPageUrl.includes(object.name));
-    foundUrl.runFunction();
+    foundUrl?.runFunction() ?? console.log("URL was not found.");
   },
 };
 
 window.onload = () => {
-  if (!plugin.injectedContent) {
-    plugin.injectedContent = true;
+  if (!plugin.hasInjectedContent) {
+    plugin.hasInjectedContent = true;
     plugin.currentPageUrl = document.location.pathname;
     plugin.checkUrl();
   }
@@ -106,7 +106,7 @@ const updatePullRequestTitleInput = () => {
   $(inputTitleLabel).insertBefore("#commit-summary-input");
 
   const commitMessageIconText =
-    "This is the title of the pull request new. Give a brief description of the change. Be short and objective.";
+    "This is the title of the pull request. Give a brief description of the change. Be short and objective.";
 
   createIconAfterElement(commitMessageIconText, "#commit-summary-input");
 };
@@ -124,7 +124,6 @@ const updatePullRequestDescriptionInput = () => {
 };
 
 /**
- * Function name: createConfirmPullRequestToolTips
  * Creates tooltips when confirming a change to file (Second step)
  */
 function createConfirmPullRequestToolTips() {
@@ -175,41 +174,31 @@ function createConfirmPullRequestToolTips() {
 
   createIconAfterElement(createPullRequestButtonIconText, submitButtonClass);
 
-  // override the container width and display to add icon
-  const numbersSummaryContainer = document.getElementsByClassName("files-bucket")[0];
-  numbersSummaryContainer.style.width = "93%";
-  numbersSummaryContainer.style.display = "inline-block";
-
   // icon above summary of changes and commits
   const requestSummaryIconText =
     "This shows the amount of commits in the pull request, the amount of files you changed in the pull request, how many comments were on the commits for the pull request and the ammount of people who worked together on this pull request.";
   const summaryClass = ".overall-summary";
+  createIconAfterElement(requestSummaryIconText, summaryClass);
 
-  const requestSummaryIcon = createIconAfterElement(requestSummaryIconText, summaryClass);
-  requestSummaryIcon.style = "float:right;";
+  createPullRequestComparisonIcon();
+}
 
-  // adjust width of github container for new icon element
-  const commitSummaryContainer = document.getElementsByClassName("details-collapse")[0];
-
-  commitSummaryContainer.style.width = "93%";
-  commitSummaryContainer.style.display = "inline-block";
-
-  // icon above container for changes in current pull request
+const createPullRequestComparisonIcon = () => {
   const comparisonIconText =
     "This shows the changes between the orginal file and your version. Green(+) represents lines added. Red(-) represents removed lines";
 
-  const comparisonClass = ".toc-diff-stats";
-
-  createIconAfterElement(comparisonIconText, comparisonClass);
-}
+  const comparisonClass = "#commits_bucket";
+  const comparisonIcon = createIconAfterElement(comparisonIconText, comparisonClass);
+  comparisonIcon.style.float = "right";
+  comparisonIcon.style.marginTop = "20px";
+  comparisonIcon.style.marginRight = "-10px";
+};
 
 /**
- * Function name: createReviewPullRequestToolTips
  * Adds tooltips when reviewing a pull request (Final step)
  */
 function createReviewPullRequestToolTips() {
-  pullRequestProcess.createProgressBar(3, ".gh-header-show");
-  const BUTTONS_IN_REPO = 2;
+  pullRequestProcess.createProgressBar(3, ".gh-header");
 
   const pullRequestStatusIconText =
     "This indicates that the pull request is open meaning someone will get to it soon.";
@@ -240,17 +229,9 @@ function createReviewPullRequestToolTips() {
 
   updatePullRequestButtonRow();
   updateClosePullRequestButton();
-
-  /* Detect when user submits a comment in pull request and reload page */
-  $(".js-new-comment-form").on("submit", (event) => {
-    event.preventDefault();
+  $(document).on("submit", ".js-new-comment-form", () => {
     chrome.storage.sync.set({ hasSubmittedMessage: true });
-    window.location.reload();
-  });
-
-  /* Force the page to re-load to properly display plugin */
-  $(".tabnav-tab").on("click", (event) => {
-    window.location.assign(event.target.href);
+    createMessageSubmittedRibbon();
   });
 }
 
@@ -279,17 +260,6 @@ const updateClosePullRequestButton = () => {
     }
   });
 };
-
-/**
- * Function name: sortArrayInDescendingOrder
- * @param {int} array - array to be sorted
- * Sorts given array in descending order
- */
-function sortArrayInDescendingOrder(array) {
-  array.sort((a, b) => {
-    return b - a;
-  });
-}
 
 /**
  * Function name: checkIsEditingForkedFile
@@ -344,38 +314,35 @@ function isProcessCompleted() {
  * Function name: createSuccessRibbon
  * Creates ribbon above progress bar to know the process is successful
  */
-async function createSuccessRibbon() {
-  let ribbonMessage;
+function createSuccessRibbon() {
+  if (document.location.pathname.includes("/pull")) {
+    const successRibbonContainer = document.createElement("div");
+    successRibbonContainer.className = "successRibbon text-center";
+    const ribbonMessage = "The pull request was created successfully and will be reviewed shortly";
 
-  const hasSubmittedMessage = await checkIfMessageSubmitted();
-
-  const successRibbonContainer = document.createElement("div");
-  successRibbonContainer.className = "successRibbon text-center";
-
-  if (document.location.pathname.includes("/pull") && !hasSubmittedMessage) {
-    ribbonMessage = "The pull request was created successfully and will be reviewed shortly";
+    const ribbonTextNode = document.createTextNode(ribbonMessage);
+    successRibbonContainer.appendChild(ribbonTextNode);
+    $(successRibbonContainer).insertBefore(".container");
   }
+}
 
-  if (hasSubmittedMessage) {
-    ribbonMessage = `The mentioned user will receive a notification and may help you work on the pull request.`;
+const createMessageSubmittedRibbon = async () => {
+  const hasSubmittedMessage = await hasSubmittedMessage();
+  if (hasSubmittedMessage && $(".successRibbon").length === 1) {
+    const ribbonMessage = `The mentioned user will receive a notification and may help you work on the pull request.`;
+    $(".successRibbon").html(ribbonMessage);
   }
-
-  const ribbonTextNode = document.createTextNode(ribbonMessage);
-
-  successRibbonContainer.appendChild(ribbonTextNode);
-
-  $(successRibbonContainer).insertBefore(".container");
 
   if (hasSubmittedMessage && $(".container").length === 1) {
     chrome.storage.sync.set({ hasSubmittedMessage: false });
   }
-}
+};
 
 /**
  * Function name: checkIfMessageSubmitted
  * Returns if the user recently submitted a message to a pull request or not
  */
-async function checkIfMessageSubmitted() {
+async function hasSubmittedMessage() {
   const hasSubmittedMessage = new Promise((resolve) => {
     chrome.storage.sync.get("hasSubmittedMessage", (result) => {
       resolve(result.hasSubmittedMessage);
@@ -383,61 +350,6 @@ async function checkIfMessageSubmitted() {
   });
 
   return hasSubmittedMessage;
-}
-
-/**
- * Custom jQuery function to toggle text
- */
-$.fn.extend({
-  toggleText(firstElement, secondElement) {
-    return this.text(this.text() === secondElement ? firstElement : secondElement);
-  },
-});
-
-/**
- * Function name: getCommits
- * @param {string} username - GitHub username for API
- * Uses GitHub API to view commit totals for user
- */
-async function getCommits(repositories, username) {
-  const skillGraphContainer = document.getElementById("skillGraph");
-
-  const apiHeader = {
-    Authorization: `Token ${plugin.oAuthToken}`,
-  };
-
-  const repoObject = {};
-
-  let total = 0;
-
-  for (const repo of repositories) {
-    if (total < 10) {
-      const commitUrl = `https://api.github.com/repos/${username}/${repo}/commits?page=1&per_page=25`;
-
-      const commitResponse = await fetch(commitUrl, {
-        method: "GET",
-        headers: apiHeader,
-      });
-
-      const commitResult = await commitResponse.json();
-      repoObject[repo] = commitResult.length;
-
-      total += 1;
-    }
-  }
-
-  const labels = Object.keys(repoObject);
-  const data = Object.values(repoObject);
-
-  labels.sort((a, b) => {
-    return repoObject[b] - repoObject[a];
-  });
-
-  sortArrayInDescendingOrder(data);
-
-  const graphTitle = `Commits per repository for:  ${username}`;
-
-  createNewBarGraph(skillGraphContainer, graphTitle, labels, data);
 }
 
 async function getForksForRepo(gitHubRepository, repositoryOwner) {
@@ -458,53 +370,36 @@ async function getForksForRepo(gitHubRepository, repositoryOwner) {
 }
 
 async function updateUploadFilesPage() {
-  const currentRepository = $(".js-repo-root:eq(0)").text().trim();
-  const currentRepositoryOwner = $('a[rel="author"]').text().trim();
-  const forkButton =
-    'button[data-ga-click="Repository, show fork modal, action:repository_uploads#index; text:Fork"]';
-  const forkButtonLink = JSON.parse($(forkButton).attr("data-hydro-click"));
-  const currentUserId = forkButtonLink["payload"].user_id;
-  const repositoryForks = await getForksForRepo(currentRepository, currentRepositoryOwner);
+  const forkButton = ".btn-with-count button:eq(0)";
 
-  let userHasNotForkedRepo = true;
-  if (
-    $(".blankslate p:first").text().trim() ===
-    "File uploads require push access to this repository."
-  ) {
+  if (cannotForkRepository()) {
     $(".blankslate p:first").text(
       "In order to upload files, click the fork button on the upper right"
     );
 
-    $(".btn-with-count:eq(3)").addClass("btn-primary");
-  }
-
-  repositoryForks.forEach((fork) => {
-    if (fork["owner"].id === currentUserId) {
-      userHasNotForkedRepo = false;
-    }
-  });
-
-  if (userHasNotForkedRepo) {
     $(forkButton).addClass("btn-primary");
   }
+
   const commitIconText =
     "This is the title of the commit. Give a brief description of the change. Be short and objective.";
-  createIconAfterElement(commitIconText, ".js-new-blob-commit-summary");
+  createIconAfterElement(commitIconText, "#commit-summary-input");
 
   const commitDescriptionText =
     "Add a more detailed description of the commit if needed. Here you can describe the files uploaded.";
-  createIconAfterElement(commitDescriptionText, ".comment-form-textarea");
-
-  // Detect when the user creates a fork of the repository
-  $(forkButton).on("click", (event) => {
-    chrome.storage.sync.set({ hasForked: true });
-  });
+  createIconAfterElement(commitDescriptionText, "#commit-description-textarea");
 
   // Detect when the user uploades a new file to the repository
   $('button[data-edit-text="Commit changes"]').on("click", () => {
     chrome.storage.sync.set({ hasUploadedNewFile: true });
   });
 }
+
+const cannotForkRepository = () => {
+  return (
+    $(".blankslate p:first").text().trim() ===
+    "File uploads require push access to this repository."
+  );
+};
 
 /**
  * Adds tooltip when viewing a file in a repository
@@ -517,8 +412,8 @@ function updateViewFilePage() {
 
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === "CHECK_URL") {
-    if (!plugin.injectedContent || $(".helpIcon").length === 0) {
-      plugin.injectedContent = true;
+    if (!plugin.hasInjectedContent || $(".helpIcon").length === 0) {
+      plugin.hasInjectedContent = true;
       plugin.currentPageUrl = document.location.pathname;
 
       plugin.checkUrl();
@@ -540,3 +435,8 @@ function toggleExtension() {
   $(".successRibbon").toggleClass("display-none");
   $(".container").toggleClass("display-none");
 }
+
+// listen globaly for fork button to be clicked
+$(".btn-with-count button:eq(0)").on("click", (event) => {
+  chrome.storage.sync.set({ hasForked: true });
+});

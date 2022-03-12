@@ -27,8 +27,8 @@ function updateCodeLink() {
 async function createHomePage() {
   const currentPage = await getCurrentRepositoryPage();
   const canUpdateHomePage = isOnHomeOrCodePage();
-  const hasForked = await checkForkStatus();
-  const hasUploadedFile = await checkIfUploadedNewFile();
+  const hasForked = await hasForkedRepository();
+  const hasUploadedFile = await hasUploadedNewFile();
   createHomePageLink();
 
   const forkedMessage = "The repository was successfully forked";
@@ -44,7 +44,6 @@ async function createHomePage() {
   }
 
   if (currentPage === "home" && canUpdateHomePage) {
-    // toggle display for files in repo
     filesContainer.addClass("display-none");
     $(".Box-header:eq(0)").addClass("display-none");
 
@@ -94,7 +93,7 @@ function createNewMessage(newMessageContent) {
 
   successRibbonContainer.className = "successRibbon text-center";
   successRibbonContainer.appendChild(ribbonMessage);
-  $(successRibbonContainer).insertAfter(".file-navigation:eq(0)");
+  $(successRibbonContainer).insertBefore(".repository-content");
 
   if (newMessageContent.includes("file")) {
     chrome.storage.sync.set({ hasUploadedNewFile: false });
@@ -132,29 +131,25 @@ function createAccordionLayout() {
   }
 }
 
-/**
- * Retrieves stored value to check if current repository was just forked
- */
-async function checkForkStatus() {
-  const hasForked = new Promise((resolve) => {
+async function hasForkedRepository() {
+  const result = new Promise((resolve) => {
     chrome.storage.sync.get("hasForked", (result) => {
       resolve(result.hasForked);
     });
   });
-  return hasForked;
+  const hasForked = await result;
+  return hasForked ?? false;
 }
 
-/**
- * Retrieves stored value to check if current repository was just forked
- */
-async function checkIfUploadedNewFile() {
-  const hasUploadedFile = new Promise((resolve) => {
+async function hasUploadedNewFile() {
+  const result = new Promise((resolve) => {
     chrome.storage.sync.get("hasUploadedNewFile", (result) => {
       resolve(result.hasUploadedNewFile);
     });
   });
 
-  return hasUploadedFile;
+  const hasUploadedFile = await result;
+  return hasUploadedFile ?? false;
 }
 
 /**

@@ -61,3 +61,12 @@ const createIconAfterLastElement = (text, gitHubElement) => {
   $(toolTip).insertAfter(gitHubElement).last();
   return toolTip;
 };
+
+/**
+ * Custom jQuery function to toggle text
+ */
+$.fn.extend({
+  toggleText(firstElement, secondElement) {
+    return this.text(this.text() === secondElement ? firstElement : secondElement);
+  },
+});
