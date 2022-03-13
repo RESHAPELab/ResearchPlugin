@@ -74,6 +74,10 @@ const getValueFromStorage = async (key, defaultValue) => {
   return value ?? defaultValue;
 };
 
+const getString = (name) => {
+  return constantStrings[name] ?? "";
+};
+
 /**
  * Custom jQuery function to toggle text
  */

@@ -1,7 +1,4 @@
-/**
- * Updates id of code link in nav bar
- */
-function updateCodeLink() {
+function updateCodeTabId() {
   const codeNavLinkText = $(".UnderlineNav-body:eq(0) a:eq(0)").text().trim();
 
   if (codeNavLinkText === "Code") {
@@ -21,16 +18,14 @@ async function createHomePage() {
   const hasUploadedFile = await getValueFromStorage("hasUploadedNewFile", false);
   createHomePageLink();
 
-  const forkedMessage = "The repository was successfully forked";
-  const filesMessage = "The files were successfully added";
   const filesContainer = $(".file-navigation");
   const totalIcons = $(".helpIcon").length;
 
   if (hasForked && !document.location.pathname.includes("upload") && filesContainer.length === 1) {
-    createNewMessage(forkedMessage);
+    createNewMessage("The repository was successfully forked");
   }
   if (hasUploadedFile && !document.location.pathname.includes("upload")) {
-    createNewMessage(filesMessage);
+    createNewMessage("The files were successfully added");
   }
 
   if (currentPage === "home" && canUpdateHomePage) {
@@ -89,9 +84,6 @@ function createNewMessage(newMessageContent) {
   }
 }
 
-/**
- * Display files in repository inside an dropdown menu
- */
 function createAccordionLayout() {
   const canUpdateFiles = isOnHomeOrCodePage();
 
@@ -116,28 +108,21 @@ function createAccordionLayout() {
   }
 }
 
-/**
- * Updates files to collapse and expand
- */
-function toggleAccordion() {
-  $(".accordion").toggleClass("active");
-
+const toggleFileAccordion = () => {
+  const filenameClass = ".js-details-container:eq(2) .Link--primary";
+  $(".Box-header:eq(0)").toggleClass("active");
   const panel = document.getElementsByClassName("panel")[0];
 
   panel.style.maxHeight
     ? (panel.style.maxHeight = null)
     : (panel.style.maxHeight = panel.scrollHeight + "px");
 
-  // update title of each file within the github repository
-  $(".js-details-container:eq(2) .Link--primary").each((index, element) => {
+  $(filenameClass).each((index, element) => {
     $(element).attr("title", "To view this file, click here");
   });
-}
+};
 
-/**
- * Appends new link to top nav bar in repository
- */
-function createHomePageLink() {
+const createHomePageLink = () => {
   if (
     document.getElementById("homePage") === null &&
     document.getElementsByClassName("h-card").length === 0
@@ -158,7 +143,7 @@ function createHomePageLink() {
   }
 
   createNavLinkClickListener("#homePage", "home");
-}
+};
 
 /**
  * Returns page the user clicked on within repository
@@ -179,73 +164,24 @@ async function getCurrentRepositoryPage() {
   return currentPage;
 }
 
-/**
- * Adds icon next to pencil icon to edit files
- */
-function updatePencilIcon() {
-  const fileIconText = "Click the pencil to edit the file and start a pull request";
-  const fileIconClassname = ".js-update-url-with-hash:eq(1)";
-  createIconAfterElement(fileIconText, fileIconClassname);
-}
-
-/**
- * Returns if the user is currently on the home or code page of a repository
- */
-function isOnHomeOrCodePage() {
+const isOnHomeOrCodePage = () => {
   const currentUrl = document.location.pathname;
-  const invalidUrls = [
-    "/blob/",
-    "pull",
-    "/issues",
-    "/settings",
-    "/actions",
-    "/projects",
-    "/wiki",
-    "pulse",
-    "tree",
-    "commits",
-  ];
-
-  const filteredUrls = invalidUrls.filter((url) => currentUrl.includes(url));
-
-  return filteredUrls.length === 0;
-}
+  return currentUrl.split("/").length === 3;
+};
 
 const createNavLinkClickListener = (targetElement, targetPage) => {
   $(targetElement).on("click", (event) => {
-    const currentLinkText = $(".selected:eq(0)").text().trim();
-
-    if (currentLinkText === "Home" || currentLinkText === "Code") {
-      event.preventDefault();
-    }
-
     chrome.storage.sync.set({ activePage: targetPage });
-    createHomePage();
   });
 };
 
-/**
- * Listen to page changes from the background
- */
 chrome.runtime.onMessage.addListener((msg) => {
-  const currentUrlPath = document.location.pathname;
-
   if (msg.type === "UPDATE_REPO_LAYOUT") {
-    if (currentUrlPath.includes("/blob/") && $(".helpIconCircle").length === 1) {
-      updatePencilIcon();
-    }
-    $(() => {
-      {
-        $(".Box-header:eq(0)").on("click", () => {
-          toggleAccordion();
-        });
-      }
-    });
-    try {
-      updateCodeLink();
-      createHomePage();
-    } catch (error) {
-      window.location.assign(document.location.pathname);
-    }
+    updateCodeTabId();
+    createHomePage();
   }
+});
+
+$(document).on("click", ".Box-header:eq(0)", () => {
+  toggleFileAccordion();
 });
