@@ -64,6 +64,7 @@ const hideFilesInRepository = () => {
   $(".file-navigation").addClass("display-none");
   $(".Box-header:eq(0)").addClass("display-none");
   $(".Details-content--hidden-not-important:eq(1)").removeClass("d-md-block");
+  $(".js-details-container").addClass("d-none");
 };
 
 /**
