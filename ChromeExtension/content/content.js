@@ -73,8 +73,8 @@ function createFileEditorToolTips() {
   }
 
   const fileNameChangeIconText = getString("FILENAME_TOOLTIP");
-  const breadCrumbDiv = ".d-md-inline-block";
-  createIconAfterElement(fileNameChangeIconText, breadCrumbDiv);
+  const branchNameLink = ".branch-name:eq(0)";
+  createIconAfterElement(fileNameChangeIconText, branchNameLink);
 
   updatePullRequestTitleInput();
   updatePullRequestDescriptionInput();
@@ -87,7 +87,7 @@ function createFileEditorToolTips() {
   createIconBeforeElement(submitChangesIconText, "#submit-file");
 
   $('input[name="commit-choice"]').on("click", () => {
-    $(".helpIconText:eq(4)").toggleText(createPullRequestIconText, directlyCommitIconText);
+    $(".helpIconText:eq(3)").toggleText(createPullRequestIconText, directlyCommitIconText);
   });
 }
 

@@ -39,7 +39,7 @@
   text-align: center;
   margin: 0 auto 10px auto;
   border-radius: 50%;
-  background-color: white;
+  background-color: #ffffff;
 }
 
 .progressbar li:after {
@@ -51,6 +51,11 @@
   top: 15px;
   left: -44.5%;
   z-index: -1;
+}
+
+.progressbar .dark-mode-step:before {
+  background-color: hsla(212, 12%, 18%, 1);
+  color: #ffffff !important;
 }
 
 .progressbar li:first-child {
@@ -67,10 +72,12 @@
   text-transform: capitalize;
 }
 
-.progressbar li.partial:before {
+.progressbar li.partial:before,
+.dark-mode-step:before {
   color: var(--color-alert-warn-text);
-  background-image: linear-gradient(var(--color-alert-warn-bg), var(--color-alert-warn-bg));
-  border-color: var(--color-alert-warn-border);
+  background-color: rgb(13, 110, 253);
+  border-color: rgb(13, 110, 253);
+  color: #000 !important;
 }
 
 .progressbar li.completed:before {

@@ -1,4 +1,8 @@
-function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
+const isDarkMode = () => {
+  return $("html").attr("data-color-mode") === "dark";
+};
+
+const addProgressBar = (currentStep, totalSteps, rootElement, stepsList) => {
   const progressBarContainer = document.createElement("div");
   progressBarContainer.className = "container";
 
@@ -12,12 +16,17 @@ function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
   for (index = 1; index <= stepsList.length; index += 1) {
     const progressBarStep = document.createElement("li");
     progressBarStep.innerHTML = stepsList[index - 1];
-    progressBarStep.className = "partial";
 
     if (currentStep === totalSteps) {
       progressBarStep.className = "completed";
+    } else if (currentStep === index) {
+      progressBarStep.className = "partial";
     } else if (index < currentStep) {
       progressBarStep.className = "partial completed";
+    }
+
+    if (isDarkMode()) {
+      progressBarStep.className += " dark-mode-step";
     }
 
     progressBarSteps.appendChild(progressBarStep);
@@ -31,12 +40,11 @@ function addProgressBar(currentStep, totalSteps, rootElement, stepsList) {
   if (isPullRequestOpen()) {
     createSuccessRibbon();
   }
-}
+};
 
 const createIcon = (text) => {
-  const isDarkMode = $("html").attr("data-color-mode") === "dark";
   const toolTipContainer = document.createElement("div");
-  toolTipContainer.className = `helpIcon ${isDarkMode ? "darkmode-icon" : ""}`;
+  toolTipContainer.className = `helpIcon ${isDarkMode() ? "darkmode-icon" : ""}`;
 
   toolTipContainer.innerHTML = `<span class="helpIconCircle">?</span>
                                   <span class="helpIconText">${text}</span>`;
