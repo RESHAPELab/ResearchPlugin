@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      background: #fff;
+      font-size: 14px;
+      color: #333;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      width: 380px !important;
+      height: 489px !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #header-row {
+      overflow: hidden;
+      background-color: #003466;
+      line-height: 1.5;
+      color: hsla(0, 0%, 100%, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    #main-header {
+      color: #fff;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 90px;
+      height: 34px;
+    }
+
+    .switch input {
+      display: none;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ca2222;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: '';
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2ab934;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196f3;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(55px);
+    }
+
+    .slider:after {
+      content: 'OFF';
+      color: white;
+      display: block;
+      position: absolute;
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 50%;
+      font-size: 10px;
+      font-family: Verdana, sans-serif;
+    }
+
+    input:checked + .slider:after {
+      content: 'ON';
+    }
+
+    .toggle-row {
+      margin-top: 50px;
+    }
+
+    .row {
+      margin-top: 30%;
+    }
+
+    .toggle-row,
+    .row {
+      text-align: center;
+    }
+
+    .link {
+      text-decoration: none;
+      font-size: 16px;
+      color: #000000;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    #label {
+      vertical-align: top;
+      margin-right: 30px;
+    }
+  </style>
+  <body>
+    <div id="container">
+      <div id="header-row">
+        <h2 id="main-header">NAU OSL Research Plugin</h2>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <label for="toggleButton" id="label">Toggle Extension</label>
+      <label class="switch">
+        <input type="checkbox" id="togBtn" name="toggleButton" checked />
+        <div class="slider round"></div>
+      </label>
+    </div>
+
+    <div class="row">
+      <a href="https://github.com/NAU-OSL/ResearchPlugin" class="link" target="_blank">GitHub</a>
+    </div>
+    <script src="../libraries/jquery.min.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
