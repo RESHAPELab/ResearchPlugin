@@ -3,6 +3,7 @@ const plugin = {
   hasInjectedContent: false,
 
   checkUrl: () => {
+    const pathArray = document.location.pathname.split("/");
     const urlArray = [
       {
         name: "/edit/",
@@ -27,6 +28,10 @@ const plugin = {
     ];
     const foundUrl = urlArray.find((object) => plugin.currentPageUrl.includes(object.name));
     foundUrl?.runFunction() ?? console.log("URL was not found.");
+
+    if (foundUrl === undefined && pathArray.length === 2) {
+      addCompleteOverviewButton(pathArray[1]);
+    }
   },
 };
 
@@ -291,14 +296,14 @@ const createMessageSubmittedRibbon = async () => {
 };
 
 const updateUploadFilesPage = () => {
-  const forkButton = ".btn-with-count button:eq(0)";
+  const totalForksLabel = "#repo-network-counter";
 
   if (cannotForkRepository()) {
     $(".blankslate p:first").text(
       "In order to upload files, click the fork button on the upper right"
     );
 
-    $(forkButton).addClass("btn-primary");
+    $(totalForksLabel).parent().addClass("btn-primary");
   }
 
   const commitIconText = getString("COMMIT_TITLE_TOOLTIP");
@@ -328,6 +333,24 @@ const updateViewFilePage = () => {
     createIconAfterElement(historyLinkText, ".ml-3:eq(1)");
     createIconAfterElement(fileIconText, fileIconClassname);
   }
+};
+
+const addCompleteOverviewButton = (username) => {
+  const overviewButton = document.createElement("span");
+  overviewButton.className = "btn btn-primary";
+  overviewButton.id = "overview-button";
+  overviewButton.innerHTML = "Complete Overview";
+
+  if ($("#overview-button").length === 0) {
+    $(overviewButton).insertBefore(".graph-before-activity-overview");
+  }
+  $("#overview-button").on("click", () => {
+    chrome.storage.sync.set({ username: username });
+
+    chrome.runtime.sendMessage({
+      type: "OPEN_COMPLETE_OVERVIEW",
+    });
+  });
 };
 
 chrome.runtime.onMessage.addListener((msg) => {

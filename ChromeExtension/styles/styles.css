@@ -213,47 +213,6 @@
   height: 50px;
 }
 
-/* File accordion styles */
-.accordion {
-  background-color: #eee;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-  transition: 0.4s;
-}
-
-.accordian-active,
-.accordion:hover {
-  background-color: var(--color-btn-hover-bg);
-  border-color: var(--color-btn-hover-border);
-  transition-duration: 0.1s;
-}
-
-.accordion:after {
-  content: "Click to show all files \002B";
-  color: #777;
-  font-weight: bold;
-  margin-left: 15px;
-  display: flex;
-}
-
-.active:after {
-  content: "Click to collapse \2212";
-}
-
-.panel {
-  padding: 0 18px;
-  background-color: var(--color-bg-canvas);
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
-}
-
 /* New Navbar option styles */
 #houseImage {
   width: 16px;

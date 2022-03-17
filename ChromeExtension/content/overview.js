@@ -80,15 +80,11 @@ function updateOverviewPageLinks(gitHubUsername) {
 }
 
 /**
- * Function name: createCompleteOverview
- * @param {JSON} userData - JSON result of all repositories for the user
- * @param {string} username - GitHub username
  * Creates cards containing total commits and top langauge
  */
 async function createCompleteOverview(userData, username) {
   const FIRST_PAGE = 1;
   const MAX_CARDS_PER_ROW = 4;
-  const EMPTY_ROW = 0;
   const allRepositories = [];
 
   let isNewPage = false;
@@ -109,17 +105,9 @@ async function createCompleteOverview(userData, username) {
 
   for (const repo of userData) {
     const totalCommits = await getAllCommits(repo.name, username, FIRST_PAGE);
-
     const langaugeColor = await getLanguageColor(repo.language);
-
-    const repositoryCard = new Card(
-      repo.name,
-      repo.html_url,
-      totalCommits,
-      repo.language,
-      langaugeColor
-    );
-
+    const { name, html_url, language } = repo;
+    const repositoryCard = new Card(name, html_url, totalCommits, language, langaugeColor);
     allRepositories.push(repositoryCard);
   }
 
@@ -137,7 +125,7 @@ async function createCompleteOverview(userData, username) {
 
     if (totalRows !== 0) {
       lastRowCardCount = document.getElementsByClassName("row")[totalRows - 1].childElementCount;
-    } else if (totalRows === EMPTY_ROW) {
+    } else if (totalRows === 0) {
       $(newRow).appendTo("#content");
     }
 
@@ -153,8 +141,6 @@ async function createCompleteOverview(userData, username) {
 }
 
 /**
- * Function name: sortArrayByTotalCommits
- * @param {Card} array - all repositories for user
  * Sorts given array in descending order
  */
 function sortArrayByTotalCommits(array) {
@@ -164,8 +150,6 @@ function sortArrayByTotalCommits(array) {
 }
 
 /**
- * Function name: getRepos
- * @param {string} username - GitHub username
  * Uses GitHub API to view programming languages for user
  */
 async function getRepos(username) {
@@ -180,13 +164,6 @@ async function getRepos(username) {
   }
 }
 
-/**
- * Function name: getAllCommits
- * @param {string} repositoryName - GitHub repository
- * @param {string} username - GitHub username
- * @param {int} page - Current page in api pagination
- * Returns all commits for each repository for a certain user
- */
 async function getAllCommits(repositoryName, username, page) {
   const MAX_PAGES = 25;
 
@@ -203,13 +180,8 @@ async function getAllCommits(repositoryName, username, page) {
   return totalCommits;
 }
 
-/**
- * Function Name: parseGithubUrl
- * @param {string} apiUrl
- * Gets api url and returns json from GitHub
- */
 async function parseGithubUrl(apiUrl) {
-  const oAuthToken = "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";
+  const oAuthToken = "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";
 
   const apiHeaders = {
     Authorization: `Token ${oAuthToken}`,
@@ -225,12 +197,6 @@ async function parseGithubUrl(apiUrl) {
   return apiResult;
 }
 
-/**
- * Function name: getAllCommitMessages
- * @param {string} repositoryName - GitHub repository
- * @param {string} username - GitHub username
- * returns object of languages for specific repository
- */
 async function getAllCommitMessages(repository, username, page) {
   const MAX_PAGES = 15;
 
@@ -263,34 +229,16 @@ async function getAllCommitMessages(repository, username, page) {
   }
 }
 
-/**
- * Function name: updateTotalIssues
- * @param {string} repository - repository name
- * @param {string} username - GitHub username
- * @param {int} page - current page
- * Updates the total issue count in modal
- */
 async function updateRepositoryCounters(repository, username, page) {
   const totalIssues = await getTotalIssues(repository, username, page);
-
   const issueCounter = document.getElementById("issuesCounter");
-
   issueCounter.innerHTML = totalIssues;
 
   const totalCommits = await getTotalCommits(repository, username, page);
-
   const commitCounter = document.getElementById("commitsCounter");
-
   commitCounter.innerHTML = totalCommits;
 }
 
-/**
- * Function name: getTotalIssues
- * @param {string} repository - repository name
- * @param {string} username - GitHub username
- * @param {int} page - curent page
- * Finds all issues in repository and returns total
- */
 async function getTotalIssues(repository, username, page) {
   const issuesUrl = `https://api.github.com/repos/${username}/${repository}/issues?page=${page}&per_page=100`;
 
@@ -306,40 +254,25 @@ async function getTotalIssues(repository, username, page) {
   return total;
 }
 
-/**
- * Function name: getTotalCommits
- * @param {string} repository - repository name
- * @param {string} username - GitHub username
- * @param {int} page - curent page
- * Finds all commits in repository and returns total
- */
 async function getTotalCommits(repository, username, page) {
   const commitsUrl = `https://api.github.com/repos/${username}/${repository}/commits?page=${page}&per_page=100`;
 
   const commits = await parseGithubUrl(commitsUrl);
 
-  let total = 0;
-
-  commits.forEach((commit) => {
-    if (commit.author !== null && commit.author.login === username) {
-      total += 1;
-    }
-  });
+  const userCommits = commits.filter(
+    (commit) => commit.author !== null && commit.author.login === username
+  );
+  let totalCommits = userCommits.length;
 
   const MAX_PAGE = 25;
 
   if (page < MAX_PAGE && total % 100 === 0) {
-    total += await getTotalCommits(repository, username, page + 1);
+    totalCommits += await getTotalCommits(repository, username, page + 1);
   }
 
-  return total;
+  return totalCommits;
 }
 
-/**
- * @param {string} message
- * @param {string} createdDate
- * Appends new commit message to modal
- */
 async function updateRepositoryModal(message, commitLink, createdDate) {
   const username = await retrieveGitHubUsername();
 
@@ -358,10 +291,6 @@ async function updateRepositoryModal(message, commitLink, createdDate) {
   innerContainer.appendChild(messageContainer);
 }
 
-/**
- * @param {string} language - top language in repo
- * Returns color value associated with language in GitHub
- */
 async function getLanguageColor(language) {
   if (language === null) {
     return "#000";
@@ -375,11 +304,6 @@ async function getLanguageColor(language) {
   return colors[language].color;
 }
 
-/**
- * @param {string} repository  - current repository
- * @param {string} username  - GitHub username
- * @param {int} page - current page
- */
 async function getAllIssues(repository, username, page) {
   const issuesUrl = `https://api.github.com/repos/${username}/${repository}/issues?page=${page}&per_page=100`;
   const issues = await parseGithubUrl(issuesUrl);
@@ -395,19 +319,12 @@ async function getAllIssues(repository, username, page) {
   }
 }
 
-/**
- * @param {string} username - GitHub username
- * Returns url for profile image
- */
 async function retrieveProfileImage(username) {
   const profileUrl = `https://api.github.com/users/${username}`;
   const userProfile = await parseGithubUrl(profileUrl);
   return userProfile.avatar_url;
 }
 
-/**
- * Returns username from GitHub stored in browser
- */
 async function retrieveGitHubUsername() {
   const localUsername = new Promise((resolve) => {
     chrome.storage.sync.get("username", (result) => {

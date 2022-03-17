@@ -52,7 +52,9 @@ async function createHomePage() {
     $("#codeLink").addClass("selected");
     $("#codeLink").attr("aria-current", "page");
 
-    createAccordionLayout();
+    if (!document.location.pathname.includes("blob")) {
+      $("#readme").addClass("display-none");
+    }
   }
 
   if (!canUpdateHomePage && $(".selected:eq(0)").text().trim() === "Home") {
@@ -85,44 +87,6 @@ function createNewMessage(newMessageContent) {
   }
 }
 
-function createAccordionLayout() {
-  const canUpdateFiles = isOnHomeOrCodePage();
-
-  if (canUpdateFiles) {
-    $(".Box-header:eq(0)").addClass("accordion");
-    $(".js-details-container:eq(2)").addClass("panel");
-
-    const filesContainer = $('.Box:contains("commits")');
-    filesContainer.removeClass("display-none");
-
-    $(".file-navigation:eq(0)").removeClass("display-none");
-    $(".file-navigation:eq(0)").addClass("d-flex");
-
-    $(".Details-content--hidden-not-important:eq(1)").addClass("d-md-block");
-
-    $(".selected:eq(0)").removeClass("selected");
-    $("#codeLink").addClass("selected");
-
-    if (!document.location.pathname.includes("blob")) {
-      $("#readme").addClass("display-none");
-    }
-  }
-}
-
-const toggleFileAccordion = () => {
-  const filenameClass = ".js-details-container:eq(2) .Link--primary";
-  $(".Box-header:eq(0)").toggleClass("active");
-  const panel = document.getElementsByClassName("panel")[0];
-
-  panel.style.maxHeight
-    ? (panel.style.maxHeight = null)
-    : (panel.style.maxHeight = panel.scrollHeight + "px");
-
-  $(filenameClass).each((index, element) => {
-    $(element).attr("title", "To view this file, click here");
-  });
-};
-
 const createHomePageLink = () => {
   if (
     document.getElementById("homePage") === null &&
@@ -146,21 +110,8 @@ const createHomePageLink = () => {
   createNavLinkClickListener("#homePage", "home");
 };
 
-/**
- * Returns page the user clicked on within repository
- */
 async function getCurrentRepositoryPage() {
-  const storedPage = new Promise((resolve) => {
-    chrome.storage.sync.get("activePage", (result) => {
-      if (result.activePage === undefined) {
-        resolve("home");
-      } else {
-        resolve(result.activePage);
-      }
-    });
-  });
-
-  const currentPage = await storedPage;
+  const currentPage = await getValueFromStorage("activePage", "home");
 
   return currentPage;
 }
@@ -181,8 +132,4 @@ chrome.runtime.onMessage.addListener((msg) => {
     updateCodeTabId();
     createHomePage();
   }
-});
-
-$(document).on("click", ".Box-header:eq(0)", () => {
-  toggleFileAccordion();
 });
